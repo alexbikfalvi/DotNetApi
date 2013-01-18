@@ -1,0 +1,169 @@
+﻿/* 
+ * Copyright (C) 2012 Alex Bikfalvi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace DotNetApi.Windows.Controls
+{
+	/// <summary>
+	/// Creates a tool strip drop down checked list.
+	/// </summary>
+	public class ToolStripDropDownCheckedList : ToolStripDropDown
+	{
+		private CheckedListBox listBox = new CheckedListBox();
+		private int minimumVisibleItems = 10;
+		private int totalItemsHeight = 0;
+		private List<CheckedListItem> items = new List<CheckedListItem>();
+
+		/// <summary>
+		/// Creates a new class instance.
+		/// </summary>
+		public ToolStripDropDownCheckedList()
+		{
+			// Set the list box defaults.
+			this.listBox.BorderStyle = BorderStyle.FixedSingle;
+			this.listBox.CheckOnClick = true;
+			this.listBox.MinimumSize = new Size(200, 200);
+			this.listBox.ThreeDCheckBoxes = true;
+			
+			// Add an event handler to the list box.
+			this.listBox.ItemCheck += new ItemCheckEventHandler(this.OnItemCheck);
+
+			// Add the list box to the drop down.
+			this.Items.Add(new ToolStripControlHost(this.listBox));
+
+			// Set the padding.
+			this.Padding = new Padding(4, 2, 4, 0);
+		}
+
+		/// <summary>
+		/// Gets or sets the list box size.
+		/// </summary>
+		public Size ListSize
+		{
+			get { return this.listBox.Size; }
+			set { this.listBox.Size = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets the list box minimum size.
+		/// </summary>
+		public Size ListMinimumSize
+		{
+			get { return this.listBox.MinimumSize; }
+			set { this.listBox.MinimumSize = value; }
+		}
+
+		/// <summary>
+		/// Returns the value check-state pair at a given index.
+		/// </summary>
+		/// <param name="index">The index.</param>
+		/// <returns>The value check-state pair.</returns>
+		public CheckedListItem this[int index]
+		{
+			get { return this.items[index]; }
+		}
+
+		/// <summary>
+		/// An event raised when the checked state of an item has changed.
+		/// </summary>
+		public event ItemCheckEventHandler ItemCheck;
+
+		/// <summary>
+		/// Adds a new item to the checked list box.
+		/// </summary>
+		/// <param name="item">The item.</param>
+		/// <param name="name">The item name.</param>
+		/// <param name="state">Indicates whether the check state of the item.</param>
+		public void AddItem(object item, string name, CheckState state)
+		{
+			// Add a new item pair.
+			this.items.Add(new CheckedListItem(item, name, state));
+			// Add the item to the list box.
+			this.listBox.Items.Add(name, state);
+			// Update the total item height.
+			this.totalItemsHeight += this.listBox.GetItemHeight(this.listBox.Items.Count - 1);
+			// If the number of items is less than the minimum number of visible items, increase the minimum height.
+			if (this.listBox.Items.Count < this.minimumVisibleItems)
+			{
+				this.listBox.MinimumSize = new Size(this.listBox.MinimumSize.Width, this.totalItemsHeight);
+				this.listBox.Size = this.listBox.MinimumSize;
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the checked state of an item has changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		protected void OnItemCheck(object sender, ItemCheckEventArgs e)
+		{
+			// Update the items pair at the specified index.
+			CheckedListItem pair = this.items[e.Index];
+			pair.State = e.NewValue;
+			this.items[e.Index] = pair;
+			// Raise an item check event.
+			if (null != this.ItemCheck) this.ItemCheck(sender, e);
+		}
+	}
+
+	/// <summary>
+	/// A structure representing a value check-state pair.
+	/// </summary>
+	public struct CheckedListItem
+	{
+		private object item;
+		private string name;
+		private CheckState state;
+
+		/// <summary>
+		/// Creates a new pair.
+		/// </summary>
+		/// <param name="item">The item.</param>
+		/// <param name="name">The item name.</param>
+		/// <param name="state">The state.</param>
+		public CheckedListItem(object item, string name, CheckState state)
+		{
+			this.item = item;
+			this.name = name;
+			this.state = state;
+		}
+
+		/// <summary>
+		/// Gets the item.
+		/// </summary>
+		public object Item { get { return this.item; } }
+
+		/// <summary>
+		/// Gets the item name.
+		/// </summary>
+		public string Name { get { return this.name; } }
+
+		/// <summary>
+		/// Gets or sets the item checked state.
+		/// </summary>
+		public CheckState State
+		{
+			get { return this.state; }
+			set { this.state = value; }
+		}
+	}
+}

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{475F767E-2288-4E56-9B90-179A10DCAB49}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DotNetApi</RootNamespace>
+    <AssemblyName>DotNetApi</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Formatting.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Windows\Controls\SideMenu.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\SideMenuItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ToolStripDropDownCheckedList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DockButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GoToNextMessage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GoToPreviousMessage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GripHorizontal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp_48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowDown_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowDown_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowDown_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowDown_48.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
