@@ -36,6 +36,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Resources.Designer.cs">
@@ -43,6 +45,19 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Web\AsyncRequest.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcBase64.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcBoolean.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcDateTime.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcDouble.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcException.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcInt.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcMember.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcMethodCall.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcParameter.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcParameters.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcObject.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcString.cs" />
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -102,6 +117,7 @@
   <ItemGroup>
     <None Include="Resources\ArrowDown_48.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
