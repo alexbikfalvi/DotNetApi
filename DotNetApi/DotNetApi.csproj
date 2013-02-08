@@ -46,6 +46,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Web\AsyncRequest.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcArray.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcBase64.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcBoolean.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcDateTime.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Web\XmlRpc\XmlRpcParameters.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcObject.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcString.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcStruct.cs" />
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>

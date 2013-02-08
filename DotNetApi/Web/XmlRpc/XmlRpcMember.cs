@@ -28,10 +28,17 @@ namespace DotNetApi.Web.XmlRpc
 	public sealed class XmlRpcMember : XmlRpcObject
 	{
 		private static string xmlName = "member";
+		private static string xmlNameName = "name";
+		private static string xmlNameValue = "value";
 
 		private string name;
 		private XmlRpcObject value;
 
+		/// <summary>
+		/// Creates a new struct member instance from the specified name and value.
+		/// </summary>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
 		public XmlRpcMember(string name, object value)
 		{
 			this.name = name;
@@ -39,15 +46,30 @@ namespace DotNetApi.Web.XmlRpc
 		}
 
 		/// <summary>
-		/// Creates a new boolean instance from the specified XML element.
+		/// Creates a new struct member instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
 		public XmlRpcMember(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcMember.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcMember.xmlName, element.Name.LocalName));
-			this.name = element.Element("name").Value;
-			this.value = XmlRpcObject.Create(element.Element("value").Elements().);
+			this.name = element.Element(XmlRpcMember.xmlNameName).Value;
+			this.value = XmlRpcObject.Create(element.Element(XmlRpcMember.xmlNameValue).FirstNode as XElement);
 		}
+
+		/// <summary>
+		/// Returns the XML name.
+		/// </summary>
+		public static string XmlName { get { return XmlRpcMember.xmlName; } }
+
+		/// <summary>
+		/// Returns the structure name.
+		/// </summary>
+		public string Name { get { return this.Name; } }
+
+		/// <summary>
+		/// Returns the structure value.
+		/// </summary>
+		public XmlRpcObject Value { get { return this.Value; } }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.
@@ -55,7 +77,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			throw NotImplementedException();
+			return new XElement(
+				XmlRpcMember.xmlName,
+				new XElement(XmlRpcMember.xmlNameName, this.name),
+				new XElement(XmlRpcMember.xmlNameValue, this.value.GetXml())
+				);
 		}
 	}
 }

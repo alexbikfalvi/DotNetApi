@@ -56,6 +56,8 @@ namespace DotNetApi.Web.XmlRpc
 			else if (element.Name == XmlRpcDouble.XmlName) return new XmlRpcDouble(element);
 			else if (element.Name == XmlRpcDateTime.XmlName) return new XmlRpcDateTime(element);
 			else if (element.Name == XmlRpcBase64.XmlName) return new XmlRpcBase64(element);
+			else if (element.Name == XmlRpcStruct.XmlName) return new XmlRpcStruct(element);
+			else if (element.Name == XmlRpcArray.XmlName) return new XmlRpcArray(element);
 			else throw new XmlRpcException(string.Format("Unknown XML element \'{0}\'.", element.Name));
 		}
 

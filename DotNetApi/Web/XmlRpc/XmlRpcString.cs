@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcString : XmlRpcObject
 	{
-		private static string name = "string";
+		private static string xmlName = "string";
 
 		/// <summary>
 		/// Creates a new string instance.
@@ -44,7 +44,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <param name="element">The XML element.</param>
 		public XmlRpcString(XElement element)
 		{
-			if (element.Name.LocalName != XmlRpcString.name) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcString.name, element.Name.LocalName));
+			if (element.Name.LocalName != XmlRpcString.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcString.xmlName, element.Name.LocalName));
 			this.Value = element.Value;
 		}
 
@@ -64,7 +64,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			return new XElement(XmlRpcString.name, this.Value);
+			return new XElement(XmlRpcString.xmlName, this.Value);
 		}
 	}
 }
