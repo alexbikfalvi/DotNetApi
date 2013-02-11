@@ -52,12 +52,15 @@
     <Compile Include="Web\XmlRpc\XmlRpcDateTime.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcDouble.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcException.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcFault.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcInt.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcMember.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcMethodCall.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameter.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameters.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcObject.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcRequest.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcResponse.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcString.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcStruct.cs" />
     <Compile Include="Windows\Controls\ImageListBox.cs">

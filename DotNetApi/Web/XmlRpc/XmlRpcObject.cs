@@ -25,7 +25,7 @@ namespace DotNetApi.Web.XmlRpc
 	/// An XML RPC object.
 	/// </summary>
 	[Serializable]
-	public abstract class XmlRpcObject
+	public abstract class XmlRpcObject : IDisposable
 	{
 		/// <summary>
 		/// Create a new object from the specified value.
@@ -66,5 +66,10 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		/// <returns>The XML element.</returns>
 		public abstract XElement GetXml();
+
+		/// <summary>
+		/// Disposes the current object.
+		/// </summary>
+		public void Dispose() { }
 	}
 }

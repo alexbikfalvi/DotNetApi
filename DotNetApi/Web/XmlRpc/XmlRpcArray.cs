@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -55,8 +56,16 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcArray(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcArray.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcArray.xmlName, element.Name.LocalName));
+			// Get the "value" sub-elements of the "data" element.
 			IEnumerable<XElement> elements = element.Element(XmlRpcArray.xmlNameData).Elements(XmlRpcArray.xmlNameValue);
-			this.values = new XmlRpcObject[elements.
+			// Allocate the values array.
+			this.values = new XmlRpcObject[Enumerable.Count<XElement>(elements)];
+			// Add the objects to the values array.
+			uint index = 0;
+			foreach (XElement el in elements)
+			{
+				this.values[index++] = XmlRpcObject.Create(el);
+			}
 		}
 
 		/// <summary>

@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -65,6 +66,28 @@ namespace DotNetApi.Web.XmlRpc
 		public override XElement GetXml()
 		{
 			return new XElement(XmlRpcString.xmlName, this.Value);
+		}
+
+		/// <summary>
+		/// Escapes the string value. 
+		/// </summary>
+		/// <param name="value">The string value to escape.</param>
+		/// <returns>The escaped string value.</returns>
+		private static string Escape(string value)
+		{
+			string str = Regex.Replace(value, "", "");
+			return str;
+		}
+
+		/// <summary>
+		/// Unescapes the string value.
+		/// </summary>
+		/// <param name="value">The string value to unescape.</param>
+		/// <returns>The unescaped string value.</returns>
+		private static string Unescape(string value)
+		{
+			string str = Regex.Replace(value, "", "");
+			return str;
 		}
 	}
 }
