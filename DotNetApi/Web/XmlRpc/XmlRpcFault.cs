@@ -44,8 +44,8 @@ namespace DotNetApi.Web.XmlRpc
 			if (element.Name.LocalName != XmlRpcFault.xmlFault) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcFault.xmlFault, element.Name.LocalName));
 			using (XmlRpcStruct structFault = new XmlRpcStruct(element.Element(XmlRpcFault.xmlValue).FirstNode))
 			{
-				this.faultCode = (structFault[XmlRpcFault.xmlFaultCode].Value as XmlRpcInt).Value;
-				this.faultString = (structFault[XmlRpcFault.xmlFaultString].Value as XmlRpcString).Value;
+				this.faultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
+				this.faultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;
 			}
 		}
 

@@ -22,49 +22,44 @@ using System.Xml.Linq;
 namespace DotNetApi.Web.XmlRpc
 {
 	/// <summary>
-	/// An XML RPC boolean object.
+	/// A class that represents an XML RPC value.
 	/// </summary>
 	[Serializable]
-	public class XmlRpcBoolean : XmlRpcObject
+	public sealed class XmlRpcValue : XmlRpcObject
 	{
-		private static string xmlName = "boolean";
+		private static string xmlName = "value";
+
+		private XmlRpcObject value = null;
 
 		/// <summary>
-		/// Creates a new boolean instance.
+		/// Creates a new XML RPC parameter for the specified value.
 		/// </summary>
-		/// <param name="value">The boolean value.</param>
-		public XmlRpcBoolean(bool value)
+		/// <param name="value">The parameter value.</param>
+		public XmlRpcValue(object value)
 		{
-			this.Value = value;
+			this.value = XmlRpcObject.Create(value);
 		}
 
 		/// <summary>
-		/// Creates a new boolean instance from the specified XML element.
+		/// Creates a new XML-RPC value object from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcBoolean(XElement element)
+		public XmlRpcValue(XElement element)
 		{
-			if(element.Name.LocalName != XmlRpcBoolean.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcBoolean.xmlName, element.Name.LocalName));
-
-			switch (element.Value.ToLower())
-			{
-				case "0": this.Value = false; break;
-				case "1": this.Value = true; break;
-				case "false": this.Value = false; break;
-				case "true": this.Value = true; break;
-				default: throw new XmlRpcException(string.Format("Unknown boolean value \'{0}\'.", element.Value));
-			}
+			if (element.Name.LocalName != XmlRpcValue.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcValue.xmlName, element.Name.LocalName));
+			// Create the value XML RPC object from the inner XML element.
+			this.value = XmlRpcObject.Create(element.FirstNode as XElement);
 		}
 
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
-		public static string XmlName { get { return XmlRpcBoolean.xmlName; } }
+		public static string XmlName { get { return XmlRpcValue.xmlName; } }
 
 		/// <summary>
-		/// The object value;
+		/// Gets the XML RPC object corresponding to this value.
 		/// </summary>
-		public bool Value { get; set; }
+		public XmlRpcObject Value { get { return this.value; } }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.
@@ -72,7 +67,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			return new XElement(XmlRpcBoolean.xmlName, this.Value ? "true" : "false");
+			return new XElement(XmlRpcValue.xmlName, this.value.GetXml());
 		}
 	}
 }

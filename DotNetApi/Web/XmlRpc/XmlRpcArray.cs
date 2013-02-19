@@ -31,9 +31,8 @@ namespace DotNetApi.Web.XmlRpc
 	{
 		private static string xmlName = "array";
 		private static string xmlNameData = "data";
-		private static string xmlNameValue = "value";
 
-		private XmlRpcObject[] values;
+		private XmlRpcValue[] values;
 
 		/// <summary>
 		/// Creates a new array instance from the specified object array.
@@ -41,11 +40,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// <param name="values">The object array.</param>
 		public XmlRpcArray(object[] values)
 		{
-			this.values = new XmlRpcObject[values.Length];
+			this.values = new XmlRpcValue[values.Length];
 
 			for (int index = 0; index < values.Length; index++)
 			{
-				this.values[index] = XmlRpcObject.Create(values[index]);
+				this.values[index] = new XmlRpcValue(values[index]);
 			}
 		}
 
@@ -56,15 +55,15 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcArray(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcArray.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcArray.xmlName, element.Name.LocalName));
-			// Get the "value" sub-elements of the "data" element.
-			IEnumerable<XElement> elements = element.Element(XmlRpcArray.xmlNameData).Elements(XmlRpcArray.xmlNameValue);
+			// Get the sub-elements of the "data" element.
+			IEnumerable<XElement> elements = element.Element(XmlRpcArray.xmlNameData).Elements();
 			// Allocate the values array.
-			this.values = new XmlRpcObject[Enumerable.Count<XElement>(elements)];
+			this.values = new XmlRpcValue[Enumerable.Count<XElement>(elements)];
 			// Add the objects to the values array.
 			uint index = 0;
 			foreach (XElement el in elements)
 			{
-				this.values[index++] = XmlRpcObject.Create(el);
+				this.values[index++] = new XmlRpcValue(el);
 			}
 		}
 
@@ -83,12 +82,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns>The value.</returns>
-		public XmlRpcObject this[int index] { get { return this.values[index]; } }
+		public XmlRpcObject this[int index] { get { return this.values[index].Value; } }
 
 		/// <summary>
 		/// Returns the array values.
 		/// </summary>
-		public XmlRpcObject[] Values { get { return this.values; } }
+		public XmlRpcValue[] Values { get { return this.values; } }
 
 		/// <summary>
 		/// Returns the XML element corresponding to this object.
@@ -96,7 +95,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			return null;
+			XElement element = new XElement(XmlRpcArray.xmlNameData);
+			foreach (XmlRpcValue value in this.values)
+			{
+				element.Add(value.GetXml());
+			}
+			return new XElement(XmlRpcArray.xmlName, element);
 		}
 	}
 }

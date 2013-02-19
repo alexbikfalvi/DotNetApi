@@ -32,7 +32,7 @@ namespace DotNetApi.Web.XmlRpc
 		private static string xmlNameValue = "value";
 
 		private string name;
-		private XmlRpcObject value;
+		private XmlRpcValue value;
 
 		/// <summary>
 		/// Creates a new struct member instance from the specified name and value.
@@ -42,7 +42,7 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcMember(string name, object value)
 		{
 			this.name = name;
-			this.value = XmlRpcObject.Create(value);
+			this.value = new XmlRpcValue(value);
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			if (element.Name.LocalName != XmlRpcMember.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcMember.xmlName, element.Name.LocalName));
 			this.name = element.Element(XmlRpcMember.xmlNameName).Value;
-			this.value = XmlRpcObject.Create(element.Element(XmlRpcMember.xmlNameValue).FirstNode as XElement);
+			this.value = new XmlRpcValue(element.Element(XmlRpcMember.xmlNameValue) as XElement);
 		}
 
 		/// <summary>
@@ -69,7 +69,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Returns the structure value.
 		/// </summary>
-		public XmlRpcObject Value { get { return this.Value; } }
+		public XmlRpcValue Value { get { return this.Value; } }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.
@@ -80,7 +80,7 @@ namespace DotNetApi.Web.XmlRpc
 			return new XElement(
 				XmlRpcMember.xmlName,
 				new XElement(XmlRpcMember.xmlNameName, this.name),
-				new XElement(XmlRpcMember.xmlNameValue, this.value.GetXml())
+				this.value.GetXml()
 				);
 		}
 	}

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -26,19 +27,64 @@ namespace DotNetApi.Web.XmlRpc
 	/// A list of XML RPC parameters.
 	/// </summary>
 	[Serializable]
-	public class XmlRpcParameters : List<XmlRpcParameter>
+	public class XmlRpcParameters : XmlRpcObject
 	{
+		private static string xmlName = "params";
+
+		private XmlRpcParameter[] parameters;
+
 		/// <summary>
 		/// Creates a new instance of XML RPC parameters.
 		/// </summary>
 		/// <param name="parameters">The XML RPC parameters.</param>
 		public XmlRpcParameters(object[] parameters)
-			: base(parameters.Length)
 		{
+			this.parameters = new XmlRpcParameter[parameters.Length];
+			int index = 0;
 			foreach (object parameter in parameters)
 			{
-				this.Add(new XmlRpcParameter(parameter));
+				this.parameters[index++] = new XmlRpcParameter(parameter);
 			}
+		}
+
+		/// <summary>
+		/// Creates a new instance of XML RPC parameters from the specified XML element.
+		/// </summary>
+		/// <param name="element">The XML element.</param>
+		public XmlRpcParameters(XElement element)
+		{
+			if (element.Name.LocalName != XmlRpcParameters.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcParameters.xmlName, element.Name.LocalName));
+			// Create the value of each XML RPC parameter from the inner XML elements.
+			IEnumerable<XElement> elements = element.Elements();
+			// Allocated the parameters list.
+			this.parameters = new XmlRpcParameter[Enumerable.Count<XElement>(elements)];
+			// Add the parameters.
+			int index = 0;
+			foreach (XElement el in elements)
+			{
+				this.parameters[index++] = new XmlRpcParameter(el);
+			}
+		}
+
+		/// <summary>
+		/// Returns the XML name.
+		/// </summary>
+		public static string XmlName { get { return XmlRpcParameters.xmlName; } }
+
+		/// <summary>
+		/// Returns the XML element correspoding to this parameters list.
+		/// </summary>
+		/// <returns>The XML element.</returns>
+		public override XElement GetXml()
+		{
+			XElement element = new XElement(XmlRpcParameters.xmlName);
+
+			foreach (XmlRpcParameter parameter in this.parameters)
+			{
+				element.Add(parameter.GetXml());
+			}
+
+			return element;
 		}
 	}
 }

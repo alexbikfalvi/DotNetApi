@@ -63,6 +63,7 @@
     <Compile Include="Web\XmlRpc\XmlRpcResponse.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcString.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcStruct.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcValue.cs" />
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>

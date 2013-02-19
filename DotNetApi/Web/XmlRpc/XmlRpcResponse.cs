@@ -50,11 +50,28 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			XElement element = XDocument.Parse(xml).Root;
 
+			// Check the XML element name.
 			if (element.Name.LocalName != XmlRpcResponse.xmlMethodResponse) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcResponse.xmlMethodResponse, element.Name.LocalName));
 
+			// Create a new response object.
 			XmlRpcResponse response = new XmlRpcResponse();
+
+			// Parse the response XML.
+
+			
+
 
 			return response;
 		}
+
+		/// <summary>
+		/// Returns the value of the current response, or <b>null</b> if no value exists.
+		/// </summary>
+		public XmlRpcObject Value { get { return this.value; } }
+
+		/// <summary>
+		/// Returns the faule of the current response, or <b>null</b> if no fault exists.
+		/// </summary>
+		public XmlRpcFault Fault { get { return this.fault; } }
 	}
 }

@@ -46,7 +46,8 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcString(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcString.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcString.xmlName, element.Name.LocalName));
-			this.Value = element.Value;
+			// Set the value to the unescaped value of the XML element.
+			this.Value = XmlRpcString.Unescape(element.Value);
 		}
 
 		/// <summary>
@@ -55,7 +56,7 @@ namespace DotNetApi.Web.XmlRpc
 		public static string XmlName { get { return XmlRpcString.xmlName; } }
 
 		/// <summary>
-		/// The object value;
+		/// The original string value (unescaped).
 		/// </summary>
 		public string Value { get; set; }
 
@@ -65,7 +66,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			return new XElement(XmlRpcString.xmlName, this.Value);
+			// Return an XML element with the escaped version of the string.
+			return new XElement(XmlRpcString.xmlName, XmlRpcString.Escape(this.Value));
 		}
 
 		/// <summary>
@@ -75,8 +77,9 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The escaped string value.</returns>
 		private static string Escape(string value)
 		{
-			string str = Regex.Replace(value, "", "");
-			return str;
+			// Replace the "&" and "<" in the unescaped version of the argument string.
+			string str = Regex.Replace(XmlRpcString.Unescape(value), "&", "&amp;");
+			return Regex.Replace(str, "<", "&lt;");
 		}
 
 		/// <summary>
@@ -86,8 +89,9 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The unescaped string value.</returns>
 		private static string Unescape(string value)
 		{
-			string str = Regex.Replace(value, "", "");
-			return str;
+			// Replace the "&amp;" and "&lt;" in the argument string.
+			string str = Regex.Replace(value, "&amp;", "&");
+			return Regex.Replace(str, "&lt;", "<");
 		}
 	}
 }
