@@ -25,7 +25,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YtApi
+namespace DotNetApi.Web
 {
 	/// <summary>
 	/// A class representing the asynchronous request result.

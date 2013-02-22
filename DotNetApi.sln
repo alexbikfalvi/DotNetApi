@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApi", "DotNetApi\DotNetApi.csproj", "{475F767E-2288-4E56-9B90-179A10DCAB49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApiTest", "DotNetApiTest\DotNetApiTest.csproj", "{35413D72-829D-4547-A59F-AB974CCAC93F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{475F767E-2288-4E56-9B90-179A10DCAB49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{475F767E-2288-4E56-9B90-179A10DCAB49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{475F767E-2288-4E56-9B90-179A10DCAB49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35413D72-829D-4547-A59F-AB974CCAC93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35413D72-829D-4547-A59F-AB974CCAC93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35413D72-829D-4547-A59F-AB974CCAC93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35413D72-829D-4547-A59F-AB974CCAC93F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

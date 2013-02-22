@@ -29,17 +29,43 @@ namespace DotNetApi.Web.XmlRpc
 	{
 		private static string xmlMethodResponse = "methodResponse";
 		private static string xmlParams = "params";
-		private static string xmlParam = "param";
-		private static string xmlValue = "value";
 		private static string xmlFault = "fault";
 
 		private XmlRpcObject value = null;
 		private XmlRpcFault fault = null;
 
+		private string xml = null;
+
 		/// <summary>
 		/// Private constructor.
 		/// </summary>
-		private XmlRpcResponse() { }
+		/// <param name="xml">The XML string corresponding to this response.</param>
+		private XmlRpcResponse(string xml)
+		{
+			// Set the XML string.
+			this.xml = xml;
+			
+			// Parse the XML string to an XML document.
+			XDocument document = XDocument.Parse(xml);
+			XElement element;
+
+			// Check the XML root element.
+			if (document.Root.Name.LocalName != XmlRpcResponse.xmlMethodResponse) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcResponse.xmlMethodResponse, document.Root.Name.LocalName));
+
+			// Parse the XML from the response parameter, if any.
+			if(null != (element = document.Root.Element(XmlRpcResponse.xmlParams)))
+			{
+				try { this.value = (new XmlRpcParameters(element))[0].Value.Value; }
+				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
+			}
+
+			// Parse the XML from the response fault, if any.
+			if (null != (element = document.Root.Element(XmlRpcResponse.xmlFault)))
+			{
+				try { this.fault = new XmlRpcFault(element); }
+				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
+			}
+		}
 
 		/// <summary>
 		/// Creates an XML RPC response.
@@ -53,15 +79,8 @@ namespace DotNetApi.Web.XmlRpc
 			// Check the XML element name.
 			if (element.Name.LocalName != XmlRpcResponse.xmlMethodResponse) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcResponse.xmlMethodResponse, element.Name.LocalName));
 
-			// Create a new response object.
-			XmlRpcResponse response = new XmlRpcResponse();
-
-			// Parse the response XML.
-
-			
-
-
-			return response;
+			// Create and return a new response object.
+			return new XmlRpcResponse(xml);
 		}
 
 		/// <summary>
@@ -73,5 +92,10 @@ namespace DotNetApi.Web.XmlRpc
 		/// Returns the faule of the current response, or <b>null</b> if no fault exists.
 		/// </summary>
 		public XmlRpcFault Fault { get { return this.fault; } }
+
+		/// <summary>
+		/// Returns the XML string corresponding to this response.
+		/// </summary>
+		public string Xml { get { return this.xml; } }
 	}
 }

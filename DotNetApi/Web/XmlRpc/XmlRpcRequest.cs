@@ -17,6 +17,9 @@
  */
 
 using System;
+using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -34,12 +37,18 @@ namespace DotNetApi.Web.XmlRpc
 		private static string xmlValue = "value";
 
 		/// <summary>
+		/// Private constructor.
+		/// </summary>
+		private XmlRpcRequest() { }
+
+		/// <summary>
 		/// Creates a new XML RPC request.
 		/// </summary>
 		/// <param name="method">The XML RPC call method.</param>
 		/// <param name="parameters">The call parameters.</param>
-		/// <returns>The XML document corresponding the request.</returns>
-		public static string Create(string method, object[] parameters)
+		/// <param name="bom">Specify whether to include the byte-mark-order into the XML byte array.</param>
+		/// <returns>The XML document corresponding the request as a UTF-8 encoded byte array.</returns>
+		public static byte[] Create(string method, object[] parameters, bool bom = false)
 		{
 			// Create the method call parameter.
 			XElement elementMethodCall = new XElement(XmlRpcRequest.xmlMethodCall,
@@ -63,7 +72,29 @@ namespace DotNetApi.Web.XmlRpc
 				// Add the parameters element to the method call.
 				elementMethodCall.Add(elementParams);
 			}
-			return (new XDocument(elementMethodCall)).ToString(SaveOptions.None);
+			using(MemoryStream stream = new MemoryStream())
+			{
+				// Create a new XML document for the method.
+				XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", null), elementMethodCall);
+				// Create the encoding used to write the XML to the byte array.
+				UTF8Encoding encoding = new UTF8Encoding(bom);
+				// Create an XML writer using UTF-8 encoding to write the XML document.
+				using (XmlWriter xmlWriter = new XmlTextWriter(stream, encoding))
+				{
+					// Save the XML document to the memory stream using the XML writer.
+					document.Save(xmlWriter);
+					// Flush the XML writer to the memory stream.
+					xmlWriter.Flush();
+					// Reset the memory stream to the begining.
+					stream.Seek(0, SeekOrigin.Begin);
+					// Create a binary reader to read the stream into a byte array.
+					using (BinaryReader reader = new BinaryReader(stream))
+					{
+						// Read the stream into the byte array.
+						return reader.ReadBytes((int)stream.Length);
+					}
+				}
+			}
 		}
 	}
 }

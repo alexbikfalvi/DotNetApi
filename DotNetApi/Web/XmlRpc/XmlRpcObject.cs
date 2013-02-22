@@ -28,19 +28,25 @@ namespace DotNetApi.Web.XmlRpc
 	public abstract class XmlRpcObject : IDisposable
 	{
 		/// <summary>
-		/// Create a new object from the specified value.
+		/// Create a new object from the specified value. If the value is an <code>XmlRpcObject</code>, the object is returned with
+		/// no change. If the value is an <code>XElement</code>, the value is parsed according to the XML RPC rules. Otherwise, the
+		/// value is tested in the following order <code>int</code>, <code>boolean</code>, <code>string</code>, <code>double</code>, 
+		/// <code>dateTime</code>, <code>base64</code> for <code>byte[]</code>, <code>array</code> and <code>struct</code>.
 		/// </summary>
 		/// <param name="value">The object value.</param>
 		/// <returns>The XML RPC object.</returns>
 		public static XmlRpcObject Create(object value)
 		{
-			if (value.GetType() == typeof(int)) return new XmlRpcInt((int)value);
+			if (value.GetType() == typeof(XmlRpcObject)) return value as XmlRpcObject;
+			else if (value.GetType() == typeof(XElement)) return XmlRpcObject.Create(value as XElement);
+			else if (value.GetType() == typeof(int)) return new XmlRpcInt((int)value);
 			else if (value.GetType() == typeof(bool)) return new XmlRpcBoolean((bool)value);
 			else if (value.GetType() == typeof(string)) return new XmlRpcString(value as string);
 			else if (value.GetType() == typeof(double)) return new XmlRpcDouble((double)value);
 			else if (value.GetType() == typeof(DateTime)) return new XmlRpcDateTime((DateTime)value);
 			else if (value.GetType() == typeof(byte[])) return new XmlRpcBase64(value as byte[]);
-			else throw new XmlRpcException(string.Format("Unknown object type \'{0}\'.", value.GetType().ToString()));
+			else if (value.GetType().BaseType == typeof(Array)) return new XmlRpcArray(value as Array);
+			else return new XmlRpcStruct(value);
 		}
 
 		/// <summary>

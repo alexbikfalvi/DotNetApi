@@ -33,5 +33,15 @@ namespace DotNetApi.Web.XmlRpc
 			: base(message)
 		{
 		}
+
+		/// <summary>
+		/// Creates a new XML RPC exception instance.
+		/// </summary>
+		/// <param name="message">The exception message.</param>
+		/// <param name="innerException">The inner exception.</param>
+		public XmlRpcException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+		}
 	}
 }

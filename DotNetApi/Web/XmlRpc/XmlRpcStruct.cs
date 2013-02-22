@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Xml.Linq;
 
@@ -43,12 +44,26 @@ namespace DotNetApi.Web.XmlRpc
 			{
 				if (propertyInfo.CanRead)
 				{
+					// The member name.
+					string name = propertyInfo.Name;
+					// Get the display name attribute of the property.
+					object[] displayNames = propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), true);
+					// If the attributes set is not null.
+					if (displayNames != null)
+					{
+						if (displayNames.Length != 0)
+						{
+							name = (displayNames[0] as DisplayNameAttribute).DisplayName;
+						}
+					}
+					// Check there is no other member with the same name.
+					if (this.members.ContainsKey(name)) throw new XmlRpcException(string.Format("A structure field with the name \'{0}\' already exists.", name));
 					// Create a new member for each public property.
 					XmlRpcMember member = new XmlRpcMember(
-						propertyInfo.Name,
+						name,
 						propertyInfo.GetGetMethod().Invoke(obj, null));
 					// Add the member to the struct list.
-					this.members.Add(propertyInfo.Name, member);
+					this.members.Add(name, member);
 				}
 			}
 		}

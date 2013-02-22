@@ -38,13 +38,14 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new array instance from the specified object array.
 		/// </summary>
 		/// <param name="values">The object array.</param>
-		public XmlRpcArray(object[] values)
+		public XmlRpcArray(Array values)
 		{
 			this.values = new XmlRpcValue[values.Length];
 
-			for (int index = 0; index < values.Length; index++)
+			int index = 0;
+			foreach (object value in values)
 			{
-				this.values[index] = new XmlRpcValue(values[index]);
+				this.values[index++] = new XmlRpcValue(value);
 			}
 		}
 

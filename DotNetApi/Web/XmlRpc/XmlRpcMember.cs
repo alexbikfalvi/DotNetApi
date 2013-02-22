@@ -64,12 +64,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Returns the structure name.
 		/// </summary>
-		public string Name { get { return this.Name; } }
+		public string Name { get { return this.name; } }
 
 		/// <summary>
 		/// Returns the structure value.
 		/// </summary>
-		public XmlRpcValue Value { get { return this.Value; } }
+		public XmlRpcValue Value { get { return this.value; } }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

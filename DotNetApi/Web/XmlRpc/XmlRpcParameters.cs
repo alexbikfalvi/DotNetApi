@@ -72,6 +72,13 @@ namespace DotNetApi.Web.XmlRpc
 		public static string XmlName { get { return XmlRpcParameters.xmlName; } }
 
 		/// <summary>
+		/// Returns the XML RPC parameter at the specified index.
+		/// </summary>
+		/// <param name="index">The index.</param>
+		/// <returns>The XML RPC parameter.</returns>
+		public XmlRpcParameter this[int index] { get { return this.parameters[index]; } }
+
+		/// <summary>
 		/// Returns the XML element correspoding to this parameters list.
 		/// </summary>
 		/// <returns>The XML element.</returns>
