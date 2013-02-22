@@ -28,11 +28,16 @@ namespace DotNetApi.Web.XmlRpc
 	/// An XML RPC structure.
 	/// </summary>
 	[Serializable]
-	public sealed class XmlRpcStruct : XmlRpcObject
+	public class XmlRpcStruct : XmlRpcObject
 	{
 		private static string xmlName = "struct";
 
 		private Dictionary<string, XmlRpcMember> members = new Dictionary<string,XmlRpcMember>();
+
+		/// <summary>
+		/// Creates a new empty structure.
+		/// </summary>
+		protected XmlRpcStruct() { }
 
 		/// <summary>
 		/// Creates a new struct instance from the specified class object. Only public properties are added to the struct as members.
@@ -114,6 +119,16 @@ namespace DotNetApi.Web.XmlRpc
 				element.Add(member.Value.GetXml());
 			}
 			return element;
+		}
+
+		/// <summary>
+		/// Adds a new structure member.
+		/// </summary>
+		/// <param name="name">The structure member name.</param>
+		/// <param name="value">The structure member value.</param>
+		protected void Add(string name, string value)
+		{
+			this.members.Add(name, new XmlRpcMember(name, value));
 		}
 	}
 }
