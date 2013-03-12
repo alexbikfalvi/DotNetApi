@@ -27,11 +27,8 @@ namespace DotNetApi.Windows.Controls
 	[Serializable]
 	public class SideMenuItem : MenuItem
 	{
-		//private bool visible = true;
-		//private bool enabled = false;
 		private Image imageSmall = null;
 		private Image imageLarge = null;
-		//private string text = string.Empty;
 
 		// Hidden menu item
 		private ToolStripMenuItem hiddenMenuItem;
@@ -61,34 +58,15 @@ namespace DotNetApi.Windows.Controls
 			this.toolTip = new ToolTip();
 		}
 
+		// Public events.
+
 		/// <summary>
 		/// An event raised when the menu item is clicked.
 		/// </summary>
 		public new SideMenuEventHandler Click;
 
-		///// <summary>
-		///// Gets or sets whether the item is visible.
-		///// </summary>
-		//public bool Visible
-		//{
-		//	get { return this.visible; }
-		//	set
-		//	{
-		//		this.visible = value;
-		//	}
-		//}
-		///// <summary>
-		///// Gets or sets whether the item is enabled.
-		///// </summary>
-		//public bool Enabled
-		//{
-		//	get { return this.enabled; }
-		//	set
-		//	{
-		//		this.enabled = value;
-		//		this.hiddenMenuItem.Enabled = value;
-		//	}
-		//}
+		// Public properties.
+
 		/// <summary>
 		/// Gets or sets the small menu item image.
 		/// </summary>
@@ -109,26 +87,16 @@ namespace DotNetApi.Windows.Controls
 			get { return this.imageLarge; }
 			set { this.imageLarge = value; }
 		}
-		///// <summary>
-		///// Gets or sets the menu item tag.
-		///// </summary>
-		//public object Tag { get; set; }
-		///// <summary>
-		///// Gets  or sets the menu item text.
-		///// </summary>
-		//public string Text
-		//{
-		//	get { return this.text; }
-		//	set
-		//	{
-		//		this.text = value;
-		//		this.hiddenMenuItem.Text = value;
-		//	}
-		//}
-
+		/// <summary>
+		/// Gets whether the side menu item is hidden.
+		/// </summary>
 		public ToolStripMenuItem HiddenMenuItem { get { return this.hiddenMenuItem; } }
+		/// <summary>
+		/// Gets the tooltip corresponding to this side menu item.
+		/// </summary>
+		public ToolTip ToolTip { get { return this.toolTip; } }
 
-		public ToolTip ToolTop { get { return this.toolTip; } }
+		// Public methods.
 
 		/// <summary>
 		/// Selects the current menu item.
@@ -139,13 +107,31 @@ namespace DotNetApi.Windows.Controls
 			if (null != this.Click) this.Click(this);
 			this.hiddenMenuItem.Checked = true;
 		}
-
 		/// <summary>
 		/// Deselects the current menu item.
 		/// </summary>
 		public void Deselect()
 		{
 			this.hiddenMenuItem.Checked = false;
+		}
+
+		// Protected methods.
+
+		/// <summary>
+		/// A method called when the object is being disposed.
+		/// </summary>
+		/// <param name="disposing">If <b>true</b>, the control is being disposed.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				this.hiddenMenuItem.Dispose();
+				this.toolTip.Dispose();
+				if (this.imageSmall != null) this.imageSmall.Dispose();
+				if (this.imageLarge != null) this.imageLarge.Dispose();
+			}
+			// Call the base class method.
+			base.Dispose(disposing);
 		}
 	}
 }

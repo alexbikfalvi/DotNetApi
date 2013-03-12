@@ -42,8 +42,9 @@ namespace DotNetApi.Windows.Controls
 		private int minimizedItemWidth = 25;			// The width of a minimized item.
 		private int hiddenItems = 0;					// The number of hidden items. 
 		private int minimizedItems = 0;					// The number of minimized items.
-		private int visibleItems = 0;					// The number of visible items;
+		private int visibleItems = 0;					// The number of visible items.
 		private float titleFontSize = 12.0f;			// The title font size.
+		private int toolTipTopOffset = -20;				// The top offset of a minimized item tooltip.
 
 		private bool itemPressed;
 		private bool itemMinimizedPressed;
@@ -99,8 +100,12 @@ namespace DotNetApi.Windows.Controls
 			this.Resize += new EventHandler(this.ControlResize);
 
 			this.controlMenu.Closed += new ToolStripDropDownClosedEventHandler(this.ControlMenuClosed);
-
 		}
+
+		/// <summary>
+		/// An event raised when the number of visible, minimized or hidden items has changed.
+		/// </summary>
+		public event EventHandler ItemVisibilityChanged;
 
 		/// <summary>
 		/// Returns the number of enabled menu items.
@@ -124,7 +129,7 @@ namespace DotNetApi.Windows.Controls
 		public int GripHeight { get { return this.gripHeight; } }
 		
 		/// <summary>
-		/// Gets or sets the number of hidden menu items.
+		/// Gets or sets the number of hidden menu items. Negative values are ignored.
 		/// </summary>
 		[DisplayName("Hidden items"), Description("The number of hidden menu items."), Category("Menu")]
 		public int HiddenItems
@@ -132,6 +137,8 @@ namespace DotNetApi.Windows.Controls
 			get { return this.hiddenItems; }
 			set
 			{
+				// Ignore negative values.
+				if (value < 0) return;
 				// Save the original number of hidden items.
 				int originalItems = this.hiddenItems;
 				// Upper-limit the number of hidden items to the enabled without the visible and minimized.
@@ -155,6 +162,8 @@ namespace DotNetApi.Windows.Controls
 							if (null != idx) this.controlMenu.Items.Add(this.items[idx ?? -1].HiddenMenuItem);
 						}
 					}
+					// Raise an item visibility changed event.
+					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
 				}
 			}
 		}
@@ -190,7 +199,7 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Gets or sets the number of minimized menu items.
+		/// Gets or sets the number of minimized menu items. Negative values are ignored.
 		/// </summary>
 		[DisplayName("Minimized items"), Description("The number of minimized menu items."), Category("Menu")]
 		public int MinimizedItems 
@@ -198,6 +207,8 @@ namespace DotNetApi.Windows.Controls
 			get { return this.minimizedItems; }
 			set
 			{
+				// Ignore negative values.
+				if (value < 0) return;
 				// Save the original number of minimized items.
 				int originalItems = this.minimizedItems;
 				// Upper-limit the number of items that can be minimized to the difference between enabled an visible items.
@@ -211,7 +222,13 @@ namespace DotNetApi.Windows.Controls
 				// Set the number of hidden items
 				this.HiddenItems = this.EnabledItems - this.visibleItems - this.minimizedItems;
 				// Refresh the control.
-				if (this.minimizedItems != originalItems) this.Refresh();
+				if (this.minimizedItems != originalItems)
+				{
+					// Repaint the control.
+					this.Refresh();
+					// Raise an item visibility changed event.
+					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
+				}
 			}
 		}
 
@@ -254,7 +271,7 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Gets or sets the number of visible items.
+		/// Gets or sets the number of visible items. Negative values are ignored.
 		/// </summary>
 		[DisplayName("Visible items"), Description("The number of visible menu items."), Category("Menu")]
 		public int VisibleItems
@@ -262,6 +279,8 @@ namespace DotNetApi.Windows.Controls
 			get { return this.visibleItems; }
 			set
 			{
+				// Ignore negative values.
+				if (value < 0) return;
 				// Save the original number of visible items.
 				int originalItems = this.visibleItems;
 				// Upper-limit the number of visible items to the number of enabled items.
@@ -274,7 +293,13 @@ namespace DotNetApi.Windows.Controls
 				// Update the number of minimized items.
 				this.MinimizedItems = this.EnabledItems - this.visibleItems;
 				// Refresh the control.
-				if (this.visibleItems != originalItems) this.Refresh();
+				if (this.visibleItems != originalItems)
+				{
+					//  Repaint the control.
+					this.Refresh();
+					// Raise an item visibility changed event.
+					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
+				}
 				// Update the show more or fewer buttons state.
 				this.toolStripMenuItemShowMoreButtons.Enabled = (this.visibleItems == this.EnabledItems) ? false : true;
 				this.toolStripMenuItemShowFewerButtons.Enabled = (this.visibleItems == 0) ? false : true;
@@ -307,6 +332,8 @@ namespace DotNetApi.Windows.Controls
 			this.items.Add(item);
 			// Update the number of visible items
 			this.VisibleItems = this.items.Count;
+			// Raise an item visibility changed event.
+			if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
 			// If this the first item, select it.
 			if (this.items.Count == 1)
 			{
@@ -559,7 +586,7 @@ namespace DotNetApi.Windows.Controls
 					sideMenuItem.Text,
 					new System.Drawing.Font(SystemFonts.MenuFont, FontStyle.Bold),
 					rectText,
-					(this.selectedIndex == this.VisibleToGlobalIndex(index))?SystemColors.MenuText:SystemColors.GrayText,
+					(this.selectedIndex == this.VisibleToGlobalIndex(index)) ? SystemColors.MenuText : SystemColors.MenuText,
 					TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 			// Draw the large image.
 			if (null != sideMenuItem.ImageLarge)
@@ -605,6 +632,7 @@ namespace DotNetApi.Windows.Controls
 			{
 				// If the side menu item is enabled.
 				if (this.highlightedMinimizedIndex == index)
+				{
 					// If the side menu item is highlighted.
 					if (this.selectedIndex == this.MinimizedToGlobalIndex(index))
 						// If the side menu item is selected.
@@ -622,11 +650,21 @@ namespace DotNetApi.Windows.Controls
 						else
 							// If the side menu item is not pressed.
 							this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
+					// Show the tooltip.
+					sideMenuItem.ToolTip.Show(
+						sideMenuItem.Text, this,
+						this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems - index) * this.minimizedItemWidth,
+						this.ClientRectangle.Bottom - this.itemHeight + this.toolTipTopOffset);
+				}
 				else
+				{
 					// If the side menu item is not highlighted.
 					if (this.selectedIndex == this.MinimizedToGlobalIndex(index))
 						// If the side menu item is selected.
 						this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+					// Hide the tooltip.
+					sideMenuItem.ToolTip.Hide(this);
+				}
 			}
 
 			Rectangle rectText = new Rectangle(this.ClientRectangle.Left + 32, this.ClientRectangle.Bottom - (this.visibleItems-index+1)*this.itemHeight, this.ClientRectangle.Width - 40, this.itemHeight);
@@ -1058,6 +1096,24 @@ namespace DotNetApi.Windows.Controls
 		{
 			int? idx;
 			return null == (idx = this.MinimizedToGlobalIndex(index)) ? null : this.items[idx ?? -1];
+		}
+
+		/// <summary>
+		/// A method called when the control is being disposed.
+		/// </summary>
+		/// <param name="disposing">If <b>true</b> the control is being disposed.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				// Dispose all menu items.
+				foreach (SideMenuItem item in this.items)
+				{
+					item.Dispose();
+				}
+			}
+			// Call the base class method.
+			base.Dispose(disposing);
 		}
 	}
 }

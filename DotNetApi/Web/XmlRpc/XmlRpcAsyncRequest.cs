@@ -21,7 +21,7 @@ using DotNetApi.Web;
 
 namespace DotNetApi.Web.XmlRpc
 {
-	public class XmlRpcAsyncRequest : AsyncRequest
+	public class XmlRpcAsyncRequest : AsyncWebRequest
 	{
 		/// <summary>
 		/// Conversion class for an asynchronous operation returning a string.
@@ -54,11 +54,11 @@ namespace DotNetApi.Web.XmlRpc
 			Uri uri,
 			string method,
 			object[] parameters,
-			AsyncRequestCallback callback,
+			AsyncWebRequestCallback callback,
 			object state = null)
 		{
 			// Create the asynchronous state.
-			AsyncRequestState asyncState = AsyncRequest.Create(uri, callback);
+			AsyncWebResult asyncState = AsyncWebRequest.Create(uri, callback, state);
 
 			// Create the request XML.
 			byte[] request = XmlRpcRequest.Create(method, parameters);
@@ -67,9 +67,6 @@ namespace DotNetApi.Web.XmlRpc
 			asyncState.Request.ContentType = "text/xml";
 			asyncState.Request.ContentLength = request.Length;
 			asyncState.Request.GetRequestStream().Write(request, 0, request.Length);
-
-			// Set the request user state.
-			asyncState.State = state;
 
 			// Begin the request.
 			return this.Begin(asyncState);
@@ -83,14 +80,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The request response.</returns>
 		public XmlRpcResponse End(IAsyncResult result, out object state)
 		{
-			// Get the asynchronous result.
-			AsyncRequestResult asyncResult = (AsyncRequestResult)result;
-
 			// Get the asynchronous state.
-			AsyncRequestState asyncState = (AsyncRequestState)asyncResult.AsyncState;
+			AsyncWebResult asyncState = result as AsyncWebResult;
 
 			// Set the user state
-			state = asyncState.State;
+			state = asyncState.AsyncState;
 
 			// Determine the encoding of the received response
 			return this.End<XmlRpcResponse>(result, this.funcConvert);

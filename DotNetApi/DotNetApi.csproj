@@ -40,12 +40,15 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Async\AsyncResult.cs" />
+    <Compile Include="Web\AsyncWebBuffer.cs" />
+    <Compile Include="Web\AsyncWebRequest.cs" />
+    <Compile Include="Web\AsyncWebResult.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Web\AsyncRequest.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcArray.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcAsyncRequest.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcBase64.cs" />
@@ -65,10 +68,16 @@
     <Compile Include="Web\XmlRpc\XmlRpcString.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcStruct.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcValue.cs" />
+    <Compile Include="Windows\Controls\CodeTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ImageListBoxItem.cs" />
+    <Compile Include="Windows\Controls\ThreadSafeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\ToolStripDropDownCalendar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -127,7 +136,6 @@
   <ItemGroup>
     <None Include="Resources\ArrowDown_48.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
