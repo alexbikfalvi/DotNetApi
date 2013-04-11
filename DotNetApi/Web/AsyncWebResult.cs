@@ -76,6 +76,11 @@ namespace DotNetApi.Web
 		}
 
 		/// <summary>
+		/// Gets or sets the exception of the asynchronous result.
+		/// </summary>
+		public Exception Exception { get; set; }
+
+		/// <summary>
 		/// The data returned by the asynchrounous request.
 		/// </summary>
 		public AsyncWebBuffer Data { get; set; }

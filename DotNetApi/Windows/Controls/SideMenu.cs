@@ -92,7 +92,6 @@ namespace DotNetApi.Windows.Controls
 
 			this.DoubleBuffered = true;
 
-			this.Paint += new PaintEventHandler(this.PaintSideMenu);
 			this.MouseLeave += new EventHandler(this.MouseLeaveControl);
 			this.MouseMove += new MouseEventHandler(this.MouseMoveControl);
 			this.MouseDown += new MouseEventHandler(this.MouseDownControl);
@@ -459,10 +458,12 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Event handler for a paint event.
 		/// </summary>
-		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void PaintSideMenu(object sender, PaintEventArgs e)
+		protected override void OnPaint(PaintEventArgs e)
 		{
+			// Call the base class method.
+			base.OnPaint(e);
+			// Paint the control.
 			this.PaintTitle(e.Graphics);
 			this.PaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
 			this.PaintGrip(e.Graphics);
@@ -482,11 +483,14 @@ namespace DotNetApi.Windows.Controls
 		private void PaintItemBackground(Graphics g, int index, Color color)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
-			Pen pen = new Pen(ProfessionalColors.MenuBorder);
-			Brush brush = new SolidBrush(color);
-
-			g.FillRectangle(brush, rect);
-			g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			{
+				using (Brush brush = new SolidBrush(color))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
 		}
 
 		/// <summary>
@@ -499,15 +503,18 @@ namespace DotNetApi.Windows.Controls
 		private void PaintItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
-			Pen pen = new Pen(ProfessionalColors.MenuBorder);
-			Brush brush = new LinearGradientBrush(
-				rect, 
-				colorBegin, 
-				colorEnd, 
-				LinearGradientMode.Vertical);
-
-			g.FillRectangle(brush, rect);
-			g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			{
+				using (Brush brush = new LinearGradientBrush(
+					rect,
+					colorBegin,
+					colorEnd,
+					LinearGradientMode.Vertical))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
 		}
 
 		/// <summary>
@@ -520,13 +527,14 @@ namespace DotNetApi.Windows.Controls
 		private void PaintMinimizedItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Right - this.dockButtonWidth - index * this.minimizedItemWidth, this.ClientRectangle.Bottom - this.itemHeight + 1, this.minimizedItemWidth, this.itemHeight - 1);
-			Brush brush = new LinearGradientBrush(
-				rect, 
-				colorBegin, 
-				colorEnd, 
-				LinearGradientMode.Vertical);
-
-			g.FillRectangle(brush, rect);
+			using (Brush brush = new LinearGradientBrush(
+				rect,
+				colorBegin,
+				colorEnd,
+				LinearGradientMode.Vertical))
+			{
+				g.FillRectangle(brush, rect);
+			}
 		}
 
 		/// <summary>
@@ -703,15 +711,19 @@ namespace DotNetApi.Windows.Controls
 		private void PaintGrip(Graphics g)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.ClientRectangle.Width, this.gripHeight);
-			Pen pen = new Pen(ProfessionalColors.MenuBorder);
-			Brush brush = new LinearGradientBrush(
-				rect, 
-				ProfessionalColors.OverflowButtonGradientBegin, 
-				ProfessionalColors.OverflowButtonGradientEnd, 
-				LinearGradientMode.Vertical);
 
-			g.FillRectangle(brush, rect);
-			g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			{
+				using (Brush brush = new LinearGradientBrush(
+					rect,
+					ProfessionalColors.OverflowButtonGradientBegin,
+					ProfessionalColors.OverflowButtonGradientEnd,
+					LinearGradientMode.Vertical))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
 
 			// Draw the grip image.
 			g.DrawImage(
@@ -731,18 +743,22 @@ namespace DotNetApi.Windows.Controls
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.titleHeight);
 
-			Pen pen = new Pen(SystemColors.WindowFrame);
-			Brush brush = new LinearGradientBrush(
-				rect, 
-				Color.FromArgb(246, 247, 248),
-				Color.FromArgb(218, 233, 230),
-				LinearGradientMode.Vertical);
-			g.FillRectangle(brush, rect);
-			g.DrawLine(pen, rect.Left, rect.Bottom, rect.Right, rect.Bottom);
+			using (Pen pen = new Pen(SystemColors.WindowFrame))
+			{
+				using (Brush brush = new LinearGradientBrush(
+					rect,
+					Color.FromArgb(246, 247, 248),
+					Color.FromArgb(218, 233, 230),
+					LinearGradientMode.Vertical))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Bottom, rect.Right, rect.Bottom);
 
-			pen = new Pen(Color.White);
-			g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom-1);
-			g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+					pen.Color = Color.White;
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom - 1);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
 
 			if (null == this.selectedIndex) return;
 			if (null == this.items[this.selectedIndex ?? -1]) return;
@@ -765,27 +781,31 @@ namespace DotNetApi.Windows.Controls
 		private void PaintDockButton(Graphics g)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Right - this.dockButtonWidth, this.ClientRectangle.Bottom - this.itemHeight + 1, this.dockButtonWidth, this.itemHeight - 1);
-			Brush brush;
 
 			if (this.dockButtonSelected)
 			{
 				if (this.dockButtonPressed)
 				{
-					brush = new LinearGradientBrush(
-						rect, 
-						ProfessionalColors.ButtonPressedGradientBegin, 
-						ProfessionalColors.ButtonPressedGradientEnd, 
-						LinearGradientMode.Vertical);
+					using (Brush brush = new LinearGradientBrush(
+						rect,
+						ProfessionalColors.ButtonPressedGradientBegin,
+						ProfessionalColors.ButtonPressedGradientEnd,
+						LinearGradientMode.Vertical))
+					{
+						g.FillRectangle(brush, rect);
+					}
 				}
 				else
 				{
-					brush = new LinearGradientBrush(
-						rect, 
-						ProfessionalColors.ButtonSelectedHighlight, 
-						ProfessionalColors.ButtonSelectedHighlight, 
-						LinearGradientMode.Vertical);
-				}
-				g.FillRectangle(brush, rect);
+					using (Brush brush = new LinearGradientBrush(
+						rect,
+						ProfessionalColors.ButtonSelectedHighlight,
+						ProfessionalColors.ButtonSelectedHighlight,
+						LinearGradientMode.Vertical))
+					{
+						g.FillRectangle(brush, rect);
+					}
+				}			
 			}
 
 			// Draw the dock button image.
@@ -1042,9 +1062,6 @@ namespace DotNetApi.Windows.Controls
 				// Select the currently selected item.
 				this.items[index].Select();
 
-				//this.ClearControlMenuCheck(menuItem);
-
-				//menuItem.Checked = true;
 				this.Refresh();
 			}
 		}

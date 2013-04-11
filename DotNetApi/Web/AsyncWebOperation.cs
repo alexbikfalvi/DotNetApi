@@ -17,48 +17,48 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Windows.Forms;
-using System.Threading;
 
-namespace DotNetApi.Windows.Controls
+namespace DotNetApi.Web
 {
 	/// <summary>
-	/// A base class for thread-safe controls.
+	/// A request-result pair for an asynchronous web operation.
 	/// </summary>
-	public class ThreadSafeControl : UserControl
+	public struct AsyncWebOperation
 	{
-		private AutoResetEvent eventHandleCreated = new AutoResetEvent(false);
+		private AsyncWebRequest request;
+		private AsyncWebResult result;
 
 		/// <summary>
-		/// Creates a new thread-safe control instance.
+		/// Creates a new asynchronous web operation pair.
 		/// </summary>
-		public ThreadSafeControl()
+		/// <param name="request">The asynchronous web request.</param>
+		/// <param name="result">The resuest result.</param>
+		public AsyncWebOperation(AsyncWebRequest request, AsyncWebResult result)
 		{
+			this.request = request;
+			this.result = result;
 		}
 
-		/// <summary>
-		/// Waits for the window handle of the current control to be created.
-		/// </summary>
-		protected void WaitForHandle()
-		{
-			do
-			{
-				this.eventHandleCreated.WaitOne();
-			}
-			while (!this.IsHandleCreated);
-		}
+		// Public properties.
 
 		/// <summary>
-		/// An event handler called when the handle of the current control was created.
+		/// The asynchronous web request.
 		/// </summary>
-		/// <param name="e">The event arguments.</param>
-		protected override void OnHandleCreated(EventArgs e)
+		public AsyncWebRequest Request { get { return this.request; } }
+
+		/// <summary>
+		/// The request result.
+		/// </summary>
+		public AsyncWebResult Result { get { return this.result; } }
+
+		// Public methods.
+
+		/// <summary>
+		/// Cancels the asynchronous web operation.
+		/// </summary>
+		public void Cancel()
 		{
-			// Call the base class method.
-			base.OnHandleCreated(e);
-			// Set the event.
-			this.eventHandleCreated.Set();
+			this.request.Cancel(this.result);
 		}
 	}
 }

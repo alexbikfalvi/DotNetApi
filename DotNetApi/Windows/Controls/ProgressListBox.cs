@@ -18,86 +18,106 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Drawing.Design;
 using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void ImageListBoxItemActivateEventHandler(object sender, ImageListBoxItem item);
+	//public delegate void ImageListBoxItemActivateEventHandler(object sender, ImageListBoxItem item);
 
 	/// <summary>
-	/// An image list box control.
+	/// An progress list box control.
 	/// </summary>
-	public class ImageListBox : ListBox
+	public class ProgressListBox : ListBox
 	{
-		private int imageWidth = 64;
+		private ProgressListBoxItem.Collection items = new ProgressListBoxItem.Collection();
 
 		/// <summary>
-		/// Creates a new image list box instance.
+		/// Creates a new progress list box instance.
 		/// </summary>
-		public ImageListBox()
+		public ProgressListBox()
 		{
-			// Set the object properties.
+			// Set control properties.
 			this.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.ItemHeight = 48;
 			this.IntegralHeight = false;
-		}
 
-		/// <summary>
-		/// Gets or sets the image width.
-		/// </summary>
-		public int ImageWidth
-		{
-			get { return this.imageWidth; }
-			set { this.imageWidth = value; this.Invalidate(); }
+			// Set collection event handlers.
+			this.items.AfterCleared += this.OnItemsCleared;
+			this.items.AfterItemInserted += this.OnItemInserted;
+			this.items.AfterItemRemoved += this.OnItemRemoved;
+			this.items.AfterItemSet += this.OnItemSet;
 		}
 
 		/// <summary>
 		/// An event raised when the user activates an item.
 		/// </summary>
-		public event ImageListBoxItemActivateEventHandler ItemActivate;
+		//public event ImageListBoxItemActivateEventHandler ItemActivate;
+
+		// Public properties.
+
+		/// <summary>
+		/// Gets the collection of list box items.
+		/// </summary>
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
+		public new ProgressListBoxItem.Collection Items { get { return this.items; } }
 
 		/// <summary>
 		/// Adds a new item to the image list box.
 		/// </summary>
 		/// <param name="text">The item text.</param>
 		/// <param name="image">The item image.</param>
-		public void AddItem(string text, Image image)
-		{
-			// Create a new image list box item.
-			ImageListBoxItem item = new ImageListBoxItem(text, image);
+		//public void AddItem(string text, Image image)
+		//{
+		//	// Create a new image list box item.
+		//	ImageListBoxItem item = new ImageListBoxItem(text, image);
 
-			// Add the item to the list box.
-			this.Items.Add(item);
+		//	// Add the item to the list box.
+		//	this.Items.Add(item);
+		//}
+
+		private void OnItemsCleared()
+		{
+			base.Items.Clear();
+		}
+
+		private void OnItemInserted(int index, ProgressListBoxItem item)
+		{
+			base.Items.Insert(index, item);
+		}
+
+		private void OnItemRemoved(int index, ProgressListBoxItem item)
+		{
+			base.Items.RemoveAt(index);
+		}
+
+		private void OnItemSet(int index, ProgressListBoxItem oldItem, ProgressListBoxItem newItem)
+		{
+			base.Items[index] = newItem;
 		}
 
 		/// <summary>
 		/// Draws the image list box item.
 		/// </summary>
+		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
-			// Call the base class method.
 			base.OnDrawItem(e);
 
-			// If the index is outside the item count, do nothing.
 			if ((e.Index < 0) || (e.Index >= this.Items.Count)) return;
 
 			// Get the image list box item.
-			ImageListBoxItem item = this.Items[e.Index] as ImageListBoxItem;
+			ProgressListBoxItem item = this.Items[e.Index] as ProgressListBoxItem;
 
 			Rectangle rectText = new Rectangle(
-				e.Bounds.Left + this.ImageWidth + 5,
+				e.Bounds.Left + 5,
 				e.Bounds.Top,
-				e.Bounds.Width - this.ImageWidth - 5,
-				e.Bounds.Height);
-
-			Rectangle rectImage = new Rectangle(
-				e.Bounds.Left,
-				e.Bounds.Top,
-				this.imageWidth,
+				e.Bounds.Width - 5,
 				e.Bounds.Height);
 
 			using (Brush brush = new SolidBrush(e.BackColor))
@@ -117,25 +137,6 @@ namespace DotNetApi.Windows.Controls
 					e.ForeColor,
 					TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
-
-			// Draw the image.
-			if (null != item.Image)
-			{
-				e.Graphics.DrawImage(item.Image, rectImage);
-			}
-		}
-
-		/// <summary>
-		/// An event handler called when the user double click on an item.
-		/// </summary>
-		/// <param name="e">The event arguments.</param>
-		protected override void OnDoubleClick(EventArgs e)
-		{
-			// Call the base class method.
-			base.OnDoubleClick(e);
-			// Activate the selected item.
-			if ((this.SelectedItem != null) && (this.ItemActivate != null))
-				this.ItemActivate(this, this.SelectedItem as ImageListBoxItem);
 		}
 	}
 }

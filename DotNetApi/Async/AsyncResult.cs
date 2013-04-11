@@ -30,7 +30,6 @@ namespace DotNetApi.Async
 		private AutoResetEvent wait = new AutoResetEvent(false);
 		private bool completedSynchronously = false;
 		private bool completed = false;
-		private Exception exception = null;
 
 		/// <summary>
 		/// Creates a new instance of the asynchronous state.
@@ -61,14 +60,6 @@ namespace DotNetApi.Async
 		{
 			get { return this.completedSynchronously; }
 			set { this.completedSynchronously = value; }
-		}
-		/// <summary>
-		/// Gets or sets the asynchronous state exception.
-		/// </summary>
-		public Exception Exception
-		{
-			get { return this.exception; }
-			set { this.exception = value; }
 		}
 		/// <summary>
 		/// Indicates whether the operation completed.
