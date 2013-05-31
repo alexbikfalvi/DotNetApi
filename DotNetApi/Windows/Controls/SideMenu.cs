@@ -92,12 +92,6 @@ namespace DotNetApi.Windows.Controls
 
 			this.DoubleBuffered = true;
 
-			this.MouseLeave += new EventHandler(this.MouseLeaveControl);
-			this.MouseMove += new MouseEventHandler(this.MouseMoveControl);
-			this.MouseDown += new MouseEventHandler(this.MouseDownControl);
-			this.MouseUp += new MouseEventHandler(this.MouseUpControl);
-			this.Resize += new EventHandler(this.ControlResize);
-
 			this.controlMenu.Closed += new ToolStripDropDownClosedEventHandler(this.ControlMenuClosed);
 		}
 
@@ -343,6 +337,255 @@ namespace DotNetApi.Windows.Controls
 			return item;
 		}
 
+		// Protected methods.
+
+		/// <summary>
+		/// Event handler for a paint event.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			// Call the base class method.
+			base.OnPaint(e);
+			// Paint the control.
+			this.PaintTitle(e.Graphics);
+			this.PaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
+			this.PaintGrip(e.Graphics);
+			for (int index = 0; index < this.visibleItems; index++)
+				this.PaintItem(e.Graphics, index);
+			for (int index = 0; index < this.minimizedItems; index++)
+				this.PaintMinimizedItem(e.Graphics, index);
+			this.PaintDockButton(e.Graphics);
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse leaves the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseLeave(EventArgs e)
+		{
+			// Call the base class methods.
+			base.OnMouseLeave(e);
+			// Update the control.
+			if (-1 != this.highlightedVisibleIndex)
+			{
+				this.highlightedVisibleIndex = -1;
+				this.Refresh();
+			}
+			if (-1 != this.highlightedMinimizedIndex)
+			{
+				this.highlightedMinimizedIndex = -1;
+				this.Refresh();
+			}
+			if ((this.dockButtonSelected) && (!this.controlMenu.Visible))
+			{
+				this.dockButtonSelected = false;
+				this.Refresh();
+			}
+			this.Cursor = Cursors.Arrow;
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse moves over the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			// Call the base class method.
+			base.OnMouseMove(e);
+			// Update the control.
+			Rectangle rectGrip = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.Width, this.gripHeight);
+			if (this.resizeGrip)
+			{
+				if ((e.Y >= rectGrip.Bottom + this.itemHeight))
+					this.VisibleItems -= 1;
+				if ((e.Y <= rectGrip.Bottom - this.itemHeight))
+					this.VisibleItems += 1;
+				return;
+			}
+			if (this.itemPressed) return;
+			if (this.itemMinimizedPressed) return;
+			if (this.dockButtonPressed) return;
+
+			// Visible items
+			int visibleIndex = -1;
+			if ((e.X >= this.ClientRectangle.Left) && (e.X <= this.ClientRectangle.Right))
+			{
+				for (int idx = 0; idx < this.visibleItems; idx++)
+				{
+					if ((e.Y >= this.ClientRectangle.Bottom - (this.visibleItems - idx + 1) * this.itemHeight) &&
+						(e.Y < this.ClientRectangle.Bottom - (this.visibleItems - idx) * this.itemHeight))
+					{
+						visibleIndex = idx;
+						break;
+					}
+				}
+			}
+			if (visibleIndex != this.highlightedVisibleIndex)
+			{
+				this.highlightedVisibleIndex = visibleIndex;
+				this.Refresh();
+			}
+
+			// Dock button
+			if ((e.X >= this.ClientRectangle.Right - this.dockButtonWidth) && (e.X <= this.ClientRectangle.Right) && (e.Y >= this.ClientRectangle.Bottom - this.itemHeight + 1) && (e.Y <= this.ClientRectangle.Bottom))
+			{
+				if (!this.dockButtonSelected)
+				{
+					this.dockButtonSelected = true;
+					this.Refresh();
+				}
+			}
+			else if (this.dockButtonSelected)
+			{
+				this.dockButtonSelected = false;
+				this.Refresh();
+			}
+
+			// Minimized items
+			int minimizedIndex = -1;
+			if ((e.Y > this.ClientRectangle.Bottom - this.itemHeight) && (e.Y < this.ClientRectangle.Bottom))
+				for (int idx = 0; idx < this.minimizedItems; idx++)
+					if ((e.X >= this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems - idx) * this.minimizedItemWidth) &&
+						(e.X <= this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems - idx - 1) * this.minimizedItemWidth))
+					{
+						minimizedIndex = idx;
+						break;
+					}
+			if (minimizedIndex != this.highlightedMinimizedIndex)
+			{
+				this.highlightedMinimizedIndex = minimizedIndex;
+				this.Refresh();
+			}
+
+			// Cursor
+			if ((e.X >= rectGrip.Left) && (e.X <= rectGrip.Right) && (e.Y >= rectGrip.Top) && (e.Y <= rectGrip.Bottom))
+				this.Cursor = Cursors.SizeNS;
+			else if (-1 != visibleIndex)
+				this.Cursor = Cursors.Hand;
+			else if (-1 != minimizedIndex)
+				this.Cursor = Cursors.Hand;
+			else
+				this.Cursor = Cursors.Arrow;
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse clicks on the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+			// Call the base class method.
+			base.OnMouseDown(e);
+			// Update the control.
+			Rectangle rectGrip = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.ClientRectangle.Width, this.gripHeight);
+
+			if ((e.X >= rectGrip.Left) && (e.X <= rectGrip.Right) && (e.Y >= rectGrip.Top) && (e.Y <= rectGrip.Bottom))
+				this.resizeGrip = true;
+			if (-1 != this.highlightedVisibleIndex)
+			{
+				this.itemPressed = true;
+				this.Refresh();
+			}
+			if (-1 != this.highlightedMinimizedIndex)
+			{
+				this.itemMinimizedPressed = true;
+				this.Refresh();
+			}
+			if (this.dockButtonSelected)
+			{
+				this.dockButtonPressed = true;
+				this.controlMenu.Show(this, new Point(this.ClientRectangle.Right, this.ClientRectangle.Bottom - this.itemHeight / 2), ToolStripDropDownDirection.Right);
+				this.Refresh();
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse releases the click on the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			// Call the base class method.
+			base.OnMouseUp(e);
+			// Get the region of normal menu items.
+			Rectangle rectButton = new Rectangle(
+				this.ClientRectangle.Left,
+				this.ClientRectangle.Bottom - (this.visibleItems + 1 - this.highlightedVisibleIndex ?? -1) * this.itemHeight,
+				this.ClientRectangle.Width,
+				this.itemHeight);
+			// Get the region of minimized menu items.
+			Rectangle rectMinimizedButton = new Rectangle(
+				this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems - this.highlightedMinimizedIndex ?? -1) * this.minimizedItemWidth,
+				this.ClientRectangle.Bottom - this.itemHeight,
+				this.minimizedItemWidth,
+				this.itemHeight);
+
+			// Click on the normal menu items.
+			if (this.itemPressed && (e.X >= rectButton.Left) && (e.X <= rectButton.Right) && (e.Y >= rectButton.Top) && (e.Y <= rectButton.Bottom))
+			{
+				// Compute the index of the selected menu item from the index of the highlighted menu item.
+				int? selectedIndex = this.VisibleToGlobalIndex(this.highlightedVisibleIndex);
+				// If the selected index is not null.
+				if (null != selectedIndex)
+				{
+					// Deselect the previous selected item, if one was selected.
+					if (null != this.selectedIndex)
+						this.items[this.selectedIndex ?? -1].Deselect();
+					// If the new menu item is enabled.
+					if (this.items[selectedIndex ?? -1].Enabled)
+					{
+						// Change the selected index.
+						this.selectedIndex = selectedIndex;
+						// Select the menu item.
+						this.items[this.selectedIndex ?? -1].Select();
+					}
+				}
+			}
+			// Click on the minimized menu items.
+			else if (this.itemMinimizedPressed && (e.X >= rectMinimizedButton.Left) && (e.X <= rectMinimizedButton.Right) && (e.Y >= rectMinimizedButton.Top) && (e.Y <= rectMinimizedButton.Bottom))
+			{
+				// Compute the selected index from the minimized highlighted index.
+				int? selectedIndex = this.MinimizedToGlobalIndex(this.highlightedMinimizedIndex);
+				// If the selected index is not null.
+				if (null != selectedIndex)
+				{
+					// Deselect the previous selected item.
+					if (null != this.selectedIndex)
+						this.items[this.selectedIndex ?? -1].Deselect();
+					// If the new selected item is enabled.
+					if (this.items[selectedIndex ?? -1].Enabled)
+					{
+						// Change the selected index.
+						this.selectedIndex = selectedIndex;
+						// Select the menu item.
+						this.items[this.selectedIndex ?? -1].Select();
+					}
+				}
+			}
+
+			this.resizeGrip = false;
+			this.itemPressed = false;
+			this.itemMinimizedPressed = false;
+			this.dockButtonPressed = false;
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// An event handler called when the control is resized.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnResize(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnResize(e);
+			// Update the control.
+			this.VisibleItems = this.visibleItems;
+			this.Refresh();
+		}
+
+		// Private methods.
+
 		/// <summary>
 		/// Computes the global index of a menu item, based on the visible index.
 		/// </summary>
@@ -453,25 +696,6 @@ namespace DotNetApi.Windows.Controls
 
 			// Invalidate the control area corresponding to the title.
 			this.Invalidate(new Rectangle(0, 0, this.Width, padding.Top));
-		}
-
-		/// <summary>
-		/// Event handler for a paint event.
-		/// </summary>
-		/// <param name="e">The event arguments.</param>
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			// Call the base class method.
-			base.OnPaint(e);
-			// Paint the control.
-			this.PaintTitle(e.Graphics);
-			this.PaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
-			this.PaintGrip(e.Graphics);
-			for (int index = 0; index < this.visibleItems; index++)
-				this.PaintItem(e.Graphics, index);
-			for (int index = 0; index < this.minimizedItems; index++)
-				this.PaintMinimizedItem(e.Graphics, index);
-			this.PaintDockButton(e.Graphics);
 		}
 
 		/// <summary>
@@ -814,223 +1038,6 @@ namespace DotNetApi.Windows.Controls
 				this.ClientRectangle.Bottom - this.itemHeight / 2 - Resources.DockButton.Height / 2,
 				Resources.DockButton.Width,
 				Resources.DockButton.Height);
-		}
-
-		/// <summary>
-		/// An event handler called when the mouse leaves the control.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void MouseLeaveControl(object sender, EventArgs e)
-		{
-			if (-1 != this.highlightedVisibleIndex)
-			{
-				this.highlightedVisibleIndex = -1;
-				this.Refresh();
-			}
-			if (-1 != this.highlightedMinimizedIndex)
-			{
-				this.highlightedMinimizedIndex = -1;
-				this.Refresh();
-			}
-			if ((this.dockButtonSelected) && (!this.controlMenu.Visible))
-			{
-				this.dockButtonSelected = false;
-				this.Refresh();
-			}
-			this.Cursor = Cursors.Arrow;
-		}
-
-		/// <summary>
-		/// An event handler called when the mouse moves over the control.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void MouseMoveControl(object sender, MouseEventArgs e)
-		{
-			Rectangle rectGrip = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems+1)*this.itemHeight - this.gripHeight, this.Width, this.gripHeight);
-			if (this.resizeGrip)
-			{
-				if ((e.Y >= rectGrip.Bottom + this.itemHeight))
-					this.VisibleItems -= 1;
-				if ((e.Y <= rectGrip.Bottom - this.itemHeight))
-					this.VisibleItems += 1;
-				return;
-			}
-			if (this.itemPressed) return;
-			if (this.itemMinimizedPressed) return;
-			if (this.dockButtonPressed) return;
-
-			// Visible items
-			int visibleIndex = -1;
-			if ((e.X >= this.ClientRectangle.Left) && (e.X <= this.ClientRectangle.Right))
-			{
-				for (int idx = 0; idx < this.visibleItems; idx++)
-				{
-					if ((e.Y >= this.ClientRectangle.Bottom - (this.visibleItems-idx+1)*this.itemHeight) &&
-						(e.Y < this.ClientRectangle.Bottom - (this.visibleItems-idx)*this.itemHeight))
-					{
-						visibleIndex = idx;
-						break;
-					}
-				}
-			}
-			if (visibleIndex != this.highlightedVisibleIndex)
-			{
-				this.highlightedVisibleIndex = visibleIndex;
-				this.Refresh();
-			}
-
-			// Dock button
-			if ((e.X >= this.ClientRectangle.Right-this.dockButtonWidth) && (e.X <= this.ClientRectangle.Right) && (e.Y >= this.ClientRectangle.Bottom-this.itemHeight+1) && (e.Y <= this.ClientRectangle.Bottom))
-			{
-				if (!this.dockButtonSelected)
-				{
-					this.dockButtonSelected = true;
-					this.Refresh();
-				}
-			}
-			else if (this.dockButtonSelected)
-			{
-				this.dockButtonSelected = false;
-				this.Refresh();
-			}
-
-			// Minimized items
-			int minimizedIndex = -1;
-			if ((e.Y > this.ClientRectangle.Bottom-this.itemHeight) && (e.Y < this.ClientRectangle.Bottom))
-				for (int idx = 0; idx < this.minimizedItems; idx++)
-					if ((e.X >= this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems-idx)*this.minimizedItemWidth) &&
-						(e.X <= this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems-idx-1)*this.minimizedItemWidth))
-					{
-						minimizedIndex = idx;
-						break;
-					}
-			if (minimizedIndex != this.highlightedMinimizedIndex)
-			{
-				this.highlightedMinimizedIndex = minimizedIndex;
-				this.Refresh();
-			}
-
-			// Cursor
-			if ((e.X >= rectGrip.Left) && (e.X <= rectGrip.Right) && (e.Y >= rectGrip.Top) && (e.Y <= rectGrip.Bottom))
-				this.Cursor = Cursors.SizeNS;
-			else if (-1 != visibleIndex)
-				this.Cursor = Cursors.Hand;
-			else if (-1 != minimizedIndex)
-				this.Cursor = Cursors.Hand;
-			else
-				this.Cursor = Cursors.Arrow;
-		}
-
-		/// <summary>
-		/// An event handler called when the mouse clicks on the control.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void MouseDownControl(object sender, MouseEventArgs e)
-		{
-			Rectangle rectGrip = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.ClientRectangle.Width, this.gripHeight);
-
-			if ((e.X >= rectGrip.Left) && (e.X <= rectGrip.Right) && (e.Y >= rectGrip.Top) && (e.Y <= rectGrip.Bottom))
-				this.resizeGrip = true;
-			if (-1 != this.highlightedVisibleIndex)
-			{
-				this.itemPressed = true;
-				this.Refresh();
-			}
-			if (-1 != this.highlightedMinimizedIndex)
-			{
-				this.itemMinimizedPressed = true;
-				this.Refresh();
-			}
-			if (this.dockButtonSelected)
-			{
-				this.dockButtonPressed = true;
-				this.controlMenu.Show(this, new Point(this.ClientRectangle.Right, this.ClientRectangle.Bottom - this.itemHeight / 2), ToolStripDropDownDirection.Right);
-				this.Refresh();
-			}
-		}
-	
-		/// <summary>
-		/// An event handler called when the mouse releases the click on the control.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void MouseUpControl(object sender, MouseEventArgs e)
-		{
-			// Get the region of normal menu items.
-			Rectangle rectButton = new Rectangle(
-				this.ClientRectangle.Left, 
-				this.ClientRectangle.Bottom - (this.visibleItems + 1 - this.highlightedVisibleIndex ?? -1) * this.itemHeight, 
-				this.ClientRectangle.Width, 
-				this.itemHeight);
-			// Get the region of minimized menu items.
-			Rectangle rectMinimizedButton = new Rectangle(
-				this.ClientRectangle.Right - this.dockButtonWidth - (this.minimizedItems - this.highlightedMinimizedIndex ?? -1) * this.minimizedItemWidth,
-				this.ClientRectangle.Bottom - this.itemHeight,
-				this.minimizedItemWidth,
-				this.itemHeight);
-
-			// Click on the normal menu items.
-			if (this.itemPressed && (e.X >= rectButton.Left) && (e.X <= rectButton.Right) && (e.Y >= rectButton.Top) && (e.Y <= rectButton.Bottom))
-			{
-				// Compute the index of the selected menu item from the index of the highlighted menu item.
-				int? selectedIndex = this.VisibleToGlobalIndex(this.highlightedVisibleIndex);
-				// If the selected index is not null.
-				if (null != selectedIndex)
-				{
-					// Deselect the previous selected item, if one was selected.
-					if (null != this.selectedIndex)
-						this.items[this.selectedIndex ?? -1].Deselect();
-					// If the new menu item is enabled.
-					if (this.items[selectedIndex ?? -1].Enabled)
-					{
-						// Change the selected index.
-						this.selectedIndex = selectedIndex;
-						// Select the menu item.
-						this.items[this.selectedIndex ?? -1].Select();
-					}
-				}
-			}
-			// Click on the minimized menu items.
-			else if (this.itemMinimizedPressed && (e.X >= rectMinimizedButton.Left) && (e.X <= rectMinimizedButton.Right) && (e.Y >= rectMinimizedButton.Top) && (e.Y <= rectMinimizedButton.Bottom))
-			{
-				// Compute the selected index from the minimized highlighted index.
-				int? selectedIndex = this.MinimizedToGlobalIndex(this.highlightedMinimizedIndex);
-				// If the selected index is not null.
-				if (null != selectedIndex)
-				{
-					// Deselect the previous selected item.
-					if (null != this.selectedIndex)
-						this.items[this.selectedIndex ?? -1].Deselect();
-					// If the new selected item is enabled.
-					if (this.items[selectedIndex ?? -1].Enabled)
-					{
-						// Change the selected index.
-						this.selectedIndex = selectedIndex;
-						// Select the menu item.
-						this.items[this.selectedIndex ?? -1].Select();
-					}
-				}
-			}
-
-			this.resizeGrip = false;
-			this.itemPressed = false;
-			this.itemMinimizedPressed = false;
-			this.dockButtonPressed = false;
-			this.Refresh();
-		}
-
-		/// <summary>
-		/// An event handler called when the control is resized.
-		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void ControlResize(object sender, EventArgs e)
-		{
-			this.VisibleItems = this.visibleItems;
-			this.Refresh();
 		}
 
 		/// <summary>

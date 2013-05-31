@@ -45,6 +45,8 @@ namespace DotNetApi.Windows.Controls
 			this.IntegralHeight = false;
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Gets or sets the image width.
 		/// </summary>
@@ -54,10 +56,14 @@ namespace DotNetApi.Windows.Controls
 			set { this.imageWidth = value; this.Invalidate(); }
 		}
 
+		// Public events.
+
 		/// <summary>
 		/// An event raised when the user activates an item.
 		/// </summary>
 		public event ImageListBoxItemActivateEventHandler ItemActivate;
+
+		// Public methods.
 
 		/// <summary>
 		/// Adds a new item to the image list box.
@@ -72,6 +78,8 @@ namespace DotNetApi.Windows.Controls
 			// Add the item to the list box.
 			this.Items.Add(item);
 		}
+
+		// Protected methods.
 
 		/// <summary>
 		/// Draws the image list box item.

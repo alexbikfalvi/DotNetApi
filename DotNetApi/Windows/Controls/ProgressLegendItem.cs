@@ -23,11 +23,13 @@ using System.Drawing;
 
 namespace DotNetApi.Windows.Controls
 {
+	public delegate void ProgressLegendItemEventHandler(ProgressLegendItem item);
+
 	/// <summary>
-	/// An progress list box item.
+	/// A class representing a progress legend item.
 	/// </summary>
 	[DesignTimeVisible(false)]
-	public class ProgressListBoxItem : Component
+	public class ProgressLegendItem : Component
 	{
 		/// <summary>
 		/// A collection of progress navigator item items.
@@ -36,8 +38,8 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Public delegates.
 			public delegate void ClearedEventHandler();
-			public delegate void ChangedEventHandler(int index, ProgressListBoxItem item);
-			public delegate void SetEventHandler(int index, ProgressListBoxItem oldItem, ProgressListBoxItem newItem);
+			public delegate void ChangedEventHandler(int index, ProgressLegendItem item);
+			public delegate void SetEventHandler(int index, ProgressLegendItem oldItem, ProgressLegendItem newItem);
 
 			// Public properties.
 
@@ -46,21 +48,45 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="index">The index.</param>
 			/// <returns>The item.</returns>
-			public ProgressListBoxItem this[int index]
+			public ProgressLegendItem this[int index]
 			{
-				get { return this.List[index] as ProgressListBoxItem; }
+				get { return this.List[index] as ProgressLegendItem; }
 				set { this.List[index] = value; }
 			}
 
 			// Public events.
 
+			/// <summary>
+			/// An event raised before the collection is cleared.
+			/// </summary>
 			public event ClearedEventHandler BeforeCleared;
+			/// <summary>
+			/// An event raised after the collection is cleared.
+			/// </summary>
 			public event ClearedEventHandler AfterCleared;
+			/// <summary>
+			/// An event raised before an item is inserted into the collection.
+			/// </summary>
 			public event ChangedEventHandler BeforeItemInserted;
+			/// <summary>
+			/// An event raised after an item is inserted into the collection.
+			/// </summary>
 			public event ChangedEventHandler AfterItemInserted;
+			/// <summary>
+			/// An event raised before an item is removed from the collection.
+			/// </summary>
 			public event ChangedEventHandler BeforeItemRemoved;
+			/// <summary>
+			/// An event raised after an item is removed from the collection.
+			/// </summary>
 			public event ChangedEventHandler AfterItemRemoved;
+			/// <summary>
+			/// An event raised before an item is set in the collection.
+			/// </summary>
 			public event SetEventHandler BeforeItemSet;
+			/// <summary>
+			/// An event raised after an item is set in the collection.
+			/// </summary>
 			public event SetEventHandler AfterItemSet;
 
 			// Public methods.
@@ -71,7 +97,7 @@ namespace DotNetApi.Windows.Controls
 			/// <param name="item">The item.</param>
 			/// <returns>The position into which the new item was inserted,
 			/// or -1 to indicate that the item was not inserted into the collection.</returns>
-			public int Add(ProgressListBoxItem item)
+			public int Add(ProgressLegendItem item)
 			{
 				// Add the item.
 				int result = this.List.Add(item);
@@ -83,10 +109,10 @@ namespace DotNetApi.Windows.Controls
 			/// Adds a range of items to the collection.
 			/// </summary>
 			/// <param name="items">The range of items.</param>
-			public void AddRange(ProgressListBoxItem[] items)
+			public void AddRange(ProgressLegendItem[] items)
 			{
 				// Add the items.
-				foreach (ProgressListBoxItem item in items)
+				foreach (ProgressLegendItem item in items)
 				{
 					this.Add(item);
 				}
@@ -97,7 +123,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="item">The item.</param>
 			/// <returns>The index of value if found in the list; otherwise, -1.</returns>
-			public int IndexOf(ProgressListBoxItem item)
+			public int IndexOf(ProgressLegendItem item)
 			{
 				return this.List.IndexOf(item);
 			}
@@ -107,7 +133,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="index">The index.</param>
 			/// <param name="item">The item</param>
-			public void Insert(int index, ProgressListBoxItem item)
+			public void Insert(int index, ProgressLegendItem item)
 			{
 				// Insert the item.
 				this.List.Insert(index, item);
@@ -117,7 +143,7 @@ namespace DotNetApi.Windows.Controls
 			/// Removes the item from the collection.
 			/// </summary>
 			/// <param name="item">The item.</param>
-			public void Remove(ProgressListBoxItem item)
+			public void Remove(ProgressLegendItem item)
 			{
 				// Remove the item.
 				this.List.Remove(item);
@@ -128,7 +154,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="item">The item.</param>
 			/// <returns><b>True</b> if the element is found in the collection, or <b>false</b> otherwise.</returns>
-			public bool Contains(ProgressListBoxItem item)
+			public bool Contains(ProgressLegendItem item)
 			{
 				return this.List.Contains(item);
 			}
@@ -141,7 +167,7 @@ namespace DotNetApi.Windows.Controls
 			/// <param name="value">The value to validate.</param>
 			protected override void OnValidate(Object value)
 			{
-				if (value.GetType() != typeof(ProgressListBoxItem))
+				if (value.GetType() != typeof(ProgressLegendItem))
 					throw new ArgumentException("Value must be a progress navigator item.", "value");
 			}
 
@@ -178,7 +204,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnInsert(index, value);
 				// Raise the event.
-				if (this.BeforeItemInserted != null) this.BeforeItemInserted(index, value as ProgressListBoxItem);
+				if (this.BeforeItemInserted != null) this.BeforeItemInserted(index, value as ProgressLegendItem);
 			}
 
 			/// <summary>
@@ -191,7 +217,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnInsertComplete(index, value);
 				// Raise the event.
-				if (this.AfterItemInserted != null) this.AfterItemInserted(index, value as ProgressListBoxItem);
+				if (this.AfterItemInserted != null) this.AfterItemInserted(index, value as ProgressLegendItem);
 			}
 
 			/// <summary>
@@ -204,7 +230,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnRemove(index, value);
 				// Raise the event.
-				if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(index, value as ProgressListBoxItem);
+				if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(index, value as ProgressLegendItem);
 			}
 
 			/// <summary>
@@ -217,7 +243,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnRemoveComplete(index, value);
 				// Raise the event.
-				if (this.AfterItemRemoved != null) this.AfterItemRemoved(index, value as ProgressListBoxItem);
+				if (this.AfterItemRemoved != null) this.AfterItemRemoved(index, value as ProgressLegendItem);
 			}
 
 			/// <summary>
@@ -231,7 +257,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnSet(index, oldValue, newValue);
 				// Raise the event.
-				if (this.BeforeItemSet != null) this.BeforeItemSet(index, oldValue as ProgressListBoxItem, newValue as ProgressListBoxItem);
+				if (this.BeforeItemSet != null) this.BeforeItemSet(index, oldValue as ProgressLegendItem, newValue as ProgressLegendItem);
 			}
 
 			/// <summary>
@@ -245,28 +271,80 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnSetComplete(index, oldValue, newValue);
 				// Raise the event.
-				if (this.AfterItemSet != null) this.AfterItemSet(index, oldValue as ProgressListBoxItem, newValue as ProgressListBoxItem);
+				if (this.AfterItemSet != null) this.AfterItemSet(index, oldValue as ProgressLegendItem, newValue as ProgressLegendItem);
 			}
 		}
 
-		// Private variables.
-	
-		private string text;
+		private string text = null;
+		private Color color = new Color();
 
 		/// <summary>
-		/// Creates a new image list box item.
+		/// Creates a new item instance.
 		/// </summary>
-		public ProgressListBoxItem()
+		public ProgressLegendItem()
 		{
 		}
 
+		// Public events.
+
 		/// <summary>
-		/// Gets or sets the item text.
+		/// An event raised when the legend item text has changed.
+		/// </summary>
+		public event ProgressLegendItemEventHandler TextChanged;
+		/// <summary>
+		/// An event raised when the legent item color has changed.
+		/// </summary>
+		public event ProgressLegendItemEventHandler ColorChanged;
+
+		// Public properties.
+
+		/// <summary>
+		/// Gets or sets the legend item text.
 		/// </summary>
 		public string Text
 		{
 			get { return this.text; }
-			set { this.text = value; }
+			set
+			{
+				// Set the text.
+				this.text = value;
+				// Call the text changed event handler.
+				this.OnTextChanged();
+			}
+		}
+		/// <summary>
+		/// Gets or sets the legend item color.
+		/// </summary>
+		public Color Color
+		{
+			get { return this.color; }
+			set
+			{
+				// Set the color.
+				this.color = value;
+				// Call the color changed event handler.
+				this.OnColorChanged();
+			}
+		}
+
+		// Protected methods.
+
+		/// <summary>
+		/// An event handler called when the legend item text has changed.
+		/// </summary>
+		protected virtual void OnTextChanged()
+		{
+			// Raise the event.
+			if (this.TextChanged != null) this.TextChanged(this);
+		}
+
+		/// <summary>
+		/// An event handler called when the legend item color has changed.
+		/// </summary>
+		protected virtual void OnColorChanged()
+		{
+			// Raise the event.
+			if (this.ColorChanged != null) this.ColorChanged(this);
 		}
 	}
 }

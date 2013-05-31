@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -25,8 +26,8 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// An image list box item.
 	/// </summary>
-	[Serializable]
-	public class ImageListBoxItem
+	[DesignTimeVisible(false)]
+	public class ImageListBoxItem : Component
 	{
 		private string text;
 		private Image image;

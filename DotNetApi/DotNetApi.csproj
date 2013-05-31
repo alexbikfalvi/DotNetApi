@@ -76,11 +76,31 @@
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\ImageListBoxItem.cs" />
+    <Compile Include="Windows\Controls\ImageListBoxItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\NotificationBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\NotificationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ProgressBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ProgressInfo.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ProgressLegend.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ProgressLegendItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\ProgressListBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\ProgressListBoxItem.cs">
+    <Compile Include="Windows\Controls\ProgressItem.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ThreadSafeControl.cs">

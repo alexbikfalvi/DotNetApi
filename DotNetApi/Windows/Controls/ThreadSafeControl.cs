@@ -42,11 +42,11 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		protected void WaitForHandle()
 		{
-			do
+			// Wait for the control handle to be created.
+			while (!this.IsHandleCreated)
 			{
 				this.eventHandleCreated.WaitOne();
 			}
-			while (!this.IsHandleCreated);
 		}
 
 		/// <summary>
