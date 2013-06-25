@@ -69,7 +69,8 @@ namespace DotNetApi.Web
 		public AsyncWebResult(Uri uri, AsyncWebRequestCallback callback, object userState = null)
 			: base(userState)
 		{
-			this.Data = new AsyncWebBuffer();
+			this.SendData = new AsyncWebBuffer();
+			this.ReceiveData = new AsyncWebBuffer();
 			this.Request = (HttpWebRequest)WebRequest.Create(uri);
 			this.Callback = callback;
 			this.buffer = new byte[BUFFER_SIZE];
@@ -81,9 +82,14 @@ namespace DotNetApi.Web
 		public Exception Exception { get; set; }
 
 		/// <summary>
-		/// The data returned by the asynchrounous request.
+		/// The data sent by the asynchronous request.
 		/// </summary>
-		public AsyncWebBuffer Data { get; set; }
+		public AsyncWebBuffer SendData { get; set; }
+
+		/// <summary>
+		/// The data received by the asynchrounous request.
+		/// </summary>
+		public AsyncWebBuffer ReceiveData { get; set; }
 
 		/// <summary>
 		/// The request object corresponding to the asynchrounous operation.

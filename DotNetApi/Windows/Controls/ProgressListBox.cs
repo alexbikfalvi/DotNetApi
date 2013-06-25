@@ -39,6 +39,7 @@ namespace DotNetApi.Windows.Controls
 		private int spacing = 4;
 		private Size legendSize = new Size(12, 12);
 		private string textNotAvailable = "Not available";
+		private string textDisabled = "Not selected";
 		private Color colorProgressBorder = ProfessionalColors.MenuBorder;
 		private Color colorProgressDefault = SystemColors.ControlLightLight;
 		private Padding itemPadding = new Padding(4, 4, 4, 4);
@@ -125,8 +126,8 @@ namespace DotNetApi.Windows.Controls
 					// Set the pending event to false.
 					this.eventProgressCountChanged = false;
 				}
-				// Refresh the items.
-				this.RefreshItems();
+				// Refresh the list box.
+				this.Refresh();
 				// Set the pending events to false.
 				this.eventProgressLevelChanged = false;
 				this.eventProgressDefaultChanged = false;
@@ -141,6 +142,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposing">Dispose the managed resources.</param>
 		protected override void Dispose(bool disposing)
 		{
+			// Check whether this method must be called on a different thread.
+			if (this.InvokeRequired) System.Diagnostics.Debugger.Break();
 			// Dispose the control variables.
 			if (disposing)
 			{
@@ -166,6 +169,10 @@ namespace DotNetApi.Windows.Controls
 			// Get the image list box item.
 			ProgressItem item = this.Items[e.Index] as ProgressItem;
 
+			// Update the progress item geometry.
+			this.OnUpdateItemGeometrics(item, e.Bounds);
+
+			/*
 			// Compute the item bounds.
 			Rectangle bounds = new Rectangle(
 				e.Bounds.X + this.itemPadding.Left,
@@ -220,6 +227,10 @@ namespace DotNetApi.Windows.Controls
 			Rectangle legendIconBounds = new Rectangle(new Point(0, legendBounds.Y), this.legendSize);
 			// The legend item width.
 			int legendItemWidth = legendIconBounds.Width + this.spacing + legendTextBounds.Width + this.spacing;
+			*/
+
+			Rectangle legendTextBounds = item.geometrics.legendTextBounds;
+			Rectangle legendIconBounds = item.geometrics.legendIconBounds;
 
 			// Create the brush.
 			using (SolidBrush brush = new SolidBrush(e.BackColor))
@@ -230,87 +241,113 @@ namespace DotNetApi.Windows.Controls
 					// Fill the background rectangle.
 					e.Graphics.FillRectangle(brush, e.Bounds);
 
-					// If the item progress is not null.
-					if (null != item.Progress)
+					// If the item is enabled.
+					if (item.Enabled)
 					{
-						// Draw the progress rectangle.
-						e.Graphics.DrawRectangle(pen, progressBorder);
-
-						// If the item legend is not null.
-						if (null != item.Progress.Legend)
+						// If the item progress is not null.
+						if (null != item.Progress)
 						{
-							// Get the progress.
-							ProgressInfo progress = item.Progress;
-							// Get the legend.
-							ProgressLegend legend = progress.Legend;
+							// Draw the progress rectangle.
+							e.Graphics.DrawRectangle(pen, item.geometrics.progressBorder);
 
-							// Draw the progress.
-							
-							// If the progress count is greater than zero.
-							if (progress.Count > 0)
+							// If the item legend is not null.
+							if (null != item.Progress.Legend)
 							{
-								// If the legend is displayed.
-								if (showLegend)
-								{
-									// Draw the legend items, starting from the last.
-									legendIconBounds.X = legendBounds.Right;
-									for (int index = legend.Items.Count - 1; index >= 0; index--)
-									{
-										// Set the legend icon bounds.
-										legendIconBounds.X = legendIconBounds.X - legendItemWidth;
-										// Set the legend text bounds.
-										legendTextBounds.X = legendIconBounds.Right + this.spacing;
-										// Draw the legend icon.
-										brush.Color = legend.Items[index].Color;
-										e.Graphics.FillRectangle(brush, legendIconBounds);
-										e.Graphics.DrawRectangle(pen, legendIconBounds);
-										// Draw the legend text.
-										TextRenderer.DrawText(
-											e.Graphics,
-											string.Format("{0} ({1})", legend.Items[index].Text, item.Progress[index]),
-											this.Font,
-											legendTextBounds,
-											e.ForeColor,
-											TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.Top);
-									}
-								}
+								// Get the progress.
+								ProgressInfo progress = item.Progress;
+								// Get the legend.
+								ProgressLegend legend = progress.Legend;
 
-								// Create the progress item bounds.
-								Rectangle progressItemBounds = new Rectangle(
-									progressBounds.X,
-									progressBounds.Y,
-									0,
-									progressBounds.Height);
-								// For each progress item.
-								for (int index = 0; index < legend.Items.Count; index++)
+								// Draw the progress.
+
+								// If the progress count is greater than zero.
+								if (progress.Count > 0)
 								{
-									// Compute the progress bounds width.
-									progressItemBounds.Width = progress[index] * progressBounds.Width / progress.Count;
+									// If the legend is displayed.
+									if (item.geometrics.showLegend)
+									{
+										// Draw the legend items, starting from the last.
+										legendIconBounds.X = item.geometrics.legendBounds.Right;
+										for (int index = legend.Items.Count - 1; index >= 0; index--)
+										{
+											// Set the legend icon bounds.
+											legendIconBounds.X = legendIconBounds.X - item.geometrics.legendItemWidth;
+											// Set the legend text bounds.
+											legendTextBounds.X = legendIconBounds.Right + this.spacing;
+											// Draw the legend icon.
+											brush.Color = legend.Items[index].Color;
+											e.Graphics.FillRectangle(brush, legendIconBounds);
+											e.Graphics.DrawRectangle(pen, legendIconBounds);
+											// Draw the legend text.
+											TextRenderer.DrawText(
+												e.Graphics,
+												string.Format("{0} ({1})", legend.Items[index].Text, item.Progress[index]),
+												this.Font,
+												legendTextBounds,
+												e.ForeColor,
+												TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.Top);
+										}
+									}
+
+									// Create the progress item bounds.
+									Rectangle progressItemBounds = new Rectangle(
+										item.geometrics.progressBounds.X,
+										item.geometrics.progressBounds.Y,
+										0,
+										item.geometrics.progressBounds.Height);
+									// For each progress item, except the last one.
+									for (int index = 0; index < legend.Items.Count - 1; index++)
+									{
+										// Compute the progress bounds width.
+										progressItemBounds.Width = progress[index] * item.geometrics.progressBounds.Width / progress.Count;
+										// If the rectangle width is greater than zero.
+										if (progressItemBounds.Width > 0)
+										{
+											// Change the brush color.
+											brush.Color = legend.Items[index].Color;
+											// Draw the progress item rectangle.
+											e.Graphics.FillRectangle(brush, progressItemBounds);
+											// Update the rectangle left position.
+											progressItemBounds.X = progressItemBounds.Right;
+										}
+									}
+									// Draw the last item.
+									progressItemBounds.Width = item.geometrics.progressBounds.Right - progressItemBounds.X;
 									// If the rectangle width is greater than zero.
 									if (progressItemBounds.Width > 0)
 									{
 										// Change the brush color.
-										brush.Color = legend.Items[index].Color;
+										brush.Color = legend.Items[legend.Items.Count - 1].Color;
 										// Draw the progress item rectangle.
 										e.Graphics.FillRectangle(brush, progressItemBounds);
 										// Update the rectangle left position.
 										progressItemBounds.X = progressItemBounds.Right;
 									}
 								}
-							}
-							else
-							{
-
-								// Draw the not available text.
-								TextRenderer.DrawText(
-									e.Graphics,
-									this.textNotAvailable,
-									this.Font,
-									legendBounds,
-									e.ForeColor,
-									TextFormatFlags.EndEllipsis | TextFormatFlags.Right | TextFormatFlags.Top);
+								else
+								{
+									// Draw the not available text.
+									TextRenderer.DrawText(
+										e.Graphics,
+										this.textNotAvailable,
+										this.Font,
+										item.geometrics.legendBounds,
+										e.ForeColor,
+										TextFormatFlags.EndEllipsis | TextFormatFlags.Right | TextFormatFlags.Top);
+								}
 							}
 						}
+					}
+					else
+					{
+						// Draw the disabled text.
+						TextRenderer.DrawText(
+							e.Graphics,
+							this.textDisabled,
+							this.Font,
+							item.geometrics.legendBounds,
+							SystemColors.GrayText,
+							TextFormatFlags.EndEllipsis | TextFormatFlags.Right | TextFormatFlags.Top);
 					}
 				}
 			}
@@ -323,8 +360,8 @@ namespace DotNetApi.Windows.Controls
 				e.Graphics,
 				text,
 				this.fontText,
-				bounds,
-				e.ForeColor,
+				item.geometrics.itemBounds,
+				item.Enabled ? e.ForeColor : SystemColors.GrayText,
 				TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.Top);
 		}
 
@@ -348,8 +385,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Refresh the list box.
+			this.Refresh();
 		}
 
 		/// <summary>
@@ -360,8 +397,10 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class method.
 			base.OnResize(e);
-			// Refresh the items.
-			this.RefreshItems();
+			// Workaround for .NET bug which duplicates the number of list box items when refreshing during a resize.
+			//ProgressListBox.SendMessage(this.Handle, 0x0184 /*LB_RESETCONTENT*/, 0, 0);
+			// Refresh the list box.
+			this.Refresh();
 		}
 
 		// Private methods.
@@ -432,6 +471,7 @@ namespace DotNetApi.Windows.Controls
 			if (null == item) return;
 			// Add the item event handlers.
 			item.TextChanged += this.OnItemTextChanged;
+			item.EnabledChanged += OnItemEnabledChanged;
 			item.ProgressSet += this.OnItemProgressSet;
 			item.ProgressLevelChanged += this.OnItemProgressLevelChanged;
 			item.ProgressDefaultChanged += this.OnItemProgressDefaultChanged;
@@ -446,6 +486,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
+			// Refresh the list box.
+			this.Refresh();
 		}
 
 		/// <summary>
@@ -458,6 +500,7 @@ namespace DotNetApi.Windows.Controls
 			if (null == item) return;
 			// Remove the item event handlers.
 			item.TextChanged -= this.OnItemTextChanged;
+			item.EnabledChanged -= this.OnItemEnabledChanged;
 			item.ProgressSet -= this.OnItemProgressSet;
 			item.ProgressLevelChanged -= this.OnItemProgressLevelChanged;
 			item.ProgressDefaultChanged -= this.OnItemProgressDefaultChanged;
@@ -472,8 +515,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Refresh the list box.
+			this.Refresh();
 		}
 
 		/// <summary>
@@ -486,8 +529,20 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemText(item);
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Update the geometrics of the specified item.
+			this.OnUpdateItemGeometrics(item, this.GetItemRectangle(this.Items.IndexOf(item)));
+			// Refresh the list box item.
+			this.Invalidate(item.geometrics.textBounds);
+		}
+
+		/// <summary>
+		/// An event handler called when the item enabled state has changed.
+		/// </summary>
+		/// <param name="item">The item.</param>
+		private void OnItemEnabledChanged(ProgressItem item)
+		{
+			// Refresh the list box item.
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
 
 		/// <summary>
@@ -504,8 +559,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Refresh the list box item.
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
 
 		/// <summary>
@@ -522,8 +577,11 @@ namespace DotNetApi.Windows.Controls
 			}
 			else
 			{
-				// Refresh the items.
-				this.RefreshItems();
+				// Update the geometrics of the specified item.
+				this.OnUpdateItemGeometrics(item, this.GetItemRectangle(this.Items.IndexOf(item)));
+				// Refresh the list box item.
+				this.Invalidate(item.geometrics.legendBounds);
+				this.Invalidate(item.geometrics.progressBounds);
 			}
 		}
 
@@ -541,8 +599,8 @@ namespace DotNetApi.Windows.Controls
 			}
 			else
 			{
-				// Refresh the items.
-				this.RefreshItems();
+				// Refresh the list box item.
+				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 			}
 		}
 
@@ -564,8 +622,8 @@ namespace DotNetApi.Windows.Controls
 				this.OnUpdateItemProgress(item);
 				// Update the item measurements.
 				this.OnUpdateMeasurements();
-				// Refresh the items.
-				this.RefreshItems();
+				// Refresh the list box item.
+				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 			}
 		}
 
@@ -582,8 +640,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Refresh the list box item.
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
 
 		/// <summary>
@@ -598,8 +656,8 @@ namespace DotNetApi.Windows.Controls
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
 			this.OnUpdateMeasurements();
-			// Refresh the items.
-			this.RefreshItems();
+			// Refresh the list box item.
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
 
 		/// <summary>
@@ -674,6 +732,8 @@ namespace DotNetApi.Windows.Controls
 			// Update the maximum count digits for all items.
 			foreach (ProgressItem item in this.items)
 			{
+				// Set the item legend as invalid.
+				item.geometrics.validLegend = false;
 				// Compute the item number of digits.
 				int digits = item.Progress != null ? (int)Math.Ceiling(Math.Log10(item.Progress.Count)) : 0;
 				// Update the maximum number of digits.
@@ -690,6 +750,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnUpdateItemLegend(ProgressItem item)
 		{
+			// Set the item legend as invalid.
+			item.geometrics.validLegend = false;
 			// Set the maximum number of legend items to zero.
 			int count = 0;
 			// Set the maximum text width to zero.
@@ -752,6 +814,8 @@ namespace DotNetApi.Windows.Controls
 			// Update the legend for all items.
 			foreach (ProgressItem item in this.items)
 			{
+				// Set the item legend as invalid.
+				item.geometrics.validLegend = false;
 				// If the item has a progress info.
 				if (null != item.Progress)
 				{
@@ -806,6 +870,93 @@ namespace DotNetApi.Windows.Controls
 			this.itemMaximumVariableWidth = (this.itemProgressLegendMaximumTextWidth + this.itemProgressMaximumCountWidth) * this.itemProgressLegendMaximumCount;
 			// Compute the item maximum fixed width.
 			this.itemMaximumFixedWidth = this.itemMaximumWidth - this.itemMaximumVariableWidth;
+		}
+
+		/// <summary>
+		/// Updates the geometrics characteristics of the specified progress item.
+		/// </summary>
+		/// <param name="item">The progress item.</param>
+		/// <param name="bounds">The item bounds.</param>
+		private void OnUpdateItemGeometrics(ProgressItem item, Rectangle bounds)
+		{
+			// Only updated the geometrics if the bounds are different.
+			if (bounds == item.geometrics.bounds)
+			{
+				// If the legend is invalid, update the legend geometric characteristics.
+				if (!item.geometrics.validLegend) this.OnUpdateItemLegendGeometrics(item);
+				return;
+			}
+
+			// Save the bounds.
+			item.geometrics.bounds = bounds;
+
+			// Compute the item bounds.
+			item.geometrics.itemBounds = new Rectangle(
+				item.geometrics.bounds.X + this.itemPadding.Left,
+				item.geometrics.bounds.Y + this.itemPadding.Top,
+				item.geometrics.bounds.Width - this.itemPadding.Left - this.itemPadding.Right - 1,
+				item.geometrics.bounds.Height - this.itemPadding.Top - this.itemPadding.Bottom - 1);
+			// Compute the progress border.
+			item.geometrics.progressBorder = new Rectangle(
+				item.geometrics.itemBounds.X,
+				item.geometrics.itemBounds.Bottom - this.progressHeight,
+				item.geometrics.itemBounds.Width,
+				this.progressHeight);
+			// Compute the progress bounds.
+			item.geometrics.progressBounds = new Rectangle(
+				item.geometrics.progressBorder.X + 1,
+				item.geometrics.progressBorder.Y + 1,
+				item.geometrics.progressBorder.Width - 1,
+				item.geometrics.progressBorder.Height - 1);
+			// Compute the content bounds.
+			item.geometrics.contentBounds = new Rectangle(
+				item.geometrics.itemBounds.X,
+				item.geometrics.itemBounds.Y,
+				item.geometrics.itemBounds.Width,
+				item.geometrics.progressBorder.Top - item.geometrics.itemBounds.Y);
+			// The text bounds.
+			item.geometrics.textBounds = new Rectangle(
+				item.geometrics.contentBounds.X,
+				item.geometrics.contentBounds.Y,
+				this.itemMaximumTextWidth,
+				item.geometrics.contentBounds.Height);
+			
+			// Update the item legend geometrics.
+			this.OnUpdateItemLegendGeometrics(item);
+		}
+
+		/// <summary>
+		/// Updates the legend geometrics characteristics for the specified progress item.
+		/// </summary>
+		/// <param name="item">The progress item.</param>
+		private void OnUpdateItemLegendGeometrics(ProgressItem item)
+		{
+			// Compute whether th item displays the legend.
+			item.geometrics.showLegend = this.itemMaximumFixedWidth < item.geometrics.itemBounds.Width;
+			// Compute the text width scale.
+			double widthScale = item.geometrics.showLegend ?
+				(this.itemMaximumWidth > item.geometrics.itemBounds.Width) ? (item.geometrics.itemBounds.Width - this.itemMaximumFixedWidth) / ((double)this.itemMaximumVariableWidth) : 1.0 :
+				(this.itemMaximumTextWidth > item.geometrics.itemBounds.Width) ? widthScale = item.geometrics.itemBounds.Width / ((double)this.itemMaximumTextWidth) : 1.0;
+
+			// The legend bounds.
+			item.geometrics.legendBounds = new Rectangle(
+				item.geometrics.textBounds.Right,
+				item.geometrics.contentBounds.Y,
+				item.geometrics.contentBounds.Width - item.geometrics.textBounds.Width,
+				item.geometrics.contentBounds.Height);
+			// The legend text bounds.
+			item.geometrics.legendTextBounds = new Rectangle(
+				0,
+				item.geometrics.legendBounds.Y,
+				(int)((this.itemProgressLegendMaximumTextWidth + this.itemProgressMaximumCountWidth) * widthScale),
+				item.geometrics.legendBounds.Height);
+			// The legend icon bounds.
+			item.geometrics.legendIconBounds = new Rectangle(new Point(0, item.geometrics.legendBounds.Y), this.legendSize);
+			// The legend item width.
+			item.geometrics.legendItemWidth = item.geometrics.legendIconBounds.Width + this.spacing + item.geometrics.legendTextBounds.Width + this.spacing;
+
+			// Set the legend as valid.
+			item.geometrics.validLegend = true;
 		}
 	}
 }

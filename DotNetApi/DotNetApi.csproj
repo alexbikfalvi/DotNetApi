@@ -51,6 +51,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Web\HttpUtils.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcArray.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcAsyncRequest.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcBase64.cs" />

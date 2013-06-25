@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Text;
 
 namespace DotNetApi.Web
 {
@@ -25,6 +26,8 @@ namespace DotNetApi.Web
 	/// </summary>
 	public class AsyncWebBuffer
 	{
+		private byte[] data = null;
+
 		/// <summary>
 		/// Appends byte data to the current buffer.
 		/// </summary>
@@ -33,25 +36,53 @@ namespace DotNetApi.Web
 		public void Append(byte[] data, int count)
 		{
 			// Get the size of the old buffer.
-			int sizeOld = (null != this.Bytes) ? this.Bytes.Length : 0;
+			int sizeOld = (null != this.data) ? this.data.Length : 0;
 			// Compute the size of the new buffer.
 			int sizeNew = sizeOld + count;
 			// Allocate a new buffer.
 			byte[] buffer = new byte[sizeNew];
 			// Copy the old buffer into the new buffer.
-			if (null != this.Bytes)
+			if (null != this.data)
 			{
-				Buffer.BlockCopy(this.Bytes, 0, buffer, 0, sizeOld);
+				Buffer.BlockCopy(this.data, 0, buffer, 0, sizeOld);
 			}
 			// Append the new data into the new buffer.
 			Buffer.BlockCopy(data, 0, buffer, sizeOld, count);
 			// Assign the new buffer.
-			this.Bytes = buffer;
+			this.data = buffer;
 		}
 
 		/// <summary>
-		/// Gets the data bytes stored in the buffer.
+		/// Appends the string data to the current buffer, using the specified encoding.
 		/// </summary>
-		public byte[] Bytes { get; set; }
+		/// <param name="data">The data.</param>
+		/// <param name="encoding">The encoding.</param>
+		public void Append(string data, Encoding encoding)
+		{
+			// Get the number of bytes for the specified data string.
+			int count = encoding.GetByteCount(data);
+			// Get the byte data for the specified data string.
+			byte[] bytes = encoding.GetBytes(data);
+			// Get the size of the old buffer.
+			int sizeOld = (null != this.data) ? this.data.Length : 0;
+			// Compute the size of the new buffer.
+			int sizeNew = sizeOld + count;
+			// Allocate a new buffer.
+			byte[] buffer = new byte[sizeNew];
+			// Copy the old buffer into the new buffer.
+			if (null != this.data)
+			{
+				Buffer.BlockCopy(this.data, 0, buffer, 0, sizeOld);
+			}
+			// Append the new data into the new buffer.
+			Buffer.BlockCopy(bytes, 0, buffer, sizeOld, count);
+			// Assign the new buffer.
+			this.data = buffer;
+		}
+
+		/// <summary>
+		/// Gets the data stored in the buffer.
+		/// </summary>
+		public byte[] Data { get { return this.data; } }
 	};
 }

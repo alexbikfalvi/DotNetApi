@@ -35,6 +35,27 @@ namespace DotNetApi.Windows.Controls
 	public class ProgressItem : Component
 	{
 		/// <summary>
+		/// An internal class representing the geometric characteristics of the progress item.
+		/// </summary>
+		internal class Geometrics
+		{
+			internal Rectangle bounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle itemBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle progressBorder = new Rectangle(0, 0, 0, 0);
+			internal Rectangle progressBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle contentBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle textBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle legendBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle legendTextBounds = new Rectangle(0, 0, 0, 0);
+			internal Rectangle legendIconBounds = new Rectangle(0, 0, 0, 0);
+			internal int legendItemWidth = 0;
+			internal bool showLegend = false;
+			internal bool validLegend = false;
+		}
+
+		internal Geometrics geometrics = new Geometrics();
+
+		/// <summary>
 		/// A collection of progress navigator item items.
 		/// </summary>
 		public class Collection : CollectionBase
@@ -281,6 +302,7 @@ namespace DotNetApi.Windows.Controls
 		// Private variables.
 	
 		private string text = null;
+		private bool enabled = true;
 		private ProgressInfo progress = null;
 
 		/// <summary>
@@ -315,6 +337,10 @@ namespace DotNetApi.Windows.Controls
 		/// An event raised when the item text has changed.
 		/// </summary>
 		public event ProgressItemEventHandler TextChanged;
+		/// <summary>
+		/// An event raised when the item enabled state has changed.
+		/// </summary>
+		public event ProgressItemEventHandler EnabledChanged;
 		/// <summary>
 		/// An event raised before a new item progress has been set.
 		/// </summary>
@@ -370,6 +396,22 @@ namespace DotNetApi.Windows.Controls
 				this.progress = value;
 				// Call the event handler.
 				this.OnProgressChanged(progress, value);
+			}
+		}
+		/// <summary>
+		/// Gets or sets whether the progress item is enabled.
+		/// </summary>
+		public bool Enabled
+		{
+			get { return this.enabled; }
+			set
+			{
+				// Save the old enabled state.
+				bool enabled = this.enabled;
+				// Set the enabled state.
+				this.enabled = value;
+				// Call the event handler.
+				this.OnEnabledChanged(enabled, value);
 			}
 		}
 
@@ -474,6 +516,19 @@ namespace DotNetApi.Windows.Controls
 			if (progress != this.progress) return;
 			// Raise the event.
 			if (null != this.ProgressLegendChanged) this.ProgressLegendChanged(this, progress, legend);
+		}
+
+		/// <summary>
+		/// An event handler called when the item enabled state has changed.
+		/// </summary>
+		/// <param name="oldEnabled">The old enabled state.</param>
+		/// <param name="newEnabled">The new enabled state.</param>
+		protected virtual void OnEnabledChanged(bool oldEnabled, bool newEnabled)
+		{
+			// If the enabled state has not changed, do nothing.
+			if (oldEnabled == newEnabled) return;
+			// Raise the event.
+			if (null != this.EnabledChanged) this.EnabledChanged(this);
 		}
 	}
 }

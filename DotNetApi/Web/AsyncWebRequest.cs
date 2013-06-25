@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Text;
@@ -87,9 +88,30 @@ namespace DotNetApi.Web
 		/// </summary>
 		/// <param name="asyncState">The state of the asynchronous request.</param>
 		/// <returns>The result of the asynchronous request.</returns>
-		protected IAsyncResult Begin(AsyncWebResult asyncState)
+		public IAsyncResult Begin(AsyncWebResult asyncState)
 		{
 			return this.BeginAsyncRequest(asyncState);
+		}
+
+		/// <summary>
+		/// Completes the asynchronous operation and returnes the received data as a string.
+		/// </summary>
+		/// <param name="result">The asynchronous result.</param>
+		/// <returns>The asynchronous web result.</returns>
+		public AsyncWebResult End(IAsyncResult result)
+		{
+			// Get the state of the asynchronous operation.
+			AsyncWebResult asyncState = (AsyncWebResult)result;
+
+			// If an exception was thrown during the execution of the asynchronous operation.
+			if (asyncState.Exception != null)
+			{
+				// Throw the exception.
+				throw asyncState.Exception;
+			}
+
+			// Return the web result.
+			return asyncState;
 		}
 
 		/// <summary>
@@ -114,7 +136,7 @@ namespace DotNetApi.Web
 			Encoding encoding = Encoding.GetEncoding(asyncState.Response.CharacterSet);
 
 			// Return the converted data.
-			return func.GetResult((null != asyncState.Data.Bytes) ? encoding.GetString(asyncState.Data.Bytes) : string.Empty);
+			return func.GetResult((null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : string.Empty);
 		}
 
 		public void Cancel(IAsyncResult result)
@@ -145,6 +167,17 @@ namespace DotNetApi.Web
 		protected void BeginWebRequest(object state)
 		{
 			AsyncWebResult asyncState = state as AsyncWebResult;
+
+			// If there is send data.
+			if (asyncState.SendData.Data != null)
+			{
+				// Get the request stream.
+				using (Stream stream = asyncState.Request.GetRequestStream())
+				{
+					// Write the send data to the stream.
+					stream.Write(asyncState.SendData.Data, 0, asyncState.SendData.Data.Length);
+				}
+			}
 
 			// Begin the web request.
 			asyncState.Request.BeginGetResponse(this.EndWebRequest, asyncState);
@@ -216,7 +249,7 @@ namespace DotNetApi.Web
 				int count = asyncState.Stream.EndRead(result);
 
 				// Append the bytes read to the string buffer.
-				asyncState.Data.Append(asyncState.Buffer, count);
+				asyncState.ReceiveData.Append(asyncState.Buffer, count);
 
 				if (count > 0)
 				{
