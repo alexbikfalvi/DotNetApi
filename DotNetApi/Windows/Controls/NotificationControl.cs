@@ -22,7 +22,6 @@ using DotNetApi.Windows.Controls;
 
 namespace YtAnalytics.Controls
 {
-	public delegate void NotificationTaskEventHandler();
 	public delegate void ShowNotificationEventHandler(Image image, string title, string text, bool progress, int duration, NotificationTaskEventHandler task);
 	public delegate void HideNotificationEventHandler(NotificationTaskEventHandler task);
 
@@ -66,10 +65,8 @@ namespace YtAnalytics.Controls
 			{
 				// Set the message on top of all other controls.
 				this.Controls.SetChildIndex(this.notification, 0);
-				// Execute the task on the UI thread.
-				if (task != null) task();
 				// Show the message.
-				this.notification.Show(image, title, text, progress, duration);
+				this.notification.Show(image, title, text, progress, duration, task);
 			}
 		}
 

@@ -28,6 +28,30 @@ namespace DotNetApi.Web
 	{
 		private byte[] data = null;
 
+
+		/// <summary>
+		/// Appends byte data to the current buffer.
+		/// </summary>
+		/// <param name="data">A byte array containing the data to append.</param>
+		public void Append(byte[] data)
+		{
+			// Get the size of the old buffer.
+			int sizeOld = (null != this.data) ? this.data.Length : 0;
+			// Compute the size of the new buffer.
+			int sizeNew = sizeOld + data.Length;
+			// Allocate a new buffer.
+			byte[] buffer = new byte[sizeNew];
+			// Copy the old buffer into the new buffer.
+			if (null != this.data)
+			{
+				Buffer.BlockCopy(this.data, 0, buffer, 0, sizeOld);
+			}
+			// Append the new data into the new buffer.
+			Buffer.BlockCopy(data, 0, buffer, sizeOld, data.Length);
+			// Assign the new buffer.
+			this.data = buffer;
+		}
+
 		/// <summary>
 		/// Appends byte data to the current buffer.
 		/// </summary>

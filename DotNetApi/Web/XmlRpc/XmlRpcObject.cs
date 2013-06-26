@@ -37,8 +37,14 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML RPC object.</returns>
 		public static XmlRpcObject Create(object value)
 		{
-			if (value.GetType() == typeof(XmlRpcObject)) return value as XmlRpcObject;
-			else if (value.GetType() == typeof(XElement)) return XmlRpcObject.Create(value as XElement);
+			// Check if this is an XML-RPC object.
+			for (Type type = value.GetType(); type != null; )
+			{
+				if (type == typeof(XmlRpcObject)) return value as XmlRpcObject;
+				type = type.BaseType;
+			}
+			// Else, try the supported types.
+			if (value.GetType() == typeof(XElement)) return XmlRpcObject.Create(value as XElement);
 			else if (value.GetType() == typeof(int)) return new XmlRpcInt((int)value);
 			else if (value.GetType() == typeof(bool)) return new XmlRpcBoolean((bool)value);
 			else if (value.GetType() == typeof(string)) return new XmlRpcString(value as string);
@@ -64,6 +70,7 @@ namespace DotNetApi.Web.XmlRpc
 			else if (element.Name == XmlRpcBase64.XmlName) return new XmlRpcBase64(element);
 			else if (element.Name == XmlRpcStruct.XmlName) return new XmlRpcStruct(element);
 			else if (element.Name == XmlRpcArray.XmlName) return new XmlRpcArray(element);
+			else if (element.Name == XmlRpcNil.XmlName) return new XmlRpcNil(element);
 			else throw new XmlRpcException(string.Format("Unknown XML element \'{0}\'.", element.Name));
 		}
 

@@ -63,6 +63,7 @@
     <Compile Include="Web\XmlRpc\XmlRpcInt.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcMember.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcMethodCall.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcNil.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameter.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameters.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcObject.cs" />
@@ -109,6 +110,9 @@
     </Compile>
     <Compile Include="Windows\Controls\ToolStripDropDownCalendar.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\WorldMap.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Formatting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,6 +168,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ArrowDown_48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\WorldMap1000x506.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\WorldMap2000x1012.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\WorldMap4000x2024.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

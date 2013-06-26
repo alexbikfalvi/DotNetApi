@@ -89,7 +89,7 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcObject Value { get { return this.value; } }
 
 		/// <summary>
-		/// Returns the faule of the current response, or <b>null</b> if no fault exists.
+		/// Returns the fault of the current response, or <b>null</b> if no fault exists.
 		/// </summary>
 		public XmlRpcFault Fault { get { return this.fault; } }
 

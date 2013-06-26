@@ -135,8 +135,11 @@ namespace DotNetApi.Web
 
 			Encoding encoding = Encoding.GetEncoding(asyncState.Response.CharacterSet);
 
+			// Get the string data.
+			string data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : string.Empty;
+
 			// Return the converted data.
-			return func.GetResult((null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : string.Empty);
+			return func.GetResult(data);
 		}
 
 		public void Cancel(IAsyncResult result)

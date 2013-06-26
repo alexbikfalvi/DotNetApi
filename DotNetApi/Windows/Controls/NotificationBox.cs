@@ -22,6 +22,8 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
+	public delegate void NotificationTaskEventHandler();
+
 	/// <summary>
 	/// A control that displays a message box overlayed on a given control.
 	/// </summary>
@@ -43,6 +45,8 @@ namespace DotNetApi.Windows.Controls
 		private Color colorBorder = ProfessionalColors.MenuItemBorder;
 		private Color colorTitleBackground = Color.FromArgb(239, 239, 242);
 		private Color colorTitleForeground = SystemColors.GrayText;
+
+		private NotificationTaskEventHandler task = null;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -68,6 +72,9 @@ namespace DotNetApi.Windows.Controls
 			this.progressBar.MarqueeAnimationSpeed = 10;
 			this.progressBar.Style = ProgressBarStyle.Marquee;
 
+			// Set the timer event handler.
+			this.timer.Tick += this.OnTick;
+
 			// Add the controls.
 			this.Controls.Add(this.progressBar);
 
@@ -83,7 +90,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="text">The text.</param>
 		/// <param name="progress">The visibility of the progress bar.</param>
 		/// <param name="duration">The duration of the message in milliseconds. If negative, the message will be displayed indefinitely.</param>
-		public void Show(Image image, string title, string text, bool progress, int duration = -1)
+		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
+		public void Show(Image image, string title, string text, bool progress, int duration = -1, NotificationTaskEventHandler task = null)
 		{
 			// If the parent control is not null, reposition the control to the middle of the parent.
 			if (this.Parent != null)
@@ -103,6 +111,7 @@ namespace DotNetApi.Windows.Controls
 			this.title = title;
 			this.Text = text;
 			this.progressBar.Visible = progress;
+			this.task = task;
 
 			// If the duration is positive
 			if (duration > 0)
@@ -218,6 +227,8 @@ namespace DotNetApi.Windows.Controls
 			this.timer.Enabled = false;
 			// Hide the control.
 			this.Hide();
+			// Execute the task on the UI thread.
+			if (task != null) task();
 		}
 
 		/// <summary>
