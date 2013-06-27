@@ -75,6 +75,12 @@
     <Compile Include="Windows\Controls\CodeTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Windows\Controls\GeoMarker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\GeoMarkerCircle.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\ImageListBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -111,7 +117,7 @@
     <Compile Include="Windows\Controls\ToolStripDropDownCalendar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\WorldMap.cs">
+    <Compile Include="Windows\Controls\GeoWorldMap.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Formatting.cs" />

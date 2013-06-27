@@ -103,5 +103,29 @@ namespace DotNetApi.Web.XmlRpc
 			}
 			return new XElement(XmlRpcArray.xmlName, element);
 		}
+
+		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public override object GetValue()
+		{
+			return this.values;
+		}
+
+		/// <summary>
+		/// Returns the array of the specified type.
+		/// </summary>
+		/// <typeparam name="T">The array type.</typeparam>
+		/// <returns>The array.</returns>
+		public T[] GetArray<T>()
+		{
+			T[] array = new T[this.values.Length];
+			for (int index = 0; index < this.values.Length; index++ )
+			{
+				array[index] = (T)this.values[index].Value.GetValue();
+			}
+			return array;
+		}
 	}
 }

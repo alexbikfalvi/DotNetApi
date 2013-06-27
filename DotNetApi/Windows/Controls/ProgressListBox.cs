@@ -172,63 +172,6 @@ namespace DotNetApi.Windows.Controls
 			// Update the progress item geometry.
 			this.OnUpdateItemGeometrics(item, e.Bounds);
 
-			/*
-			// Compute the item bounds.
-			Rectangle bounds = new Rectangle(
-				e.Bounds.X + this.itemPadding.Left,
-				e.Bounds.Y + this.itemPadding.Top,
-				e.Bounds.Width - this.itemPadding.Left - this.itemPadding.Right - 1,
-				e.Bounds.Height - this.itemPadding.Top - this.itemPadding.Bottom - 1);
-			// Compute the progress border.
-			Rectangle progressBorder = new Rectangle(
-				bounds.X,
-				bounds.Bottom - this.progressHeight,
-				bounds.Width,
-				this.progressHeight);
-			// Compute the progress bounds.
-			Rectangle progressBounds = new Rectangle(
-				progressBorder.X + 1,
-				progressBorder.Y + 1,
-				progressBorder.Width - 1,
-				progressBorder.Height - 1);
-			// Compute the content bounds.
-			Rectangle contentBounds = new Rectangle(
-				bounds.X,
-				bounds.Y,
-				bounds.Width,
-				progressBorder.Top - bounds.Y);
-
-			// Compute whether th item displays the legend.
-			bool showLegend = this.itemMaximumFixedWidth < bounds.Width;
-			// Compute the text width scale.
-			double widthScale = showLegend ?
-				(this.itemMaximumWidth > bounds.Width) ? (bounds.Width - this.itemMaximumFixedWidth) / ((double)this.itemMaximumVariableWidth) : 1.0 : 
-				(this.itemMaximumTextWidth > bounds.Width) ? widthScale = bounds.Width / ((double)this.itemMaximumTextWidth) : 1.0;
-
-			// The text bounds.
-			Rectangle textBounds = new Rectangle(
-				contentBounds.X,
-				contentBounds.Y,
-				this.itemMaximumTextWidth,
-				contentBounds.Height);
-			// The legend bounds.
-			Rectangle legendBounds = new Rectangle(
-				textBounds.Right,
-				contentBounds.Y,
-				contentBounds.Width - textBounds.Width,
-				contentBounds.Height);
-			// The legend text bounds.
-			Rectangle legendTextBounds = new Rectangle(
-				0,
-				legendBounds.Y,
-				(int)((this.itemProgressLegendMaximumTextWidth + this.itemProgressMaximumCountWidth) * widthScale),
-				legendBounds.Height);
-			// The legend icon bounds.
-			Rectangle legendIconBounds = new Rectangle(new Point(0, legendBounds.Y), this.legendSize);
-			// The legend item width.
-			int legendItemWidth = legendIconBounds.Width + this.spacing + legendTextBounds.Width + this.spacing;
-			*/
-
 			Rectangle legendTextBounds = item.geometrics.legendTextBounds;
 			Rectangle legendIconBounds = item.geometrics.legendIconBounds;
 

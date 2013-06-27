@@ -83,5 +83,14 @@ namespace DotNetApi.Web.XmlRpc
 				this.value.GetXml()
 				);
 		}
+
+		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public override object GetValue()
+		{
+			return this.value;
+		}
 	}
 }

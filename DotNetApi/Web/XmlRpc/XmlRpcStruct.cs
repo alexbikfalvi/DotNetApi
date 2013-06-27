@@ -122,6 +122,15 @@ namespace DotNetApi.Web.XmlRpc
 		}
 
 		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public override object GetValue()
+		{
+			return this.members;
+		}
+
+		/// <summary>
 		/// Adds a new structure member.
 		/// </summary>
 		/// <param name="name">The structure member name.</param>

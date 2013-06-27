@@ -62,7 +62,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML RPC object.</returns>
 		public static XmlRpcObject Create(XElement element)
 		{
-			if (element.Name == XmlRpcInt.XmlName) return new XmlRpcInt(element);
+			if (element == null) return null;
+			else if (element.Name == XmlRpcInt.XmlName) return new XmlRpcInt(element);
 			else if (element.Name == XmlRpcBoolean.XmlName) return new XmlRpcBoolean(element);
 			else if (element.Name == XmlRpcString.XmlName) return new XmlRpcString(element);
 			else if (element.Name == XmlRpcDouble.XmlName) return new XmlRpcDouble(element);
@@ -81,8 +82,48 @@ namespace DotNetApi.Web.XmlRpc
 		public abstract XElement GetXml();
 
 		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public abstract object GetValue();
+
+		/// <summary>
 		/// Disposes the current object.
 		/// </summary>
 		public void Dispose() { }
+
+		// Public properties.
+
+		/// <summary>
+		/// Gets the value of the current object as an integer.
+		/// </summary>
+		public int? AsInt
+		{
+			get { return (this.GetType() == typeof(XmlRpcInt)) ? (int?)(this as XmlRpcInt).Value : null; }
+		}
+
+		/// <summary>
+		/// Gets the value of the current object as a double.
+		/// </summary>
+		public double? AsDouble
+		{
+			get { return (this.GetType() == typeof(XmlRpcDouble)) ? (double?)(this as XmlRpcDouble).Value : null; }
+		}
+
+		/// <summary>
+		/// Gets the value of the current object as a boolean.
+		/// </summary>
+		public bool? AsBoolean
+		{
+			get { return (this.GetType() == typeof(XmlRpcBoolean)) ? (bool?)(this as XmlRpcBoolean).Value : null; }
+		}
+
+		/// <summary>
+		/// Gets the value of the current object as a string.
+		/// </summary>
+		public string AsString
+		{
+			get { return (this.GetType() == typeof(XmlRpcString)) ? (this as XmlRpcString).Value : null; }
+		}
 	}
 }

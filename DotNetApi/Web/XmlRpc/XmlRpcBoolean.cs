@@ -74,5 +74,14 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			return new XElement(XmlRpcBoolean.xmlName, this.Value ? "true" : "false");
 		}
+
+		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public override object GetValue()
+		{
+			return this.Value;
+		}
 	}
 }

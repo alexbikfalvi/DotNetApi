@@ -71,6 +71,15 @@ namespace DotNetApi.Web.XmlRpc
 		}
 
 		/// <summary>
+		/// Returns the value corresponding to this object.
+		/// </summary>
+		/// <returns>The object value.</returns>
+		public override object GetValue()
+		{
+			return this.Value;
+		}
+
+		/// <summary>
 		/// Escapes the string value. 
 		/// </summary>
 		/// <param name="value">The string value to escape.</param>
