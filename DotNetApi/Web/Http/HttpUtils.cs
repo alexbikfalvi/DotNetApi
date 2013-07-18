@@ -21,7 +21,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Net;
 
-namespace DotNetApi.Web
+namespace DotNetApi.Web.Http
 {
 	/// <summary>
 	/// A class representing a set of utilities for HTTP.

@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Security;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc

@@ -42,7 +42,7 @@ namespace DotNetApi.Windows.Controls
 		private string textDisabled = "Not selected";
 		private Color colorProgressBorder = ProfessionalColors.MenuBorder;
 		private Color colorProgressDefault = SystemColors.ControlLightLight;
-		private Padding itemPadding = new Padding(4, 4, 4, 4);
+		private Padding itemPadding = new Padding(4);
 		private Font fontText;
 
 		// List items measurements.
@@ -468,6 +468,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnItemTextChanged(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Update the item text.
 			this.OnUpdateItemText(item);
 			// Update the item measurements.
@@ -484,6 +486,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnItemEnabledChanged(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Refresh the list box item.
 			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
@@ -496,6 +500,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="newProgress">The new progress.</param>
 		private void OnItemProgressSet(ProgressItem item, ProgressInfo oldProgress, ProgressInfo newProgress)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Update the item progress.
 			this.OnUpdateItemProgress(item);
 			// Update the item legend.
@@ -512,6 +518,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnItemProgressLevelChanged(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// If the progress events are suspended.
 			if (this.suspendProgressEvents)
 			{
@@ -534,6 +542,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnItemProgressDefaultChanged(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// If the progress events are suspended.
 			if (this.suspendProgressEvents)
 			{
@@ -553,6 +563,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnItemProgressCountChanged(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// If the progress events are suspended.
 			if (this.suspendProgressEvents)
 			{
@@ -579,6 +591,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="newLegend">The new legend.</param>
 		private void OnItemProgressLegendSet(ProgressItem item, ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Update the item legend.
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
@@ -595,6 +609,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="legend">The legend.</param>
 		private void OnItemProgressLegendChanged(ProgressItem item, ProgressInfo progress, ProgressLegend legend)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Update the item legend.
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
@@ -609,6 +625,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The progress item</param>
 		private void OnUpdateItemText(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Recompute the text maximum width.
 			int width = TextRenderer.MeasureText(item.Text, this.fontText).Width;
 			// If the text width is greater than the previous maximum.
@@ -629,6 +647,8 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateItemsText()
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Set the maximum width to zero.
 			this.itemMaximumTextWidth = 0;
 			// Update the text width for all items.
@@ -650,6 +670,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnUpdateItemProgress(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Compute the count digits for this item.
 			int digits = item.Progress != null ? (int)Math.Ceiling(Math.Log10(item.Progress.Count)) : 0;
 			// If the number of digits is greater than the current maximum.
@@ -670,6 +692,8 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateItemsProgress()
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Set the maximum count digits to zero.
 			this.itemProgressMaximumCountDigits = 0;
 			// Update the maximum count digits for all items.
@@ -693,6 +717,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		private void OnUpdateItemLegend(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Set the item legend as invalid.
 			item.geometrics.validLegend = false;
 			// Set the maximum number of legend items to zero.
@@ -749,6 +775,8 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateItemsLegend()
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Set the maximum legend item count to zero.
 			this.itemProgressLegendMaximumCount = 0;
 			// Set the maximum legend item width to zero.
@@ -793,6 +821,8 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateMeasurements()
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Compute the progress string for the progress count digits.
 			StringBuilder stringBuilder = new StringBuilder(this.itemProgressMaximumCountDigits + 3);
 			stringBuilder.Append(" (").Append('0', this.itemProgressMaximumCountDigits).Append(')');
@@ -822,6 +852,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="bounds">The item bounds.</param>
 		private void OnUpdateItemGeometrics(ProgressItem item, Rectangle bounds)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Only updated the geometrics if the bounds are different.
 			if (bounds == item.geometrics.bounds)
 			{
@@ -874,6 +906,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The progress item.</param>
 		private void OnUpdateItemLegendGeometrics(ProgressItem item)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Compute whether th item displays the legend.
 			item.geometrics.showLegend = this.itemMaximumFixedWidth < item.geometrics.itemBounds.Width;
 			// Compute the text width scale.

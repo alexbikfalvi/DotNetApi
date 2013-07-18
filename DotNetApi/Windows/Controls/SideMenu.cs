@@ -19,32 +19,44 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
+	public delegate void SideMenuEventHandler(SideMenu sideMenu);
+
+	/// <summary>
+	/// A class representing a side menu.
+	/// </summary>
 	public class SideMenu : Panel
 	{
 		// Private members
-		private List<SideMenuItem> items = new List<SideMenuItem>();
+		private SideMenuItem.Collection items = new SideMenuItem.Collection();
 
 		private int dockButtonWidth = 18;				// The width of the dock button.
 		private int gripHeight = 8;						// The grip height.
-		private int? highlightedVisibleIndex = null;	// The index of the highlighted visible item.
-		private int? highlightedMinimizedIndex = null;	// The index of the highlighted minimized item.
-		private int? selectedIndex = null;				// The index of the selected menu item.
 		private int itemHeight = 48;					// The menu item height.
 		private int titleHeight = 27;					// The height of the title.
 		private int minimumPanelHeight = 50;			// The minimum panel height.
 		private int minimizedItemWidth = 25;			// The width of a minimized item.
+		private float titleFontSize = 12.0f;			// The title font size.
+		private int toolTipTopOffset = -20;				// The top offset of a minimized item tooltip.
+
+		private int maximumVisibleItems = 0;			// The maximum number of visible items.
+		private int maximumMinimizedItems = 0;			// The maximum number of minimized items.
+
 		private int hiddenItems = 0;					// The number of hidden items. 
 		private int minimizedItems = 0;					// The number of minimized items.
 		private int visibleItems = 0;					// The number of visible items.
-		private float titleFontSize = 12.0f;			// The title font size.
-		private int toolTipTopOffset = -20;				// The top offset of a minimized item tooltip.
+
+		private int? highlightedVisibleIndex = null;	// The index of the highlighted visible item.
+		private int? highlightedMinimizedIndex = null;	// The index of the highlighted minimized item.
+		private int? selectedIndex = null;				// The index of the selected menu item.
 
 		private bool itemPressed;
 		private bool itemMinimizedPressed;
@@ -77,90 +89,53 @@ namespace DotNetApi.Windows.Controls
 
 			this.controlMenu.Items.AddRange(new ToolStripItem[] {
 				this.toolStripMenuItemShowMoreButtons, 
-				this.toolStripMenuItemShowFewerButtons
+				this.toolStripMenuItemShowFewerButtons,
+				this.toolStripSeparator
 			});
 
 			this.toolStripMenuItemShowMoreButtons.Size = new Size(200, 22);
 			this.toolStripMenuItemShowMoreButtons.Image = Resources.ArrowUp_16;
 			this.toolStripMenuItemShowMoreButtons.Text = "Show &More Buttons";
-			this.toolStripMenuItemShowMoreButtons.Click += new EventHandler(this.ShowMoreButtonsClick);
+			this.toolStripMenuItemShowMoreButtons.Click += new EventHandler(this.OnShowMoreButtonsClick);
 
 			this.toolStripMenuItemShowFewerButtons.Size = new Size(200, 22);
 			this.toolStripMenuItemShowFewerButtons.Image = Resources.ArrowDown_16;
 			this.toolStripMenuItemShowFewerButtons.Text = "Show Fe&wer Buttons";
-			this.toolStripMenuItemShowFewerButtons.Click += new EventHandler(this.ShowFewerButtonsClick);
+			this.toolStripMenuItemShowFewerButtons.Click += new EventHandler(this.OnShowFewerButtonsClick);
 
 			this.DoubleBuffered = true;
 
-			this.controlMenu.Closed += new ToolStripDropDownClosedEventHandler(this.ControlMenuClosed);
+			this.controlMenu.Closed += new ToolStripDropDownClosedEventHandler(this.OnControlMenuClosed);
+
+			// Set the items collection event handlers.
+			this.items.BeforeCleared += this.OnBeforeItemsCleared;
+			this.items.AfterCleared += this.OnAfterItemsCleared;
+			this.items.AfterItemInserted += this.OnAfterItemInserted;
+			this.items.AfterItemRemoved += this.OnAfterItemRemoved;
+			this.items.AfterItemSet += this.OnAfterItemSet;
 		}
+
+		// Public events.
 
 		/// <summary>
 		/// An event raised when the number of visible, minimized or hidden items has changed.
 		/// </summary>
-		public event EventHandler ItemVisibilityChanged;
+		public event SideMenuEventHandler ItemVisibilityChanged;
+
+		// Public properties.
 
 		/// <summary>
-		/// Returns the number of enabled menu items.
+		/// Gets the collection of side menu items.
 		/// </summary>
-		[DisplayName("Enabled items"), Description("The number of enabled menu items."), Category("Menu")]
-		public int EnabledItems
-		{
-			get
-			{
-				int visibleItems = 0;
-				foreach(SideMenuItem item in this.items)
-					visibleItems += null != item ? item.Visible ? 1 : 0 : 0;
-				return visibleItems;
-			}
-		}
-		
+		[DisplayName("Items"), Description("The collection of side menu items"), Category("Menu")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
+		public SideMenuItem.Collection Items { get { return this.items; } }
 		/// <summary>
 		/// Gets the grip height.
 		/// </summary>
 		[DisplayName("Grip height"), Description("The height of the grip zone in pixels."), Category("Menu")]
-		public int GripHeight { get { return this.gripHeight; } }
-		
-		/// <summary>
-		/// Gets or sets the number of hidden menu items. Negative values are ignored.
-		/// </summary>
-		[DisplayName("Hidden items"), Description("The number of hidden menu items."), Category("Menu")]
-		public int HiddenItems
-		{
-			get { return this.hiddenItems; }
-			set
-			{
-				// Ignore negative values.
-				if (value < 0) return;
-				// Save the original number of hidden items.
-				int originalItems = this.hiddenItems;
-				// Upper-limit the number of hidden items to the enabled without the visible and minimized.
-				this.hiddenItems = (this.EnabledItems - this.visibleItems - this.minimizedItems < value) ?
-					this.EnabledItems - this.visibleItems - this.minimizedItems : value;
-				// If the number of hidden items different from the original.
-				if (this.hiddenItems != originalItems)
-				{
-					// Remove all items from the control menu.
-					while(this.controlMenu.Items.Count > 2) this.controlMenu.Items.RemoveAt(2);
-					// If there are hidden items.
-					if (this.hiddenItems > 0)
-					{
-						// Add a separator to the control menu.
-						this.controlMenu.Items.Add(this.toolStripSeparator);
-						// 
-						for (int index = 0; index < this.hiddenItems; index++)
-						{
-							int? idx = this.HiddenToGlobalIndex(index);
-
-							if (null != idx) this.controlMenu.Items.Add(this.items[idx ?? -1].HiddenMenuItem);
-						}
-					}
-					// Raise an item visibility changed event.
-					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
-				}
-			}
-		}
-		
+		public int GripHeight { get { return this.gripHeight; } }	
 		/// <summary>
 		/// Gets or sets the menu item height.
 		/// </summary>
@@ -168,9 +143,8 @@ namespace DotNetApi.Windows.Controls
 		public int ItemHeight
 		{
 			get { return this.itemHeight; }
-			set { this.itemHeight = value; }
+			set { this.OnSetItemHeight(value); }
 		}
-
 		/// <summary>
 		/// Gets or sets the minimized item width.
 		/// </summary>
@@ -178,9 +152,8 @@ namespace DotNetApi.Windows.Controls
 		public int MinimizedItemWidth
 		{
 			get { return this.minimizedItemWidth; }
-			set { this.minimizedItemWidth = value; }
+			set { this.OnSetMinimizedItemWidth(value); }
 		}
-		
 		/// <summary>
 		/// Gets or sets the minimum panel height.
 		/// </summary>
@@ -190,79 +163,20 @@ namespace DotNetApi.Windows.Controls
 			get { return this.minimumPanelHeight; }
 			set { this.minimumPanelHeight = value; }
 		}
-
-		/// <summary>
-		/// Gets or sets the number of minimized menu items. Negative values are ignored.
-		/// </summary>
-		[DisplayName("Minimized items"), Description("The number of minimized menu items."), Category("Menu")]
-		public int MinimizedItems 
-		{
-			get { return this.minimizedItems; }
-			set
-			{
-				// Ignore negative values.
-				if (value < 0) return;
-				// Save the original number of minimized items.
-				int originalItems = this.minimizedItems;
-				// Upper-limit the number of items that can be minimized to the difference between enabled an visible items.
-				this.minimizedItems = (this.EnabledItems - this.visibleItems < value) ?
-					this.EnabledItems - this.visibleItems : value;
-				// Upper-limit the number of minimzed items by the width of the button.
-				if (this.minimizedItems * this.minimizedItemWidth + this.dockButtonWidth > this.Width)
-					this.minimizedItems = (this.Width - this.dockButtonWidth) / this.minimizedItemWidth;
-				// Lower-limit the number of minimzed items to zero.
-				if (this.minimizedItems < 0) this.minimizedItems = 0;
-				// Set the number of hidden items
-				this.HiddenItems = this.EnabledItems - this.visibleItems - this.minimizedItems;
-				// Refresh the control.
-				if (this.minimizedItems != originalItems)
-				{
-					// Repaint the control.
-					this.Refresh();
-					// Raise an item visibility changed event.
-					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
-				}
-			}
-		}
-
 		/// <summary>
 		/// Get the index of the selected menu item.
 		/// </summary>
 		[DisplayName("Selected index"), Description("The index of the selected menu item, or null if no item is selected."), Category("Menu")]
 		public int? SelectedIndex { get { return this.selectedIndex; } }
-
 		/// <summary>
 		/// Gets or sets the current selected item.
 		/// </summary>
-		[DisplayName("Selecte item"), Description("The selected menu item, or null if no item is selected.")]
+		[DisplayName("Selected item"), Description("The selected menu item, or null if no item is selected.")]
 		public SideMenuItem SelectedItem
 		{
 			get { return this.selectedIndex != null ? this.items[this.selectedIndex ?? -1] : null; }
-			set
-			{
-				// Change the selected index, and if the selected index is not -1.
-				int index;
-				if (-1 != (index = this.items.IndexOf(value)))
-				{
-					// If the index is different from the selected index.
-					if (index != this.selectedIndex)
-					{
-						// Change the selected index.
-						this.selectedIndex = index;
-						// Select the menu item.
-						value.Select();
-						// Refresh the control.
-						this.Refresh();
-					}
-				}
-				else
-				{
-					// Set the selected index to null.
-					this.selectedIndex = null;
-				}
-			}
+			set { this.OnSetSelectedItem(value); }
 		}
-
 		/// <summary>
 		/// Gets or sets the number of visible items. Negative values are ignored.
 		/// </summary>
@@ -270,34 +184,26 @@ namespace DotNetApi.Windows.Controls
 		public int VisibleItems
 		{
 			get { return this.visibleItems; }
-			set
-			{
-				// Ignore negative values.
-				if (value < 0) return;
-				// Save the original number of visible items.
-				int originalItems = this.visibleItems;
-				// Upper-limit the number of visible items to the number of enabled items.
-				this.visibleItems = (this.EnabledItems < value) ? this.EnabledItems : value;
-				// Upper-limit the number of visible items to the minimum panel height.
-				if ((this.visibleItems + 1) * this.itemHeight + this.gripHeight + this.minimumPanelHeight > this.Height)
-					this.visibleItems = (this.Height - this.minimumPanelHeight - this.gripHeight) / this.itemHeight - 1;
-				// Lower-limit the number of visible items to zero.
-				if (this.visibleItems < 0) this.visibleItems = 0;
-				// Update the number of minimized items.
-				this.MinimizedItems = this.EnabledItems - this.visibleItems;
-				// Refresh the control.
-				if (this.visibleItems != originalItems)
-				{
-					//  Repaint the control.
-					this.Refresh();
-					// Raise an item visibility changed event.
-					if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
-				}
-				// Update the show more or fewer buttons state.
-				this.toolStripMenuItemShowMoreButtons.Enabled = (this.visibleItems == this.EnabledItems) ? false : true;
-				this.toolStripMenuItemShowFewerButtons.Enabled = (this.visibleItems == 0) ? false : true;
-			}
+			set { this.OnSetVisibleItems(value); }
 		}
+		/// <summary>
+		/// Gets or sets the number of minimized menu items. Negative values are ignored.
+		/// </summary>
+		[DisplayName("Minimized items"), Description("The number of minimized menu items."), Category("Menu")]
+		public int MinimizedItems
+		{
+			get { return this.minimizedItems; }
+			private set { this.OnSetMinimizedItems(value); }
+		}
+		/// <summary>
+		/// Gets or sets the number of hidden menu items. Negative values are ignored.
+		/// </summary>
+		[DisplayName("Hidden items"), Description("The number of hidden menu items."), Category("Menu")]
+		public int HiddenItems
+		{
+			get { return this.hiddenItems; }
+		}
+		// Public methods.
 
 		/// <summary>
 		/// Adds a new menu item to the side menu.
@@ -312,32 +218,40 @@ namespace DotNetApi.Windows.Controls
 			string text,
 			Image imageSmall,
 			Image imageLarge,
-			SideMenuEventHandler handler,
+			SideMenuItemEventHandler handler,
 			object tag = null)
 		{
 			// Create a new side menu item.
-			SideMenuItem item = new SideMenuItem(text, imageSmall, imageLarge, this.HiddenItemClick);
+			SideMenuItem item = new SideMenuItem(text, imageSmall, imageLarge);
 			// Add the item tag.
 			item.Tag = tag;
 			// Add the user event handler.
 			item.Click += handler;
 			// Add the menu item to the items list.
 			this.items.Add(item);
-			// Update the number of visible items
-			this.VisibleItems = this.items.Count;
-			// Raise an item visibility changed event.
-			if (this.ItemVisibilityChanged != null) this.ItemVisibilityChanged(this, null);
-			// If this the first item, select it.
-			if (this.items.Count == 1)
-			{
-				item.Select();
-				this.selectedIndex = 0;
-			}
 			// Return the item.
 			return item;
 		}
 
 		// Protected methods.
+
+		/// <summary>
+		/// A method called when the control is being disposed.
+		/// </summary>
+		/// <param name="disposing">If <b>true</b> the control is being disposed.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				// Dispose all menu items.
+				foreach (SideMenuItem item in this.items)
+				{
+					item.Dispose();
+				}
+			}
+			// Call the base class method.
+			base.Dispose(disposing);
+		}
 
 		/// <summary>
 		/// Event handler for a paint event.
@@ -348,15 +262,55 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnPaint(e);
 			// Paint the control.
-			this.PaintTitle(e.Graphics);
-			this.PaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
-			this.PaintGrip(e.Graphics);
+			this.OnPaintTitle(e.Graphics);
+			this.OnPaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
+			this.OnPaintGrip(e.Graphics);
 			for (int index = 0; index < this.visibleItems; index++)
-				this.PaintItem(e.Graphics, index);
+				this.OnPaintItem(e.Graphics, index);
 			for (int index = 0; index < this.minimizedItems; index++)
-				this.PaintMinimizedItem(e.Graphics, index);
-			this.PaintDockButton(e.Graphics);
+				this.OnPaintMinimizedItem(e.Graphics, index);
+			this.OnPaintDockButton(e.Graphics);
 		}
+
+		/// <summary>
+		/// An event handler called when the control is resized.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnResize(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnResize(e);
+			
+			// Update the maximum number of visible items.
+			this.maximumVisibleItems = (this.ClientRectangle.Height - this.titleHeight - this.gripHeight - this.minimumPanelHeight) / this.itemHeight - 1;
+			// Update the maximum number of minimized items.
+			this.maximumMinimizedItems = (this.ClientRectangle.Width - this.dockButtonWidth) / this.minimizedItemWidth;
+
+			// Update the number of visible items.
+			if (this.visibleItems > this.maximumVisibleItems)
+			{
+				this.OnSetVisibleItems(this.maximumVisibleItems);
+			}
+
+			// Update the number of minimized items, if the number is greater than the maximum.
+			else if (this.minimizedItems > this.maximumMinimizedItems)
+			{
+				this.OnSetMinimizedItems(this.maximumMinimizedItems);
+			}
+
+			// Update the number of minimized items, if the number of hidden items is greater than zero.
+			else if ((this.minimizedItems < this.maximumMinimizedItems) && (this.hiddenItems > 0))
+			{
+				this.OnSetMinimizedItems(this.minimizedItems + this.hiddenItems);
+			}
+
+			// Else, refresh the control
+			else
+			{
+				this.OnRefresh();
+			}
+		}
+
 
 		/// <summary>
 		/// An event handler called when the mouse leaves the control.
@@ -367,20 +321,20 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class methods.
 			base.OnMouseLeave(e);
 			// Update the control.
-			if (-1 != this.highlightedVisibleIndex)
+			if (null != this.highlightedVisibleIndex)
 			{
-				this.highlightedVisibleIndex = -1;
-				this.Refresh();
+				this.highlightedVisibleIndex = null;
+				this.OnRefresh();
 			}
-			if (-1 != this.highlightedMinimizedIndex)
+			if (null != this.highlightedMinimizedIndex)
 			{
-				this.highlightedMinimizedIndex = -1;
-				this.Refresh();
+				this.highlightedMinimizedIndex = null;
+				this.OnRefresh();
 			}
 			if ((this.dockButtonSelected) && (!this.controlMenu.Visible))
 			{
 				this.dockButtonSelected = false;
-				this.Refresh();
+				this.OnRefresh();
 			}
 			this.Cursor = Cursors.Arrow;
 		}
@@ -424,7 +378,7 @@ namespace DotNetApi.Windows.Controls
 			if (visibleIndex != this.highlightedVisibleIndex)
 			{
 				this.highlightedVisibleIndex = visibleIndex;
-				this.Refresh();
+				this.OnRefresh();
 			}
 
 			// Dock button
@@ -433,13 +387,13 @@ namespace DotNetApi.Windows.Controls
 				if (!this.dockButtonSelected)
 				{
 					this.dockButtonSelected = true;
-					this.Refresh();
+					this.OnRefresh();
 				}
 			}
 			else if (this.dockButtonSelected)
 			{
 				this.dockButtonSelected = false;
-				this.Refresh();
+				this.OnRefresh();
 			}
 
 			// Minimized items
@@ -455,7 +409,7 @@ namespace DotNetApi.Windows.Controls
 			if (minimizedIndex != this.highlightedMinimizedIndex)
 			{
 				this.highlightedMinimizedIndex = minimizedIndex;
-				this.Refresh();
+				this.OnRefresh();
 			}
 
 			// Cursor
@@ -485,23 +439,23 @@ namespace DotNetApi.Windows.Controls
 			if (-1 != this.highlightedVisibleIndex)
 			{
 				this.itemPressed = true;
-				this.Refresh();
+				this.OnRefresh();
 			}
 			if (-1 != this.highlightedMinimizedIndex)
 			{
 				this.itemMinimizedPressed = true;
-				this.Refresh();
+				this.OnRefresh();
 			}
 			if (this.dockButtonSelected)
 			{
 				this.dockButtonPressed = true;
 				this.controlMenu.Show(this, new Point(this.ClientRectangle.Right, this.ClientRectangle.Bottom - this.itemHeight / 2), ToolStripDropDownDirection.Right);
-				this.Refresh();
+				this.OnRefresh();
 			}
 		}
 
 		/// <summary>
-		/// An event handler called when the mouse releases the click on the control.
+		/// An event handler called when the mouse releases the on the control.
 		/// </summary>
 		/// <param name="e">The event arguments.</param>
 		protected override void OnMouseUp(MouseEventArgs e)
@@ -568,20 +522,157 @@ namespace DotNetApi.Windows.Controls
 			this.itemPressed = false;
 			this.itemMinimizedPressed = false;
 			this.dockButtonPressed = false;
-			this.Refresh();
+			
+			// Refresh the control.
+			this.OnRefresh();
 		}
 
 		/// <summary>
-		/// An event handler called when the control is resized.
+		/// Sets the side menu item height.
 		/// </summary>
-		/// <param name="e">The event arguments.</param>
-		protected override void OnResize(EventArgs e)
+		/// <param name="itemHeight">The item height.</param>
+		protected virtual void OnSetItemHeight(int itemHeight)
 		{
-			// Call the base class method.
-			base.OnResize(e);
-			// Update the control.
-			this.VisibleItems = this.visibleItems;
-			this.Refresh();
+			// If the item height has not changed, do nothing.
+			if (itemHeight == this.itemHeight) return;
+			// Set the item height.
+			this.itemHeight = itemHeight;
+		}
+
+		/// <summary>
+		/// Sets the side menu minimized item width.
+		/// </summary>
+		/// <param name="minimizedItemWidth">The minimized item width.</param>
+		protected virtual void OnSetMinimizedItemWidth(int minimizedItemWidth)
+		{
+			// If the item width has not changed, do nothing.
+			if (minimizedItemWidth == this.minimizedItemWidth) return;
+			// Set the minimized item width.
+			this.minimizedItemWidth = minimizedItemWidth;
+		}
+
+		/// <summary>
+		/// Changes the current selected item.
+		/// </summary>
+		/// <param name="item">The new selected item.</param>
+		protected virtual void OnSetSelectedItem(SideMenuItem item)
+		{
+			// Change the selected index, and if the selected index is not -1.
+			int index;
+			if (-1 != (index = this.items.IndexOf(item)))
+			{
+				// If the index is different from the selected index.
+				if (index != this.selectedIndex)
+				{
+					// Change the selected index.
+					this.selectedIndex = index;
+					// Select the menu item.
+					item.Select();
+				}
+			}
+			else
+			{
+				// Set the selected index to null.
+				this.selectedIndex = null;
+			}
+			// Refresh the control.
+			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// Sets the number of visible items.
+		/// </summary>
+		/// <param name="visibleItems">The number of visible items.</param>
+		/// <returns><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</returns>
+		protected virtual bool OnSetVisibleItems(int visibleItems)
+		{
+			// Ignore negative values.
+			if (visibleItems < 0) return false;
+			// Save the number of original visible items.
+			int originalItems = this.visibleItems;
+			// Upper-limit the number of visible items to the maximum number of visible items.
+			this.visibleItems = (visibleItems <= this.maximumVisibleItems) ? visibleItems : this.maximumVisibleItems;
+
+			// Update the hidden menu for the visible items.
+			for (int index = 0; index < this.visibleItems; index++)
+			{
+				this.items[index].HiddenMenuItem.Visible = false;
+			}
+			
+			// Set the number of minimized items.
+			if (!this.OnSetMinimizedItems(this.items.Count - this.visibleItems))
+			{
+				//  Refresh the control.
+				this.OnRefresh();
+				// Call the item visibility changed event handler.
+				this.OnItemsVisibilityChanged();
+			}
+
+			// Update the show more or fewer buttons state.
+			this.toolStripMenuItemShowMoreButtons.Enabled = ((this.visibleItems < this.maximumVisibleItems) && (this.visibleItems < this.items.Count));
+			this.toolStripMenuItemShowFewerButtons.Enabled = (this.visibleItems > 0);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Sets the specified number of minimized items.
+		/// </summary>
+		/// <param name="minimizedItems">The number of minimized items to set.</param>
+		/// <return><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</return>
+		protected virtual bool OnSetMinimizedItems(int minimizedItems)
+		{
+			// Ignore negative values.
+			if (minimizedItems < 0) return false;
+			// Save the original number of minimized items.
+			int originalItems = this.minimizedItems;
+			// Upper-limit the number of minimized items to the maximum number of minimized items.
+			this.minimizedItems = (minimizedItems <= this.maximumMinimizedItems) ? minimizedItems : this.maximumMinimizedItems;
+
+			// Update the hidden menu for the minimized items.
+			for (int index = this.visibleItems; index < this.visibleItems + this.minimizedItems; index++)
+			{
+				this.items[index].HiddenMenuItem.Visible = false;
+			}
+
+			// Set the number of hidden items.
+			if (!this.OnSetHiddenItems())
+			{
+				// Refresh the control.
+				this.OnRefresh();
+				// Call the item visibility changed event handler.
+				this.OnItemsVisibilityChanged();
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Sets the specified number of hidden items.
+		/// </summary>
+		/// <returns><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</returns>
+		protected virtual bool OnSetHiddenItems()
+		{
+			// Ignore negative values.
+			if (hiddenItems < 0) return false;
+			// Save the original number of hidden items.
+			int originalItems = this.hiddenItems;
+			// Compute the number of hidden items.
+			this.hiddenItems = this.items.Count - this.visibleItems - this.minimizedItems;
+
+			// Update the hidden menu for the hidden items.
+			for (int index = this.visibleItems + this.minimizedItems; index < this.items.Count; index++)
+			{
+				this.items[index].HiddenMenuItem.Visible = true;
+			}
+			this.toolStripSeparator.Visible = this.visibleItems + this.minimizedItems < this.items.Count;
+
+			// Refresh the control.
+			this.OnRefresh();
+			// Call the item visibility changed event handler.
+			this.OnItemsVisibilityChanged();
+
+			return true;
 		}
 
 		// Private methods.
@@ -593,22 +684,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The global index.</returns>
 		private int? VisibleToGlobalIndex(int? index)
 		{
-			if (null == index) return null;
-			if (index >= this.items.Count) return null; // Return null when outside the items count.
-
-			int visibleIndex = 0;
-			for (int idx = 0; (idx < this.items.Count) && (visibleIndex < this.visibleItems); idx++)
-			{
-				if (null != this.items[idx])
-				{
-					if (this.items[idx].Visible)
-					{
-						if (visibleIndex == index) return idx;
-						visibleIndex++;
-					}
-				}
-			}
-			return null;
+			return index;
 		}
 
 		/// <summary>
@@ -618,27 +694,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The global index.</returns>
 		private int? MinimizedToGlobalIndex(int? index)
 		{
-			if (null == index) return null;
-			if (index >= this.items.Count) return null; // Return null when outside the items count.
-
-			int? lastVisibleIndex = this.VisibleToGlobalIndex(this.visibleItems - 1);
-			int minimizedIndex = 0;
-
-			if ((null == lastVisibleIndex) && (this.visibleItems > 0)) return null; // Return null when all items are visible.
-
-			for (int idx = (lastVisibleIndex ?? -1) + 1; (idx < this.items.Count) && (minimizedIndex < this.minimizedItems); idx++)
-			{
-				if (null != this.items[idx])
-				{
-					if (this.items[idx].Visible)
-					{
-						if (minimizedIndex == index)
-							return idx;
-						minimizedIndex++;
-					}
-				}
-			}
-			return null;
+			return index == null ? null : index + this.visibleItems;
 		}
 
 		/// <summary>
@@ -648,37 +704,39 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The global index.</returns>
 		private int? HiddenToGlobalIndex(int? index)
 		{
-			if (null == index) return null;
-			if (index >= this.items.Count) return null; // Return null when outside the items count.
+			return index == null ? null : index + this.visibleItems + this.minimizedItems;
+		}
 
-			int? lastIndex = this.MinimizedToGlobalIndex(this.minimizedItems - 1);
-			int hiddenIndex = 0;
+		/// <summary>
+		/// Returns the visible menu item at a specified global index.
+		/// </summary>
+		/// <param name="index">The global item index.</param>
+		/// <returns>The side menu item or null, if the item at the specified index is not visible.</returns>
+		private SideMenuItem GetVisibleItem(int index)
+		{
+			// Get the global index of the visible index.
+			int? idx = this.VisibleToGlobalIndex(index);
+			// Return the the side menu item.
+			return idx.HasValue ? this.items[idx.Value] : null;
+		}
 
-			if ((null == lastIndex) && (this.minimizedItems > 0)) return null; // Return null when all items are minimized.
-			if (null == lastIndex)
-			{
-				lastIndex = this.VisibleToGlobalIndex(this.visibleItems - 1);
-				if ((null == lastIndex) && (this.visibleItems > 0)) return null; // Return null when all items are visible.
-			}
-
-			for (int idx = (lastIndex ?? -1) + 1; (idx < this.items.Count) && (hiddenIndex < this.hiddenItems); idx++)
-			{
-				if (null != this.items[idx])
-				{
-					if (this.items[idx].Visible)
-					{
-						if (hiddenIndex == index) return idx;
-						hiddenIndex++;
-					}
-				}
-			}
-			return null;
+		/// <summary>
+		/// Returns the minimized menu item at a specified global index.
+		/// </summary>
+		/// <param name="index">The global item index.</param>
+		/// <returns>The side menu item or null, if the item at the specified index is not minimized.</returns>
+		private SideMenuItem GetMinimizedItem(int index)
+		{
+			// Get th global index of the visible index.
+			int? idx = this.MinimizedToGlobalIndex(index);
+			// Return the side menu item.
+			return idx.HasValue ? this.items[idx.Value] : null;
 		}
 
 		/// <summary>
 		/// Refreshes the side menu.
 		/// </summary>
-		private new void Refresh()
+		private void OnRefresh()
 		{
 			// Compute the new padding of the side menu;
 			Padding padding = new Padding(0, this.titleHeight + 1, 0, this.itemHeight * (this.visibleItems + 1) + this.gripHeight);
@@ -699,74 +757,11 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Paints the background of a side menu item with a single color.
-		/// </summary>
-		/// <param name="g">The graphics object.</param>
-		/// <param name="index">The menu item index.</param>
-		/// <param name="color">The color.</param>
-		private void PaintItemBackground(Graphics g, int index, Color color)
-		{
-			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
-			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
-			{
-				using (Brush brush = new SolidBrush(color))
-				{
-					g.FillRectangle(brush, rect);
-					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Paints the background of a side menu item with a color gradient.
-		/// </summary>
-		/// <param name="g">The graphics object.</param>
-		/// <param name="index">The menu item index.</param>
-		/// <param name="colorBegin">The gradient begin color.</param>
-		/// <param name="colorEnd">The gradient end color.</param>
-		private void PaintItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
-		{
-			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
-			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
-			{
-				using (Brush brush = new LinearGradientBrush(
-					rect,
-					colorBegin,
-					colorEnd,
-					LinearGradientMode.Vertical))
-				{
-					g.FillRectangle(brush, rect);
-					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Paints a minimized menu item with a color gradient.
-		/// </summary>
-		/// <param name="g">The graphics object.</param>
-		/// <param name="index">The menu item index.</param>
-		/// <param name="colorBegin">The gradient begin color.</param>
-		/// <param name="colorEnd">The gradient end color.</param>
-		private void PaintMinimizedItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
-		{
-			Rectangle rect = new Rectangle(this.ClientRectangle.Right - this.dockButtonWidth - index * this.minimizedItemWidth, this.ClientRectangle.Bottom - this.itemHeight + 1, this.minimizedItemWidth, this.itemHeight - 1);
-			using (Brush brush = new LinearGradientBrush(
-				rect,
-				colorBegin,
-				colorEnd,
-				LinearGradientMode.Vertical))
-			{
-				g.FillRectangle(brush, rect);
-			}
-		}
-
-		/// <summary>
 		/// Paints a normal side menu item.
 		/// </summary>
 		/// <param name="g">The graphics object.</param>
 		/// <param name="index">The menu item index.</param>
-		private void PaintItem(Graphics g, int index)
+		private void OnPaintItem(Graphics g, int index)
 		{
 			SideMenuItem sideMenuItem = this.GetVisibleItem(index);
 			if (null == sideMenuItem) return;
@@ -779,40 +774,41 @@ namespace DotNetApi.Windows.Controls
 						// The side menu item is selected.
 						if (this.itemPressed)
 							// The side menu item is pressed.
-							this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
+							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
 						else
 							// The side menu item is not pressed.
-							this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
 					else
 						// The side menu item is not selected.
 						if (this.itemPressed)
 							// The side menu item is pressed.
-							this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
+							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
 						else
 							// The side menu item is not pressed.
-							this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
+							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
 				else
 					// The side menu item is not highlighted.
 					if (this.selectedIndex == this.VisibleToGlobalIndex(index))
 						// The side menu item is not selected.
-						this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+						this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
 					else
 						// The side menu item is not selected.
-						this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
+						this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
 			else
 				// The side menu item is disabled.
 				if (this.selectedIndex == this.VisibleToGlobalIndex(index))
 					// The side menu item is selected.
-					this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+					this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
 				else
 					// The side menu item is not selected.
-					this.PaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientBegin);
+					this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientBegin);
 
 
 			Rectangle rectText = new Rectangle(this.ClientRectangle.Left + this.itemHeight, this.ClientRectangle.Bottom - (this.visibleItems - index + 1) * this.itemHeight, this.ClientRectangle.Width - 40, this.itemHeight);
 
 			// Draw the text.
 			if (null != sideMenuItem.Text)
+			{
 				TextRenderer.DrawText(
 					g,
 					sideMenuItem.Text,
@@ -820,6 +816,7 @@ namespace DotNetApi.Windows.Controls
 					rectText,
 					(this.selectedIndex == this.VisibleToGlobalIndex(index)) ? SystemColors.MenuText : SystemColors.MenuText,
 					TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+			}
 			// Draw the large image.
 			if (null != sideMenuItem.ImageLarge)
 			{
@@ -851,11 +848,82 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Paints the background of a side menu item with a single color.
+		/// </summary>
+		/// <param name="g">The graphics object.</param>
+		/// <param name="index">The menu item index.</param>
+		/// <param name="color">The color.</param>
+		private void OnPaintItemBackground(Graphics g, int index, Color color)
+		{
+			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
+			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			{
+				using (Brush brush = new SolidBrush(color))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Paints the background of a side menu item with a color gradient.
+		/// </summary>
+		/// <param name="g">The graphics object.</param>
+		/// <param name="index">The menu item index.</param>
+		/// <param name="colorBegin">The gradient begin color.</param>
+		/// <param name="colorEnd">The gradient end color.</param>
+		private void OnPaintItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
+		{
+			Rectangle rect = new Rectangle(
+				this.ClientRectangle.Left,
+				this.ClientRectangle.Bottom - (index + 1) * this.itemHeight,
+				this.ClientRectangle.Width,
+				this.itemHeight);
+			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			{
+				using (Brush brush = new LinearGradientBrush(
+					rect,
+					colorBegin,
+					colorEnd,
+					LinearGradientMode.Vertical))
+				{
+					g.FillRectangle(brush, rect);
+					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Paints a minimized menu item with a color gradient.
+		/// </summary>
+		/// <param name="g">The graphics object.</param>
+		/// <param name="index">The menu item index.</param>
+		/// <param name="colorBegin">The gradient begin color.</param>
+		/// <param name="colorEnd">The gradient end color.</param>
+		private void OnPaintMinimizedItemBackground(Graphics g, int index, Color colorBegin, Color colorEnd)
+		{
+			Rectangle rect = new Rectangle(
+				this.ClientRectangle.Right - this.dockButtonWidth - index * this.minimizedItemWidth,
+				this.ClientRectangle.Bottom - this.itemHeight + 1,
+				this.minimizedItemWidth,
+				this.itemHeight - 1);
+			using (Brush brush = new LinearGradientBrush(
+				rect,
+				colorBegin,
+				colorEnd,
+				LinearGradientMode.Vertical))
+			{
+				g.FillRectangle(brush, rect);
+			}
+		}
+
+		/// <summary>
 		/// Paints a minimized side menu item.
 		/// </summary>
 		/// <param name="g">The graphics object.</param>
 		/// <param name="index">The menu item index.</param>
-		private void PaintMinimizedItem(Graphics g, int index)
+		private void OnPaintMinimizedItem(Graphics g, int index)
 		{
 			SideMenuItem sideMenuItem = this.GetMinimizedItem(index);
 			if (null == sideMenuItem) return;
@@ -870,18 +938,18 @@ namespace DotNetApi.Windows.Controls
 						// If the side menu item is selected.
 						if (this.itemMinimizedPressed)
 							// If the side menu item is pressed.
-							this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
 						else
 							// If the side menu item is not pressed.
-							this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
 					else
 						// If the side menu item is not selected.
 						if (this.itemMinimizedPressed)
 							// If the side menu item is pressed.
-							this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
 						else
 							// If the side menu item is not pressed.
-							this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
 					// Show the tooltip.
 					sideMenuItem.ToolTip.Show(
 						sideMenuItem.Text, this,
@@ -893,7 +961,7 @@ namespace DotNetApi.Windows.Controls
 					// If the side menu item is not highlighted.
 					if (this.selectedIndex == this.MinimizedToGlobalIndex(index))
 						// If the side menu item is selected.
-						this.PaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+						this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
 					// Hide the tooltip.
 					sideMenuItem.ToolTip.Hide(this);
 				}
@@ -932,7 +1000,7 @@ namespace DotNetApi.Windows.Controls
 		/// Paints the side menu grip.
 		/// </summary>
 		/// <param name="g">The graphics object.</param>
-		private void PaintGrip(Graphics g)
+		private void OnPaintGrip(Graphics g)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.ClientRectangle.Width, this.gripHeight);
 
@@ -963,7 +1031,7 @@ namespace DotNetApi.Windows.Controls
 		/// Paints the side menu title.
 		/// </summary>
 		/// <param name="g">The graphics object.</param>
-		private void PaintTitle(Graphics g)
+		private void OnPaintTitle(Graphics g)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.titleHeight);
 
@@ -1002,7 +1070,7 @@ namespace DotNetApi.Windows.Controls
 		/// Paints the side menu dock button.
 		/// </summary>
 		/// <param name="g">The graphics object.</param>
-		private void PaintDockButton(Graphics g)
+		private void OnPaintDockButton(Graphics g)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Right - this.dockButtonWidth, this.ClientRectangle.Bottom - this.itemHeight + 1, this.dockButtonWidth, this.itemHeight - 1);
 
@@ -1041,18 +1109,70 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// An event handler called when the side menu item text has changed.
+		/// </summary>
+		/// <param name="item">The side menu item.</param>
+		private void OnItemTextChanged(SideMenuItem item)
+		{
+			// Refresh the item.
+			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// An event handler called when the side menu item small image has changed.
+		/// </summary>
+		/// <param name="item">The side menu item.</param>
+		private void OnItemSmallImageChanged(SideMenuItem item)
+		{
+			// Refresh the item.
+			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// An event handler called when the side menu item large image has changed.
+		/// </summary>
+		/// <param name="item">The side menu item.</param>
+		private void OnItemLargeImageChanged(SideMenuItem item)
+		{
+			// Refresh the item.
+			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// An event handler called when the side menu item control has  changed.
+		/// </summary>
+		/// <param name="item">The side menu item.</param>
+		/// <param name="oldControl">The old control.</param>
+		/// <param name="newControl">The new control.</param>
+		private void OnItemControlChanged(SideMenuItem item, ISideControl oldControl, ISideControl newControl)
+		{
+			// Get the index of the side menu item.
+			int index = this.items.IndexOf(item);
+			// Hide the old control.
+			if (null != oldControl)
+			{
+				oldControl.HideSideControl();
+			}
+			// Show the new control.
+			if (null != newControl)
+			{
+				if (index == this.selectedIndex)
+				{
+					newControl.ShowSideControl();
+				}
+				else
+				{
+					newControl.HideSideControl();
+				}
+			}
+		}
+
+		/// <summary>
 		/// An event handler called when the user clicks on a hidden item.
 		/// </summary>
-		/// <param name="sender">The sender object.</param>
-		/// <param name="e">The event arguments.</param>
-		private void HiddenItemClick(object sender, EventArgs e)
+		/// <param name="item">The side menu item.</param>
+		private void OnItemHiddenClick(SideMenuItem item)
 		{
-			// Get the toolstrip item.
-			ToolStripMenuItem menuItem = sender as ToolStripMenuItem;
-
-			// Get the side menu item.
-			SideMenuItem item = menuItem.Tag as SideMenuItem;
-
 			// Get the index of the menu item.
 			int index = this.items.IndexOf(item);
 
@@ -1069,7 +1189,7 @@ namespace DotNetApi.Windows.Controls
 				// Select the currently selected item.
 				this.items[index].Select();
 
-				this.Refresh();
+				this.OnRefresh();
 			}
 		}
 
@@ -1078,7 +1198,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void ShowMoreButtonsClick(object sender, EventArgs e)
+		private void OnShowMoreButtonsClick(object sender, EventArgs e)
 		{
 			this.VisibleItems++;
 		}
@@ -1088,56 +1208,171 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void ShowFewerButtonsClick(object sender, EventArgs e)
+		private void OnShowFewerButtonsClick(object sender, EventArgs e)
 		{
 			this.VisibleItems--;
 		}
 
-		private void ControlMenuClosed(object sender, ToolStripDropDownClosedEventArgs e)
+		/// <summary>
+		/// An event handler called when the control menu is closed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlMenuClosed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
+			// Depress and deselect the dock button.
 			this.dockButtonPressed = false;
 			this.dockButtonSelected = false;
-			this.Refresh();
+			// Refresh the control.
+			this.OnRefresh();
 		}
 
 		/// <summary>
-		/// Returns the visible menu item at a specified global index.
+		/// An event handler called when the item visibility has changed.
 		/// </summary>
-		/// <param name="index">The global item index.</param>
-		/// <returns>The side menu item or null, if the item at the specified index is not visible.</returns>
-		private SideMenuItem GetVisibleItem(int index)
+		private void OnItemsVisibilityChanged()
 		{
-			int? idx;
-			return null == (idx = this.VisibleToGlobalIndex(index)) ? null : this.items[idx ?? -1];
+			// Raise the item visibility event.
+			if (null != this.ItemVisibilityChanged) this.ItemVisibilityChanged(this);
 		}
 
 		/// <summary>
-		/// Returns the minimized menu item at a specified global index.
+		/// An event handler called before the menu item collection has been cleared.
 		/// </summary>
-		/// <param name="index">The global item index.</param>
-		/// <returns>The side menu item or null, if the item at the specified index is not minimized.</returns>
-		private SideMenuItem GetMinimizedItem(int index)
+		private void OnBeforeItemsCleared()
 		{
-			int? idx;
-			return null == (idx = this.MinimizedToGlobalIndex(index)) ? null : this.items[idx ?? -1];
-		}
-
-		/// <summary>
-		/// A method called when the control is being disposed.
-		/// </summary>
-		/// <param name="disposing">If <b>true</b> the control is being disposed.</param>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing)
+			// Remove the event handlers and hidden menu for all items.
+			foreach (SideMenuItem item in this.items)
 			{
-				// Dispose all menu items.
-				foreach (SideMenuItem item in this.items)
+				// Remove the event handlers.
+				item.TextChanged -= this.OnItemTextChanged;
+				item.SmallImageChanged -= this.OnItemSmallImageChanged;
+				item.LargeImageChanged -= this.OnItemLargeImageChanged;
+				item.ControlChanged -= this.OnItemControlChanged;
+				item.HiddenClick -= this.OnItemHiddenClick;
+
+				// Remove the hidden menu.
+				this.controlMenu.Items.Remove(item.HiddenMenuItem);
+			}
+		}
+
+		/// <summary>
+		/// An event handler called after the menu item collection has been cleared.
+		/// </summary>
+		private void OnAfterItemsCleared()
+		{
+			// Update the number of visible items.
+			this.VisibleItems = this.items.Count;
+			// Call the item visibility changed event handler.
+			this.OnItemsVisibilityChanged();
+			// Change the selected index.
+			this.selectedIndex = null;
+			// Refresh the control.
+			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// An event handler called after a new menu item has been inserted.
+		/// </summary>
+		/// <param name="index">The item index.</param>
+		/// <param name="item">The menu item</param>
+		private void OnAfterItemInserted(int index, SideMenuItem item)
+		{
+			// Add the item event handlers.
+			item.TextChanged += this.OnItemTextChanged;
+			item.SmallImageChanged += this.OnItemSmallImageChanged;
+			item.LargeImageChanged += this.OnItemLargeImageChanged;
+			item.ControlChanged += this.OnItemControlChanged;
+			item.HiddenClick += this.OnItemHiddenClick;
+			
+			// Add the hidden menu item.
+			this.controlMenu.Items.Add(item.HiddenMenuItem);
+
+			// If this is the first item.
+			if (this.items.Count == 1)
+			{
+				// Select the item.
+				item.Select();
+				// Change the selected index.
+				this.selectedIndex = 0;
+			}
+			// Update the number of visible items.
+			this.VisibleItems = this.items.Count;
+		}
+
+		/// <summary>
+		/// An event handler called after an existing menu item has been removed.
+		/// </summary>
+		/// <param name="index">The index.</param>
+		/// <param name="item">The menu item.</param>
+		private void OnAfterItemRemoved(int index, SideMenuItem item)
+		{
+			// Remove the hidden event handler.
+			item.TextChanged -= this.OnItemTextChanged;
+			item.SmallImageChanged -= this.OnItemSmallImageChanged;
+			item.LargeImageChanged -= this.OnItemLargeImageChanged;
+			item.ControlChanged -= this.OnItemControlChanged;
+			item.HiddenClick -= this.OnItemHiddenClick;
+
+			// Remove the hidden menu item.
+			this.controlMenu.Items.Remove(item.HiddenMenuItem);
+
+			// If this is the selected item.
+			if (this.selectedIndex == index)
+			{
+				// If the item list is not empty.
+				if (this.items.Count > 0)
 				{
-					item.Dispose();
+					// Select the first item.
+					this.items[0].Select();
+					// Change the selected index.
+					this.selectedIndex = 0;
+				}
+				else
+				{
+					this.selectedIndex = null;
 				}
 			}
-			// Call the base class method.
-			base.Dispose(disposing);
+			// Update the number of visible items
+			this.VisibleItems = this.items.Count;
+		}
+
+		/// <summary>
+		/// An event handler called after a menu item has been set.
+		/// </summary>
+		/// <param name="index">The index.</param>
+		/// <param name="oldItem">The old menu item.</param>
+		/// <param name="newItem">The new menu item.</param>
+		private void OnAfterItemSet(int index, SideMenuItem oldItem, SideMenuItem newItem)
+		{
+			// Check that the arguments are not null.
+			if (null == oldItem) throw new ArgumentNullException("oldItem");
+			if (null == newItem) throw new ArgumentNullException("newItem");
+
+			// If the new and the old item are the same, do nothing.
+			if (oldItem == newItem) return;
+
+			// Remove the event handlers from the old item.
+			oldItem.TextChanged -= this.OnItemTextChanged;
+			oldItem.SmallImageChanged -= this.OnItemSmallImageChanged;
+			oldItem.LargeImageChanged -= this.OnItemLargeImageChanged;
+			oldItem.ControlChanged -= this.OnItemControlChanged;
+			oldItem.HiddenClick -= this.OnItemHiddenClick;
+			
+			// Add the event handlers to the new item.
+			newItem.TextChanged += this.OnItemTextChanged;
+			newItem.SmallImageChanged += this.OnItemSmallImageChanged;
+			newItem.LargeImageChanged += this.OnItemLargeImageChanged;
+			newItem.ControlChanged += this.OnItemControlChanged;
+			newItem.HiddenClick += this.OnItemHiddenClick;
+
+			// Remove the old hidden menu item from the items list.
+			this.controlMenu.Items.Remove(oldItem.HiddenMenuItem);
+			// Add the new hidden menu item to the items list.
+			this.controlMenu.Items.Add(newItem.HiddenMenuItem);
+
+			// Refresh the control.
+			this.OnRefresh();
 		}
 	}
 }

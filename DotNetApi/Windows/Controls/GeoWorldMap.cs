@@ -56,6 +56,7 @@ namespace DotNetApi.Windows.Controls
 
 		private bool gridMajor = true;
 		private bool gridMinor = true;
+		private bool showMarkers = true;
 		private Color colorGridMajor = Color.FromArgb(128, Color.Gray);
 		private Color colorGridMinor = Color.FromArgb(48, Color.Gray);
 
@@ -133,7 +134,22 @@ namespace DotNetApi.Windows.Controls
 				this.Refresh();
 			}
 		}
-
+		/// <summary>
+		/// Gets or sets whether the markers are displayed.
+		/// </summary>
+		public bool ShowMarkers
+		{
+			get { return this.showMarkers; }
+			set
+			{
+				// Save the old value.
+				bool old = this.showMarkers;
+				// Set the variable.
+				this.showMarkers = value;
+				// Call the event handler.
+				this.OnShowMarkersChanged(old, value);
+			}
+		}
 		/// <summary>
 		/// Gets the collection of geo markers.
 		/// </summary>
@@ -237,8 +253,8 @@ namespace DotNetApi.Windows.Controls
 		private Point GetCoordinatesPoint(PointF coordinates)
 		{
 			return new Point(
-				(int)(this.ClientRectangle.Left + GeoWorldMap.Normalize((coordinates.X / 360.0) + 0.5 + GeoWorldMap.deltaLong) * this.ClientRectangle.Width),
-				(int)(this.ClientRectangle.Top + GeoWorldMap.Normalize(0.5 - (coordinates.Y / 180.0) + GeoWorldMap.deltaLat) * this.ClientRectangle.Height)
+				(int)(this.ClientRectangle.Left + GeoWorldMap.Normalize((coordinates.X / 360.0) + 0.5 + GeoWorldMap.deltaLong) * this.ClientRectangle.Width) + 1,
+				(int)(this.ClientRectangle.Top + GeoWorldMap.Normalize(0.5 - (coordinates.Y / 180.0) + GeoWorldMap.deltaLat) * this.ClientRectangle.Height) + 1
 				);
 		}
 
@@ -404,6 +420,23 @@ namespace DotNetApi.Windows.Controls
 			if (oldEmphasis == newEmphasis) return;
 			// Refresh the control at the marker rectangle.
 			this.Invalidate(this.GetCoordinatesRectangle(marker.Coordinates, new Size(marker.Size.Width + 2, marker.Size.Height + 2)));
+		}
+
+		/// <summary>
+		/// An event handler called when the display of markers has changed.
+		/// </summary>
+		/// <param name="oldShow">The old value.</param>
+		/// <param name="newShow">The new value.</param>
+		private void OnShowMarkersChanged(bool oldShow, bool newShow)
+		{
+			// If the value has not changed, do nothing.
+			if (oldShow == newShow) return;
+			//  Invalidate the region for all markers.
+			foreach (GeoMarker marker in this.markers)
+			{
+				// Refresh the control at the marker rectangle.
+				this.Invalidate(this.GetCoordinatesRectangle(marker.Coordinates, new Size(marker.Size.Width + 2, marker.Size.Height + 2)));
+			}
 		}
 	}
 }
