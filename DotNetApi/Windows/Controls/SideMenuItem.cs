@@ -169,7 +169,7 @@ namespace DotNetApi.Windows.Controls
 			/// <param name="value">The value to validate.</param>
 			protected override void OnValidate(Object value)
 			{
-				if (value.GetType() != typeof(SideMenuItem))
+				if (!(value is SideMenuItem))
 					throw new ArgumentException("Value must be a progress navigator item.", "value");
 			}
 

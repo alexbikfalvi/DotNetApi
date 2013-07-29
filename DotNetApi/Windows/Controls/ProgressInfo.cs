@@ -182,6 +182,10 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		// Protected methods.
+		
+		/// <summary>
+		/// An event handler called when the progress level has changed.
+		/// </summary>
 		protected virtual void OnLevelChanged()
 		{
 			// Raise the event.

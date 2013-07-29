@@ -47,6 +47,8 @@ namespace YtAnalytics.Controls
 			this.delegateHideMessage = new HideNotificationEventHandler(this.HideMessage);
 		}
 
+		// Protected methods.
+
 		/// <summary>
 		/// Shows an alerting message on top of the control.
 		/// </summary>
@@ -86,6 +88,22 @@ namespace YtAnalytics.Controls
 				// Execute the task on the UI thread.
 				if (task != null) task();
 			}
+		}
+
+		/// <summary>
+		/// An event handler called when the control is being resized.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnResize(EventArgs e)
+		{
+			// If the notification box is visible.
+			if (this.notification.Visible)
+			{
+				// Reposition the notification box.
+				this.notification.Reposition();
+			}
+			// Call the base class method.
+			base.OnResize(e);
 		}
 	}
 }

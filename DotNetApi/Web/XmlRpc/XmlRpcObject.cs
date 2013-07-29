@@ -45,13 +45,13 @@ namespace DotNetApi.Web.XmlRpc
 				type = type.BaseType;
 			}
 			// Else, try the supported types.
-			if (value.GetType() == typeof(XElement)) return XmlRpcObject.Create(value as XElement);
-			else if (value.GetType() == typeof(int)) return new XmlRpcInt((int)value);
-			else if (value.GetType() == typeof(bool)) return new XmlRpcBoolean((bool)value);
-			else if (value.GetType() == typeof(string)) return new XmlRpcString(value as string);
-			else if (value.GetType() == typeof(double)) return new XmlRpcDouble((double)value);
-			else if (value.GetType() == typeof(DateTime)) return new XmlRpcDateTime((DateTime)value);
-			else if (value.GetType() == typeof(byte[])) return new XmlRpcBase64(value as byte[]);
+			if (value is XElement) return XmlRpcObject.Create(value as XElement);
+			else if (value is int) return new XmlRpcInt((int)value);
+			else if (value is bool) return new XmlRpcBoolean((bool)value);
+			else if (value is string) return new XmlRpcString(value as string);
+			else if (value is double) return new XmlRpcDouble((double)value);
+			else if (value is DateTime) return new XmlRpcDateTime((DateTime)value);
+			else if (value is byte[]) return new XmlRpcBase64(value as byte[]);
 			else if (value.GetType().BaseType == typeof(Array)) return new XmlRpcArray(value as Array);
 			else return new XmlRpcStruct(value);
 		}
@@ -100,7 +100,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		public int? AsInt
 		{
-			get { return (this.GetType() == typeof(XmlRpcInt)) ? (int?)(this as XmlRpcInt).Value : null; }
+			get { return this is XmlRpcInt ? (int?)(this as XmlRpcInt).Value : null; }
 		}
 
 		/// <summary>
@@ -108,7 +108,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		public double? AsDouble
 		{
-			get { return (this.GetType() == typeof(XmlRpcDouble)) ? (double?)(this as XmlRpcDouble).Value : null; }
+			get { return this is XmlRpcDouble ? (double?)(this as XmlRpcDouble).Value : null; }
 		}
 
 		/// <summary>
@@ -116,7 +116,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		public bool? AsBoolean
 		{
-			get { return (this.GetType() == typeof(XmlRpcBoolean)) ? (bool?)(this as XmlRpcBoolean).Value : null; }
+			get { return this is XmlRpcBoolean ? (bool?)(this as XmlRpcBoolean).Value : null; }
 		}
 
 		/// <summary>
@@ -124,7 +124,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		public string AsString
 		{
-			get { return (this.GetType() == typeof(XmlRpcString)) ? (this as XmlRpcString).Value : null; }
+			get { return this is XmlRpcString ? (this as XmlRpcString).Value : null; }
 		}
 	}
 }

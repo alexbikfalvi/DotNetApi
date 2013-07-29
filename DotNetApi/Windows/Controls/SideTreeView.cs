@@ -21,7 +21,7 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void SideTreeViewControlChangedEventHandler(Control sender, PanelControl control);
+	public delegate void SideTreeViewControlChangedEventHandler(Control sender, Control control);
 
 	/// <summary>
 	/// A control representing a side tree view.
@@ -40,6 +40,7 @@ namespace DotNetApi.Windows.Controls
 			this.ItemHeight = 20;
 			this.ShowLines = false;
 			this.ShowRootLines = false;
+			this.Visible = false;
 		}
 
 		// Public events.
@@ -52,6 +53,20 @@ namespace DotNetApi.Windows.Controls
 		// Public methods.
 
 		/// <summary>
+		/// Initializes the side control.
+		/// </summary>
+		public void Initialize()
+		{
+			// Expand all nodes.
+			this.ExpandAll();
+			// If there are nodes, select the first node.
+			if (this.Nodes.Count > 0)
+			{
+				this.SelectedNode = this.Nodes[0];
+			}
+		}
+
+		/// <summary>
 		/// Shows the current side control and activates its content.
 		/// </summary>
 		public void ShowSideControl()
@@ -60,8 +75,14 @@ namespace DotNetApi.Windows.Controls
 			base.Show();
 			// Select this control.
 			base.Select();
-			// Call the node selection changed event handler.
-			this.OnNodeSelectionChanged(this.SelectedNode);
+			// If there exists a selected node.
+			if (null != this.SelectedNode)
+			{
+				// Get the control tag for the selected tree node.
+				Control control = this.SelectedNode.Tag as Control;
+				// Raise a control changed event for this control.
+				if (null != this.ControlChanged) this.ControlChanged(this, control);
+			}
 		}
 
 		/// <summary>
@@ -96,9 +117,13 @@ namespace DotNetApi.Windows.Controls
 			// If the selected node is null, do nothing.
 			if (null == node) return;
 			// Get the control tag for the selected tree node.
-			PanelControl control = node.Tag as PanelControl;
-			// Raise a control changed event for this control.
-			if (null != this.ControlChanged) this.ControlChanged(this, control);
+			Control control = node.Tag as Control;
+			// If this control is visible.
+			if (this.Visible)
+			{
+				// Raise a control changed event for this control.
+				if (null != this.ControlChanged) this.ControlChanged(this, control);
+			}
 		}
 	}
 }

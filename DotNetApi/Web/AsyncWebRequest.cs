@@ -94,7 +94,7 @@ namespace DotNetApi.Web
 		}
 
 		/// <summary>
-		/// Completes the asynchronous operation and returnes the received data as a string.
+		/// Completes the asynchronous operation and returns the asynchronous web result.
 		/// </summary>
 		/// <param name="result">The asynchronous result.</param>
 		/// <returns>The asynchronous web result.</returns>
@@ -102,6 +102,45 @@ namespace DotNetApi.Web
 		{
 			// Get the state of the asynchronous operation.
 			AsyncWebResult asyncState = (AsyncWebResult)result;
+
+			// If an exception was thrown during the execution of the asynchronous operation.
+			if (asyncState.Exception != null)
+			{
+				// Throw the exception.
+				throw asyncState.Exception;
+			}
+
+			// Return the web result.
+			return asyncState;
+		}
+
+		/// <summary>
+		/// Completes the asynchronous operation and returns the asynchrnous web result and the received data,
+		/// if any, as a string using the response encoding.
+		/// </summary>
+		/// <param name="result">The asynchronous result.</param>
+		/// <param name="data">The received data as a string using the response encoding.</param>
+		/// <returns>The asynchronous web result.</returns>
+		public AsyncWebResult End(IAsyncResult result, out string data)
+		{
+			// Get the state of the asynchronous operation.
+			AsyncWebResult asyncState = (AsyncWebResult)result;
+
+			// If the response is not null.
+			if (asyncState.Response != null)
+			{
+				// Get the encoding
+				Encoding encoding = asyncState.Response.CharacterSet != null ?
+					Encoding.GetEncoding(asyncState.Response.CharacterSet) : Encoding.UTF8;
+
+				// Get the string data.
+				data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : null;
+			}
+			else
+			{
+				// Set the data to null.
+				data = null;
+			}
 
 			// If an exception was thrown during the execution of the asynchronous operation.
 			if (asyncState.Exception != null)
@@ -133,15 +172,21 @@ namespace DotNetApi.Web
 				throw asyncState.Exception;
 			}
 
-			Encoding encoding = Encoding.GetEncoding(asyncState.Response.CharacterSet);
+			// Get the encoding
+			Encoding encoding = asyncState.Response.CharacterSet != null ?
+				Encoding.GetEncoding(asyncState.Response.CharacterSet) : Encoding.UTF8;
 
 			// Get the string data.
-			string data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : string.Empty;
+			string data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : null;
 
 			// Return the converted data.
 			return func.GetResult(data);
 		}
 
+		/// <summary>
+		/// Cancels the asynchronous web request.
+		/// </summary>
+		/// <param name="result">The result of the asynchronous operation to cancel.</param>
 		public void Cancel(IAsyncResult result)
 		{
 			// Get the state of the asynchronous operation.
@@ -151,6 +196,10 @@ namespace DotNetApi.Web
 			ThreadPool.QueueUserWorkItem(new WaitCallback(this.CancelAsync), asyncState);
 		}
 
+		/// <summary>
+		/// Cancels the asynchronous web request.
+		/// </summary>
+		/// <param name="state">The result of the asynchronous operation to cancel.</param>
 		protected void CancelAsync(object state)
 		{
 			AsyncWebResult asyncState = state as AsyncWebResult;
@@ -159,6 +208,11 @@ namespace DotNetApi.Web
 			asyncState.Request.Abort();
 		}
 
+		/// <summary>
+		/// Begins an asynchronous web request.
+		/// </summary>
+		/// <param name="asyncState">The asynchronous web state.</param>
+		/// <returns>The result of the asynchronous operation.</returns>
 		protected IAsyncResult BeginAsyncRequest(AsyncWebResult asyncState)
 		{
 			// Use the system thread pool to begin the asynchronous request on a worker thread.
@@ -167,6 +221,10 @@ namespace DotNetApi.Web
 			return asyncState;
 		}
 
+		/// <summary>
+		/// Begins a web request for the specified asynchronous state.
+		/// </summary>
+		/// <param name="state">The asynchronous state.</param>
 		protected void BeginWebRequest(object state)
 		{
 			AsyncWebResult asyncState = state as AsyncWebResult;
@@ -186,6 +244,10 @@ namespace DotNetApi.Web
 			asyncState.Request.BeginGetResponse(this.EndWebRequest, asyncState);
 		}
 
+		/// <summary>
+		/// Ends a web request for the specified asynchronous operation result.
+		/// </summary>
+		/// <param name="result">The result of the asynchronous operation.</param>
 		protected void EndWebRequest(IAsyncResult result)
 		{
 			// Get the state of the asynchronous operation
@@ -205,13 +267,23 @@ namespace DotNetApi.Web
 				}
 
 				// Complete the web request and get the result.
-				asyncState.Response = (HttpWebResponse)asyncState.Request.EndGetResponse(result);
+				try
+				{
+					// Try get the normal response.
+					asyncState.Response = (HttpWebResponse)asyncState.Request.EndGetResponse(result);
+				}
+				catch (WebException exception)
+				{
+					// For a web exception, use the exception response.
+					asyncState.Response = (HttpWebResponse)exception.Response;
+					// Set the exception.
+					asyncState.Exception = exception;
+				}
+
 				// Get the stream corresponding to the web response.
 				asyncState.Stream = asyncState.Response.GetResponseStream();
 				// Begin reading for the returned data.
 				this.BeginStreamRead(asyncState);
-				// Complete the asynchronous operation.
-				asyncState.Complete();
 			}
 			catch (Exception exception)
 			{
@@ -224,12 +296,21 @@ namespace DotNetApi.Web
 			}
 		}
 
+		/// <summary>
+		/// Begins a read from the data stream of the specified asynchronous request.
+		/// </summary>
+		/// <param name="asyncState">The state of the asynchronous operation.</param>
+		/// <returns>The result of the asynchronous read operation.</returns>
 		protected IAsyncResult BeginStreamRead(AsyncWebResult asyncState)
 		{
 			// Begin the read operation.
 			return asyncState.Stream.BeginRead(asyncState.Buffer, 0, AsyncWebResult.BUFFER_SIZE, this.EndStreamRead, asyncState);
 		}
 
+		/// <summary>
+		/// Ends a read from the data stream of the specified asynchronous request.
+		/// </summary>
+		/// <param name="result">The result of the asynchronous operation.</param>
 		protected void EndStreamRead(IAsyncResult result)
 		{
 			// Get the state of the asynchronous operation
@@ -261,6 +342,8 @@ namespace DotNetApi.Web
 				}
 				else
 				{
+					// Close the response stream.
+					asyncState.Response.Close();
 					// Otherwise, signal that the asynchronous operation has completed.
 					asyncState.Complete();
 					// Call the callback function.
@@ -269,6 +352,8 @@ namespace DotNetApi.Web
 			}
 			catch (Exception exception)
 			{
+				// Close the response stream.
+				asyncState.Response.Close();
 				// If an exception occured, set the exception.
 				asyncState.Exception = exception;
 				// Complete the asynchronous operation.

@@ -55,23 +55,6 @@ namespace DotNetApiTest
 			this.textBox.AppendText(hex.ToString());
 			 * 
 			 */
-
-			this.request.Begin(
-				new Uri("https://www.planet-lab.org/PLCAPI/"),
-				"system.sslistMethods", null,
-				//"system.methodHelp", new object[] { "DeleteTagType" },
-				this.Callback);
-		}
-
-		private void Callback(AsyncRequestResult result)
-		{
-			if (this.InvokeRequired) this.Invoke(new AsyncRequestCallback(this.Callback), new object[] { result });
-			else
-			{
-				object state;
-				XmlRpcResponse res = this.request.End(result, out state);
-				this.textBox.AppendText(res.Xml);
-			}
 		}
 	}
 }

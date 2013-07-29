@@ -28,8 +28,15 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class SecureTextBox : TextBox
 	{
-		private SecureString secureText = new SecureString();
+		private const int WM_CUT = 0x300;
+		private const int WM_COPY = 0x301;
+		private const int WM_PASTE = 0x302;
+		private const int WM_CLEAR = 0x303;
+		private const int WM_UNDO = 0x304;
+
 		private static char passwordChar = '●';
+
+		private SecureString secureText = new SecureString();
 		private bool keyProcessed = false;
 
 		/// <summary>
@@ -37,7 +44,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public SecureTextBox()
 		{
-			this.UseSystemPasswordChar = true;
+			//this.UseSystemPasswordChar = true;
 		}
 
 		// Public properties.
@@ -135,20 +142,9 @@ namespace DotNetApi.Windows.Controls
 					// Add the type character to the secure string instance.
 
 					// If there are selected characters, remove the selected characters.
-					for (int index = 0; index < this.SelectionLength; index++)
-					{
-						this.secureText.RemoveAt(this.SelectionStart);
-					}
-
+					this.secureText.Remove(this.SelectionStart, this.SelectionLength);
 					// Add the new character at the cursor position in the secure text.
-					if (position == this.secureText.Length)
-					{
-						this.secureText.AppendChar(charCode);
-					}
-					else
-					{
-						this.secureText.InsertAt(position, charCode);
-					}
+					this.secureText.InsertAt(position, charCode);
 					// Update the displayed text.
 					base.Text = new string(SecureTextBox.passwordChar, this.secureText.Length);
 					// Increment the caret position.
@@ -173,10 +169,7 @@ namespace DotNetApi.Windows.Controls
 							else if (this.SelectionLength > 0)
 							{
 								// Remove the selection.
-								for (int index = 0; index < this.SelectionLength; index++)
-								{
-									this.secureText.RemoveAt(this.SelectionStart);
-								}
+								this.secureText.Remove(this.SelectionStart, this.SelectionLength);
 							}
 							// Update the text.
 							base.Text = new string(SecureTextBox.passwordChar, this.secureText.Length);
@@ -211,10 +204,7 @@ namespace DotNetApi.Windows.Controls
 				// If there is selecte text, remove the selected text.
 				if (this.SelectionLength > 0)
 				{
-					for (int index = 0; index < this.SelectionLength; index++)
-					{
-						this.secureText.RemoveAt(this.SelectionStart);
-					}
+					this.secureText.Remove(this.SelectionStart, this.SelectionLength);
 				}
 				else if (this.SelectionStart < this.secureText.Length)
 				{
@@ -234,6 +224,28 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Processes all window messages for this control.
+		/// </summary>
+		/// <param name="m">The window message.</param>
+		protected override void WndProc(ref Message m)
+		{
+			switch (m.Msg)
+			{
+				case WM_PASTE:
+					// Paste the text from the clipboard.
+					if (Clipboard.ContainsText())
+					{
+						this.OnPaste(Clipboard.GetText());
+					}
+					break;
+				default:
+					// Call the base class function.
+					base.WndProc(ref m);
+					break;
+			}
+		}
+
+		/// <summary>
 		/// An event handler called when the text of the secure text box has been set.
 		/// </summary>
 		/// <param name="text">The new text.</param>
@@ -249,13 +261,34 @@ namespace DotNetApi.Windows.Controls
 			}
 			else
 			{
-				// Dispose the current secure text.
+				// Dispose the previous secure text.
 				this.secureText.Dispose();
-				// Set the new secure text.
-				this.secureText = text;
+				// Set the new secure text to a read-write copy of the secure text.
+				this.secureText = text.Copy();
 				// Update the displayed text.
 				base.Text = new string(SecureTextBox.passwordChar, this.secureText.Length);
 			}
+		}
+
+		/// <summary>
+		/// Pastes the specified text into the secure text box control.
+		/// </summary>
+		/// <param name="text">The text to paste.</param>
+		protected virtual void OnPaste(string text)
+		{
+			// Get the caret position.
+			int position = this.SelectionStart;
+
+			// If there are selected characters, remove the selected characters.
+			this.secureText.Remove(this.SelectionStart, this.SelectionLength);
+			// Add the new characters at the cursor position in the secure text.
+			this.secureText.InsertAt(position, text);
+			// Update the displayed text.
+			base.Text = new string(SecureTextBox.passwordChar, this.secureText.Length);
+			// Set the selected length to zero.
+			this.SelectionLength = 0;
+			// Set the caret position at the previous position plus the length of the pasted text.
+			this.SelectionStart = position + text.Length;
 		}
 	}
 }

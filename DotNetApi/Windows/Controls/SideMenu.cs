@@ -33,7 +33,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a side menu.
 	/// </summary>
-	public class SideMenu : Panel
+	public class SideMenu : ContainerControl
 	{
 		// Private members
 		private SideMenuItem.Collection items = new SideMenuItem.Collection();
@@ -115,13 +115,6 @@ namespace DotNetApi.Windows.Controls
 			this.items.AfterItemSet += this.OnAfterItemSet;
 		}
 
-		// Public events.
-
-		/// <summary>
-		/// An event raised when the number of visible, minimized or hidden items has changed.
-		/// </summary>
-		public event SideMenuEventHandler ItemVisibilityChanged;
-
 		// Public properties.
 
 		/// <summary>
@@ -167,7 +160,11 @@ namespace DotNetApi.Windows.Controls
 		/// Get the index of the selected menu item.
 		/// </summary>
 		[DisplayName("Selected index"), Description("The index of the selected menu item, or null if no item is selected."), Category("Menu")]
-		public int? SelectedIndex { get { return this.selectedIndex; } }
+		public int? SelectedIndex
+		{
+			get { return this.selectedIndex; }
+			set { this.OnSetSelectedIndex(value); }
+		}
 		/// <summary>
 		/// Gets or sets the current selected item.
 		/// </summary>
@@ -552,31 +549,46 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// An event handler called when the selected index is set.
+		/// </summary>
+		/// <param name="index">The selected index.</param>
+		protected virtual void OnSetSelectedIndex(int? index)
+		{
+			// If the selected index is greater than the number of items, set the selected index to null.
+			if (index > this.items.Count) index = null;
+			// If the selected index is less than zero, set the selected index to null.
+			if (index < 0) index = null;
+			// If the current selected index has value.
+			if (this.selectedIndex.HasValue)
+			{
+				// Deselect the menu item at the selected index.
+				this.items[this.selectedIndex.Value].Deselect();
+			}
+			// Set the selected index to the new index.
+			this.selectedIndex = index;
+			// If the selected index has a value.
+			if (this.selectedIndex.HasValue)
+			{
+				// Select the menu item at the selected index.
+				this.items[this.selectedIndex.Value].Select();
+			}
+			// Refresh the control.
+			this.OnRefresh();
+		}
+
+		/// <summary>
 		/// Changes the current selected item.
 		/// </summary>
 		/// <param name="item">The new selected item.</param>
 		protected virtual void OnSetSelectedItem(SideMenuItem item)
 		{
-			// Change the selected index, and if the selected index is not -1.
-			int index;
-			if (-1 != (index = this.items.IndexOf(item)))
+			// Get the index of the specified item.
+			int index = this.items.IndexOf(item);
+			// If the index is not negative, select the specified index.
+			if (index >= 0)
 			{
-				// If the index is different from the selected index.
-				if (index != this.selectedIndex)
-				{
-					// Change the selected index.
-					this.selectedIndex = index;
-					// Select the menu item.
-					item.Select();
-				}
+				this.OnSetSelectedIndex(index);
 			}
-			else
-			{
-				// Set the selected index to null.
-				this.selectedIndex = null;
-			}
-			// Refresh the control.
-			this.OnRefresh();
 		}
 
 		/// <summary>
@@ -604,8 +616,6 @@ namespace DotNetApi.Windows.Controls
 			{
 				//  Refresh the control.
 				this.OnRefresh();
-				// Call the item visibility changed event handler.
-				this.OnItemsVisibilityChanged();
 			}
 
 			// Update the show more or fewer buttons state.
@@ -640,8 +650,6 @@ namespace DotNetApi.Windows.Controls
 			{
 				// Refresh the control.
 				this.OnRefresh();
-				// Call the item visibility changed event handler.
-				this.OnItemsVisibilityChanged();
 			}
 
 			return true;
@@ -669,8 +677,6 @@ namespace DotNetApi.Windows.Controls
 
 			// Refresh the control.
 			this.OnRefresh();
-			// Call the item visibility changed event handler.
-			this.OnItemsVisibilityChanged();
 
 			return true;
 		}
@@ -1228,15 +1234,6 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// An event handler called when the item visibility has changed.
-		/// </summary>
-		private void OnItemsVisibilityChanged()
-		{
-			// Raise the item visibility event.
-			if (null != this.ItemVisibilityChanged) this.ItemVisibilityChanged(this);
-		}
-
-		/// <summary>
 		/// An event handler called before the menu item collection has been cleared.
 		/// </summary>
 		private void OnBeforeItemsCleared()
@@ -1263,8 +1260,6 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Update the number of visible items.
 			this.VisibleItems = this.items.Count;
-			// Call the item visibility changed event handler.
-			this.OnItemsVisibilityChanged();
 			// Change the selected index.
 			this.selectedIndex = null;
 			// Refresh the control.

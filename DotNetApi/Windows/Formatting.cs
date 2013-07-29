@@ -26,46 +26,49 @@ namespace DotNetApi.Windows
 	/// <summary>
 	/// Formats a control to the default configuration.
 	/// </summary>
-	public class Formatting
+	public static class Formatting
 	{
-		private bool fontChange = false;
-		private FontFamily fontDefaultFamily = null;
+		private static bool fontChange = false;
+		private static FontFamily fontDefaultFamily = null;
 		static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
-		public Formatting()
+		static Formatting()
 		{
 			// Check the major version of the operating system.
 			if (Environment.OSVersion.Version.Major == 5)
 			{
 				// Windows 2000 (5.0), XP (5.1) and Server 2003 (5.2): the default font is Tahoma.
-				this.fontDefaultFamily = SystemFonts.DialogFont.FontFamily;
-				this.fontChange = true;
+				Formatting.fontDefaultFamily = SystemFonts.DialogFont.FontFamily;
+				Formatting.fontChange = true;
 			}
 			else if (Environment.OSVersion.Version.Major >= 6)
 			{
 				// Windows Vista and above: the default font is SegoeUI.
-				this.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
-				this.fontChange = true;
+				Formatting.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
+				Formatting.fontChange = true;
 			}
 		}
 
-		public void SetFont(Control control)
+		public static void SetFont(Control control)
 		{
 			// If the control is null, exit.
 			if (null == control) return;
 			// If the font cannot be changed, return.
-			if (!this.fontChange) return;
-
+			if (!Formatting.fontChange) return;
+			// Suspend the control layout.
+			control.SuspendLayout();
 			// For all child controls.
 			foreach (Control child in control.Controls)
 			{
 				// If the child font is in the replace list.
 				if (Formatting.fontReplaceList.IndexOf(child.Font.Name) > -1)
 				{
-					this.SetFont(child);
-					child.Font = new Font(this.fontDefaultFamily, child.Font.Size, child.Font.Style);
+					Formatting.SetFont(child);
+					child.Font = new Font(Formatting.fontDefaultFamily, child.Font.Size, child.Font.Style);
 				}
 			}
+			// Resume the control layout.
+			control.ResumeLayout();
 		}
 	}
 }

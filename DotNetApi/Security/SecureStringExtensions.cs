@@ -19,9 +19,16 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 namespace DotNetApi.Security
 {
+	/// <summary>
+	/// A delegate for executing 
+	/// </summary>
+	/// <param name="data"></param>
+	public delegate void SecureByteArrayCall(byte[] data);
+
 	/// <summary>
 	/// A class with extensions for secure string objects.
 	/// </summary>
@@ -50,7 +57,7 @@ namespace DotNetApi.Security
 				// Compare the two buffers.
 				unsafe
 				{
-					for (Char* ptr1 = (Char*)ptrLeft.ToPointer(), ptr2 = (Char*)ptrRight.ToPointer(); 
+					for (char* ptr1 = (char*)ptrLeft.ToPointer(), ptr2 = (char*)ptrRight.ToPointer(); 
 						*ptr1 != 0 && *ptr2 != 0;
 						ptr1++, ptr2++)
 					{
@@ -84,6 +91,34 @@ namespace DotNetApi.Security
 		public static bool IsEmpty(this SecureString secureString)
 		{
 			return secureString.Length == 0;
+		}
+
+		/// <summary>
+		/// Inserts the specified string text at a position inside the secure string.
+		/// </summary>
+		/// <param name="secureString">The secure string.</param>
+		/// <param name="index">The index.</param>
+		/// <param name="text">The text to insert.</param>
+		public static void InsertAt(this SecureString secureString, int index, string text)
+		{
+			for (int idx = 0; idx < text.Length; idx++)
+			{
+				secureString.InsertAt(index + idx, text[idx]);
+			}
+		}
+
+		/// <summary>
+		/// Removes the specified number of characters from the secure string, starting at the given index..
+		/// </summary>
+		/// <param name="secureString">The secure string.</param>
+		/// <param name="index">The index from where to remove characters.</param>
+		/// <param name="count">The number of characters to remove.</param>
+		public static void Remove(this SecureString secureString, int index, int count)
+		{
+			for (int idx = 0; idx < count; idx++)
+			{
+				secureString.RemoveAt(index);
+			}
 		}
 
 		/// <summary>
@@ -139,5 +174,62 @@ namespace DotNetApi.Security
 				}
 			}
 		}
+
+		/// <summary>
+		/// Converts the secure string into an unsecure string.
+		/// </summary>
+		/// <param name="secureString">The secure string to convert.</param>
+		/// <returns>The unsecure string.</returns>
+		public static byte[] ConvertToUnsecureByteArray(this SecureString secureString, Encoding encoding)
+		{
+			// Check the argument is not null.
+			if (null == secureString) throw new ArgumentNullException("secureString");
+
+			// Create an unmanaged string to store the secure string data.
+			IntPtr unmanagedString = IntPtr.Zero;
+
+			try
+			{
+				// Get the secure string data into the unmanaged buffer.
+				unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(secureString);
+				// Enter an unsafe context. 
+				unsafe
+				{
+					// Get a pointer to the null terminated unmanaged string.
+					char* chars = (char*)unmanagedString.ToPointer();
+					// Get the length of the null terminated unmanaged string.
+					int charCount = lstrlen(chars);
+					// Get the number of bytes needed for the byte array.
+					int byteCount = encoding.GetByteCount(chars, secureString.Length);
+					// Create a byte array to contain the unsecure data.
+					byte[] bytes = new byte[byteCount];
+					// If the byte count is greater than zero.
+					if (byteCount > 0)
+					{
+						// Use a fixed pointer to the byte array.
+						fixed (byte* ptr = bytes)
+						{
+							// Encode the string characters into the byte array.
+							encoding.GetBytes(chars, charCount, ptr, byteCount);
+						}
+					}
+					// Return the byte array.
+					return bytes;
+				}
+			}
+			finally
+			{
+				// Release the unmanaged buffer.
+				Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
+			}
+		}
+
+		/// <summary>
+		/// Use the external Windows function to get the length of a Unicode zero-terminated string.
+		/// </summary>
+		/// <param name="str">The zero-terminated Unicode string.</param>
+		/// <returns>The string length.</returns>
+		[DllImport("kernel32.dll", CharSet=CharSet.Unicode)]
+		static extern unsafe int lstrlen(char* str);
 	}
 }

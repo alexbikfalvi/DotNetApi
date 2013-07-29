@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -43,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncResult.cs" />
+    <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
     <Compile Include="Security\SecureStringExtensions.cs" />
     <Compile Include="Web\AsyncWebBuffer.cs" />
@@ -98,9 +100,6 @@
     <Compile Include="Windows\Controls\NotificationControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\PanelControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Windows\Controls\ProgressBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -145,6 +144,8 @@
     <Compile Include="Windows\Controls\ToolStripDropDownCheckedList.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Xml\XmlFilter.cs" />
+    <Compile Include="Xml\XmlParse.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +199,7 @@
   <ItemGroup>
     <None Include="Resources\WorldMap4000x2024.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

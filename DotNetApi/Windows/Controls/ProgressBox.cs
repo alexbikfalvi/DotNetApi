@@ -32,11 +32,17 @@ namespace DotNetApi.Windows.Controls
 		private int progressHeight = 12;
 		private int spacing = 4;
 		private Size legendSize = new Size(12, 12);
-		private string text = null;
+		private Color colorProgressBorder = ProfessionalColors.MenuBorder;
+		private Color colorProgressDefault = SystemColors.ControlLightLight;
+		
+		private Size textSize;
 
-		private Rectangle rectangleBounds;
-		private Rectangle rectangleBorder;
-		private Rectangle rectangleProgress;
+		private Rectangle controlBounds;
+		private Rectangle controlBorder;
+		private Rectangle progressBounds;
+		private Rectangle progressBorder;
+		private Rectangle contentBounds;
+		private Rectangle textBounds;
 
 		/// <summary>
 		/// Creates a new progress box control instance.
@@ -84,6 +90,22 @@ namespace DotNetApi.Windows.Controls
 				this.OnProgressHeightSet(progressHeight, value);
 			}
 		}
+		/// <summary>
+		/// Gets or sets the progress bar border color.
+		/// </summary>
+		public Color ColorProgressBorder
+		{
+			get { return this.colorProgressBorder; }
+			set { this.colorProgressBorder = value; }
+		}
+		/// <summary>
+		/// Gets or sets the default progress color.
+		/// </summary>
+		public Color ColorProgressDefault
+		{
+			get { return this.colorProgressDefault; }
+			set { this.colorProgressDefault = value; }
+		}
 
 		// Protected methods.
 
@@ -94,6 +116,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="newProgress">The new progress info.</param>
 		protected virtual void OnProgressSet(ProgressInfo oldProgress, ProgressInfo newProgress)
 		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Remove the event handler for the old progress info.
 			if (null != oldProgress)
 			{
@@ -112,6 +136,14 @@ namespace DotNetApi.Windows.Controls
 				newProgress.LegendSet += this.OnProgressLegendSet;
 				newProgress.LegendChanged += this.OnProgressLegendChanged;
 			}
+			// Update the progress.
+			this.OnUpdateProgress();
+			// Update the legend.
+			this.OnUpdateLegend();
+			// Update the geometric measurements.
+			this.OnUpdateGeometrics();
+			// Refresh the control.
+			this.Invalidate(this.controlBorder);
 		}
 
 		/// <summary>
@@ -152,6 +184,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="newLegend">The new legend.</param>
 		protected virtual void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
 		{
+			// If the old legend is the same as the new legend, do nothing.
+			if (oldLegend == newLegend) return;
 		}
 
 		/// <summary>
@@ -181,9 +215,19 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnPaint(e);
 
+			// Create the drawing brush.
 			using (SolidBrush brush = new SolidBrush(Color.Black))
 			{
-				e.Graphics.FillRectangle(brush, this.rectangleBounds);
+				// Create the drawing pen.
+				using (Pen pen = new Pen(this.colorProgressBorder))
+				{
+					// If the progress is not null.
+					if (null != this.progress)
+					{
+						// Draw the progress bar border.
+						e.Graphics.DrawRectangle(pen, this.progressBorder);
+					}
+				}
 			}
 		}
 
@@ -193,10 +237,14 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="e">The event arguments.</param>
 		protected override void OnResize(EventArgs e)
 		{
-			// Call the base class method.
-			base.OnResize(e);
+			// Update the progress.
+			this.OnUpdateProgress();
+			// Update the legend.
+			this.OnUpdateLegend();
 			// Update the geometry of the control.
 			this.OnUpdateGeometrics();
+			// Call the base class method.
+			base.OnResize(e);
 		}
 
 		/// <summary>
@@ -205,10 +253,14 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="e"></param>
 		protected override void OnPaddingChanged(EventArgs e)
 		{
-			// Call the base class method.
-			base.OnPaddingChanged(e);
+			// Update the progress.
+			this.OnUpdateProgress();
+			// Update the legend.
+			this.OnUpdateLegend();
 			// Update the geometry of the control.
 			this.OnUpdateGeometrics();
+			// Call the base class method.
+			base.OnPaddingChanged(e);
 		}
 
 		/// <summary>
@@ -217,6 +269,10 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="e">The event arguments.</param>
 		protected override void OnTextChanged(EventArgs e)
 		{
+			// Update the text width.
+			this.textSize = TextRenderer.MeasureText(this.Text, this.Font);
+			// Update the geometry of the control.
+			this.OnUpdateGeometrics();
 			// Call the base class method.
 			base.OnTextChanged(e);
 		}
@@ -225,17 +281,71 @@ namespace DotNetApi.Windows.Controls
 		// Private methods.
 
 		/// <summary>
+		/// An event handler called when the progress information is being updated.
+		/// </summary>
+		private void OnUpdateProgress()
+		{
+		}
+
+		/// <summary>
+		/// An event handler called when the progress legend is being updated.
+		/// </summary>
+		private void OnUpdateLegend()
+		{
+		}
+
+		/// <summary>
 		/// A method called to update the geometric characteristics of the progress control.
 		/// </summary>
 		private void OnUpdateGeometrics()
 		{
-			// Update the geometry of the control.
-			this.rectangleBounds = this.ClientRectangle;
-			this.rectangleBorder = new Rectangle(
-				this.rectangleBounds.X + this.Padding.Left,
-				this.rectangleBounds.Y + this.Padding.Top,
-				this.rectangleBounds.Width - this.Padding.Top - this.Padding.Bottom,
-				this.rectangleBounds.Height - this.Padding.Left - this.Padding.Right);
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
+			
+			// If the control bounds have changed.
+			if (this.controlBounds != this.ClientRectangle)
+			{
+				// Compute the control bounds.
+				this.controlBounds = this.ClientRectangle;
+				// Compute the control border.
+				this.controlBorder = new Rectangle(
+					this.controlBounds.X + this.Padding.Left,
+					this.controlBounds.Y + this.Padding.Top,
+					this.controlBounds.Width - this.Padding.Top - this.Padding.Bottom,
+					this.controlBounds.Height - this.Padding.Left - this.Padding.Right);
+				// Compute the progress border.
+				this.progressBorder = new Rectangle(
+					this.controlBorder.X,
+					this.controlBorder.Bottom - this.progressHeight,
+					this.controlBorder.Width,
+					this.progressHeight);
+				// Compute the progress bounds.
+				this.progressBounds = new Rectangle(
+					this.progressBorder.X + 1,
+					this.progressBorder.Y + 1,
+					this.progressBorder.Width - 1,
+					this.progressBorder.Height - 1);
+				// Compute the content bounds.
+				this.contentBounds = new Rectangle(
+					this.controlBorder.X,
+					this.controlBorder.Y,
+					this.controlBorder.Width,
+					this.progressBorder.Top - this.controlBorder.Y);
+			}
+
+			// Compute the text bounds.
+			this.textBounds = new Rectangle(
+				this.contentBounds.X,
+				this.contentBounds.Y,
+				this.textSize.Width,
+				this.controlBounds.Height);
+		}
+
+		/// <summary>
+		/// A method called to update the geometrics of the progress legend.
+		/// </summary>
+		private void OnUpdateLegendGeometrics()
+		{
 		}
 	}
 }

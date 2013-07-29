@@ -122,7 +122,7 @@ namespace DotNetApi.Windows.Controls
 					// Update the items progress.
 					this.OnUpdateItemsProgress();
 					// Update the item measurements.
-					this.OnUpdateMeasurements();
+					this.OnUpdateGeometrics();
 					// Set the pending event to false.
 					this.eventProgressCountChanged = false;
 				}
@@ -327,7 +327,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the item legend.
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box.
 			this.Refresh();
 		}
@@ -428,7 +428,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the items legend.
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box.
 			this.Refresh();
 		}
@@ -457,7 +457,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the items legend.
 			this.OnUpdateItemsLegend();
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box.
 			this.Refresh();
 		}
@@ -473,7 +473,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the item text.
 			this.OnUpdateItemText(item);
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Update the geometrics of the specified item.
 			this.OnUpdateItemGeometrics(item, this.GetItemRectangle(this.Items.IndexOf(item)));
 			// Refresh the list box item.
@@ -507,7 +507,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the item legend.
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box item.
 			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
@@ -576,7 +576,7 @@ namespace DotNetApi.Windows.Controls
 				// Update the item progress.
 				this.OnUpdateItemProgress(item);
 				// Update the item measurements.
-				this.OnUpdateMeasurements();
+				this.OnUpdateGeometrics();
 				// Refresh the list box item.
 				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 			}
@@ -596,7 +596,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the item legend.
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box item.
 			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
@@ -614,7 +614,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the item legend.
 			this.OnUpdateItemLegend(item);
 			// Update the item measurements.
-			this.OnUpdateMeasurements();
+			this.OnUpdateGeometrics();
 			// Refresh the list box item.
 			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
 		}
@@ -819,7 +819,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when updating the item measurements.
 		/// </summary>
-		private void OnUpdateMeasurements()
+		private void OnUpdateGeometrics()
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
@@ -854,50 +854,48 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
+
 			// Only updated the geometrics if the bounds are different.
 			if (bounds == item.geometrics.bounds)
 			{
-				// If the legend is invalid, update the legend geometric characteristics.
-				if (!item.geometrics.validLegend) this.OnUpdateItemLegendGeometrics(item);
-				return;
+				// Save the bounds.
+				item.geometrics.bounds = bounds;
+
+				// Compute the item bounds.
+				item.geometrics.itemBounds = new Rectangle(
+					item.geometrics.bounds.X + this.itemPadding.Left,
+					item.geometrics.bounds.Y + this.itemPadding.Top,
+					item.geometrics.bounds.Width - this.itemPadding.Left - this.itemPadding.Right - 1,
+					item.geometrics.bounds.Height - this.itemPadding.Top - this.itemPadding.Bottom - 1);
+				// Compute the progress border.
+				item.geometrics.progressBorder = new Rectangle(
+					item.geometrics.itemBounds.X,
+					item.geometrics.itemBounds.Bottom - this.progressHeight,
+					item.geometrics.itemBounds.Width,
+					this.progressHeight);
+				// Compute the progress bounds.
+				item.geometrics.progressBounds = new Rectangle(
+					item.geometrics.progressBorder.X + 1,
+					item.geometrics.progressBorder.Y + 1,
+					item.geometrics.progressBorder.Width - 1,
+					item.geometrics.progressBorder.Height - 1);
+				// Compute the content bounds.
+				item.geometrics.contentBounds = new Rectangle(
+					item.geometrics.itemBounds.X,
+					item.geometrics.itemBounds.Y,
+					item.geometrics.itemBounds.Width,
+					item.geometrics.progressBorder.Top - item.geometrics.itemBounds.Y);
 			}
 
-			// Save the bounds.
-			item.geometrics.bounds = bounds;
-
-			// Compute the item bounds.
-			item.geometrics.itemBounds = new Rectangle(
-				item.geometrics.bounds.X + this.itemPadding.Left,
-				item.geometrics.bounds.Y + this.itemPadding.Top,
-				item.geometrics.bounds.Width - this.itemPadding.Left - this.itemPadding.Right - 1,
-				item.geometrics.bounds.Height - this.itemPadding.Top - this.itemPadding.Bottom - 1);
-			// Compute the progress border.
-			item.geometrics.progressBorder = new Rectangle(
-				item.geometrics.itemBounds.X,
-				item.geometrics.itemBounds.Bottom - this.progressHeight,
-				item.geometrics.itemBounds.Width,
-				this.progressHeight);
-			// Compute the progress bounds.
-			item.geometrics.progressBounds = new Rectangle(
-				item.geometrics.progressBorder.X + 1,
-				item.geometrics.progressBorder.Y + 1,
-				item.geometrics.progressBorder.Width - 1,
-				item.geometrics.progressBorder.Height - 1);
-			// Compute the content bounds.
-			item.geometrics.contentBounds = new Rectangle(
-				item.geometrics.itemBounds.X,
-				item.geometrics.itemBounds.Y,
-				item.geometrics.itemBounds.Width,
-				item.geometrics.progressBorder.Top - item.geometrics.itemBounds.Y);
-			// The text bounds.
+			// Compute the text bounds.
 			item.geometrics.textBounds = new Rectangle(
 				item.geometrics.contentBounds.X,
 				item.geometrics.contentBounds.Y,
 				this.itemMaximumTextWidth,
 				item.geometrics.contentBounds.Height);
-			
-			// Update the item legend geometrics.
-			this.OnUpdateItemLegendGeometrics(item);
+
+			// If the legend is invalid, update the legend geometric characteristics.
+			if (!item.geometrics.validLegend) this.OnUpdateItemLegendGeometrics(item);
 		}
 
 		/// <summary>

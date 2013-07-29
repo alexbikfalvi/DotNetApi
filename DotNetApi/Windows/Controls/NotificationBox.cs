@@ -34,6 +34,8 @@ namespace DotNetApi.Windows.Controls
 		private ProgressBar progressBar = new ProgressBar();
 		private Timer timer = new Timer();
 		private int titleHeight = 35;
+		private int defaultWidth = 400;
+		private int defaultHeight = 130;
 
 		private Rectangle borderControl = new Rectangle();
 		private Rectangle borderTitle = new Rectangle();
@@ -57,8 +59,8 @@ namespace DotNetApi.Windows.Controls
 			this.SuspendLayout();
 
 			// Default properties.
-			this.Width = 400;
-			this.Height = 130;
+			this.Width = this.defaultWidth;
+			this.Height = this.defaultHeight;
 			this.Margin = new Padding(10);
 			this.Padding = new Padding(16, 8, 16, 16);
 			this.Visible = false;
@@ -93,18 +95,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
 		public void Show(Image image, string title, string text, bool progress, int duration = -1, NotificationTaskEventHandler task = null)
 		{
-			// If the parent control is not null, reposition the control to the middle of the parent.
-			if (this.Parent != null)
-			{
-				// If the parent width is smaller than the control width, resize the control.
-				if (this.Parent.ClientRectangle.Width < this.Width - this.Margin.Left - this.Margin.Right)
-				{
-					this.Width = this.Parent.ClientRectangle.Width - this.Margin.Left - this.Margin.Right;
-				}
-				// Compute the position of the control.
-				this.Left = (this.Parent.Width - this.Width) / 2;
-				this.Top = (this.Parent.Height - this.Height) / 2;
-			}
+			// Reposition the control.
+			this.Reposition();
 
 			// Set the message box parameters.
 			this.image = image;
@@ -125,6 +117,23 @@ namespace DotNetApi.Windows.Controls
 			this.Show();
 			// Refresh the control.
 			this.OnRefresh();
+		}
+
+		/// <summary>
+		/// Repositions the progress box in the middle of the parent control.
+		/// </summary>
+		public void Reposition()
+		{
+			// If the parent control is not null, reposition the control to the middle of the parent.
+			if (this.Parent != null)
+			{
+				// If the parent width is smaller than the default control width, resize the control.
+				this.Width = (this.Parent.ClientRectangle.Width < this.defaultWidth - this.Margin.Left - this.Margin.Right) ?
+					this.Parent.ClientRectangle.Width - this.Margin.Left - this.Margin.Right : this.defaultWidth;
+				// Compute the position of the control.
+				this.Left = (this.Parent.Width - this.Width) / 2;
+				this.Top = (this.Parent.Height - this.Height) / 2;
+			}
 		}
 
 		// Protected methods.

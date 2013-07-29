@@ -26,6 +26,11 @@ namespace DotNetApi.Windows.Controls
 	public interface ISideControl
 	{
 		/// <summary>
+		/// Initializes the current side control.
+		/// </summary>
+		void Initialize();
+
+		/// <summary>
 		/// Shows the current side control and activates the control content.
 		/// </summary>
 		void ShowSideControl();
