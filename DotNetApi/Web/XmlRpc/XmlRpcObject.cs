@@ -126,5 +126,17 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			get { return this is XmlRpcString ? (this as XmlRpcString).Value : null; }
 		}
+
+		// Public methods.
+
+		/// <summary>
+		/// Returns the array of the specified type.
+		/// </summary>
+		/// <typeparam name="T">The array type.</typeparam>
+		/// <returns>The array.</returns>
+		public T[] AsArray<T>()
+		{
+			return this is XmlRpcArray ? (this as XmlRpcArray).GetArray<T>() : null;
+		}
 	}
 }

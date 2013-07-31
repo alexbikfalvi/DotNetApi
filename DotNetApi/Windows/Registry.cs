@@ -40,8 +40,7 @@ namespace DotNetApi.Windows
 			try
 			{
 				object value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue);
-				return null != value ? value is bool ? (bool)value : 
-					value is int ? (int)value != 0 : defaultValue : defaultValue;
+				return null != value ? Convert.ToBoolean(value) : defaultValue;
 			}
 			catch { return defaultValue; }
 		}
@@ -69,7 +68,7 @@ namespace DotNetApi.Windows
 			try
 			{
 				object value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue);
-				return (int)(null != value ? value : defaultValue);
+				return null != value ? Convert.ToInt32(value) : defaultValue;
 			}
 			catch { return defaultValue; }
 		}
@@ -185,7 +184,7 @@ namespace DotNetApi.Windows
 			try
 			{
 				object value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue.Ticks);
-				return null != value ? new DateTime((long)value) : defaultValue;
+				return null != value ? new DateTime(Convert.ToInt64(value)) : defaultValue;
 			}
 			catch { return defaultValue; }
 		}
@@ -213,7 +212,7 @@ namespace DotNetApi.Windows
 			try
 			{
 				object value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue.Ticks);
-				return null != value ? TimeSpan.FromTicks((long)(int)value) : defaultValue;
+				return null != value ? TimeSpan.FromTicks(Convert.ToInt64(value)) : defaultValue;
 			}
 			catch { return defaultValue; }
 		}

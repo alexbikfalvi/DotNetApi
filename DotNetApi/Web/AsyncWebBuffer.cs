@@ -28,6 +28,14 @@ namespace DotNetApi.Web
 	{
 		private byte[] data = null;
 
+		// Public properties.
+
+		/// <summary>
+		/// Gets the data stored in the buffer.
+		/// </summary>
+		public byte[] Data { get { return this.data; } }
+
+		// Public methods.
 
 		/// <summary>
 		/// Appends byte data to the current buffer.
@@ -105,8 +113,22 @@ namespace DotNetApi.Web
 		}
 
 		/// <summary>
-		/// Gets the data stored in the buffer.
+		/// Returns the data as a string using UTF-8 encoding.
 		/// </summary>
-		public byte[] Data { get { return this.data; } }
+		/// <returns>The data as a string.</returns>
+		public override string ToString()
+		{
+			return this.data != null ? Encoding.UTF8.GetString(this.data) : string.Empty;
+		}
+
+		/// <summary>
+		/// Returns the data as a string using the specified encoding.
+		/// </summary>
+		/// <param name="encoding">The encoding.</param>
+		/// <returns>The data as a string.</returns>
+		public string ToString(Encoding encoding)
+		{
+			return this.data != null ? encoding.GetString(this.data) : string.Empty;
+		}
 	};
 }

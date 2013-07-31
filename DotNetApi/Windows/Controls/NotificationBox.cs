@@ -95,15 +95,15 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
 		public void Show(Image image, string title, string text, bool progress, int duration = -1, NotificationTaskEventHandler task = null)
 		{
-			// Reposition the control.
-			this.Reposition();
-
 			// Set the message box parameters.
 			this.image = image;
 			this.title = title;
 			this.Text = text;
 			this.progressBar.Visible = progress;
 			this.task = task;
+
+			// Reposition the control.
+			this.Reposition(progress);
 
 			// If the duration is positive
 			if (duration > 0)
@@ -124,16 +124,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public void Reposition()
 		{
-			// If the parent control is not null, reposition the control to the middle of the parent.
-			if (this.Parent != null)
-			{
-				// If the parent width is smaller than the default control width, resize the control.
-				this.Width = (this.Parent.ClientRectangle.Width < this.defaultWidth - this.Margin.Left - this.Margin.Right) ?
-					this.Parent.ClientRectangle.Width - this.Margin.Left - this.Margin.Right : this.defaultWidth;
-				// Compute the position of the control.
-				this.Left = (this.Parent.Width - this.Width) / 2;
-				this.Top = (this.Parent.Height - this.Height) / 2;
-			}
+			this.Reposition(this.progressBar.Visible);
 		}
 
 		// Protected methods.
@@ -148,6 +139,8 @@ namespace DotNetApi.Windows.Controls
 			{
 				// Dispose the timer.
 				this.timer.Dispose();
+				// Dispose the progerss bar.
+				this.progressBar.Dispose();
 			}
 			// Call the base class dispose method.
 			base.Dispose(disposing);
@@ -207,6 +200,8 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class method.
 			base.OnResize(e);
+			// Measure the new size of the controls.
+			this.OnMeasureControls(this.progressBar.Visible);
 			// Call the refresh event handler.
 			this.OnRefresh();
 		}
@@ -245,6 +240,36 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnRefresh()
 		{
+			// Repaint the control.
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// Repositions the progress box in the middle of the parent control.
+		/// </summary>
+		/// <param name="progress">Indicates if the progress bar is showed.</param>
+		public void Reposition(bool progress)
+		{
+			// If the parent control is not null, reposition the control to the middle of the parent.
+			if (this.Parent != null)
+			{
+				// If the parent width is smaller than the default control width, resize the control.
+				this.Width = (this.Parent.ClientRectangle.Width < this.defaultWidth - this.Margin.Left - this.Margin.Right) ?
+					this.Parent.ClientRectangle.Width - this.Margin.Left - this.Margin.Right : this.defaultWidth;
+				// Measure the size of the controls.
+				this.OnMeasureControls(progress);
+				// Compute the position of the control.
+				this.Left = (this.Parent.Width - this.Width) / 2;
+				this.Top = (this.Parent.Height - this.Height) / 2;
+			}
+		}
+
+		/// <summary>
+		/// Measures the size of the controls.
+		/// </summary>
+		/// <param name="progress">Indicates if the progress bar is showed.</param>
+		private void OnMeasureControls(bool progress)
+		{
 			// Control border.
 			this.borderControl.X = this.ClientRectangle.X;
 			this.borderControl.Y = this.ClientRectangle.Y;
@@ -279,10 +304,8 @@ namespace DotNetApi.Windows.Controls
 			this.borderText.X = this.borderImage.Right + this.Padding.Left;
 			this.borderText.Y = this.borderImage.Y;
 			this.borderText.Width = this.borderControl.Right - this.borderText.X - this.Padding.Right;
-			this.borderText.Height = this.progressBar.Top - this.borderText.Y - this.Padding.Bottom;
-
-			// Repaint the control.
-			this.Refresh();
+			this.borderText.Height = progress ? this.progressBar.Top - this.borderText.Y - this.Padding.Bottom :
+				this.ClientRectangle.Bottom - this.borderText.Y - this.Padding.Bottom;
 		}
 	}
 }
