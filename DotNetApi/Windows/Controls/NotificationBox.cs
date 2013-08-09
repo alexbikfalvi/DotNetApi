@@ -22,7 +22,7 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void NotificationTaskEventHandler();
+	public delegate void NotificationTaskEventHandler(object[] parameters);
 
 	/// <summary>
 	/// A control that displays a message box overlayed on a given control.
@@ -49,6 +49,7 @@ namespace DotNetApi.Windows.Controls
 		private Color colorTitleForeground = SystemColors.GrayText;
 
 		private NotificationTaskEventHandler task = null;
+		private object[] parameters = null;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -93,7 +94,14 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="progress">The visibility of the progress bar.</param>
 		/// <param name="duration">The duration of the message in milliseconds. If negative, the message will be displayed indefinitely.</param>
 		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
-		public void Show(Image image, string title, string text, bool progress, int duration = -1, NotificationTaskEventHandler task = null)
+		public void Show(
+			Image image,
+			string title,
+			string text,
+			bool progress,
+			int duration = -1,
+			NotificationTaskEventHandler task = null,
+			object[] parameters = null)
 		{
 			// Set the message box parameters.
 			this.image = image;
@@ -101,17 +109,23 @@ namespace DotNetApi.Windows.Controls
 			this.Text = text;
 			this.progressBar.Visible = progress;
 			this.task = task;
+			this.parameters = parameters;
 
 			// Reposition the control.
 			this.Reposition(progress);
 
-			// If the duration is positive
+			// If the duration is positive.
 			if (duration > 0)
 			{
 				// Set the timer interval.
 				this.timer.Interval = duration;
 				// Enable the timer.
 				this.timer.Enabled = true;
+			}
+			else
+			{
+				// Execute the task.
+				if (this.task != null) this.task(this.parameters);
 			}
 			// Show the control.
 			this.Show();
@@ -232,7 +246,7 @@ namespace DotNetApi.Windows.Controls
 			// Hide the control.
 			this.Hide();
 			// Execute the task on the UI thread.
-			if (task != null) task();
+			if (this.task != null) this.task(this.parameters);
 		}
 
 		/// <summary>

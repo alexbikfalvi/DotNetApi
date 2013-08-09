@@ -554,10 +554,10 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="index">The selected index.</param>
 		protected virtual void OnSetSelectedIndex(int? index)
 		{
-			// If the selected index is greater than the number of items, set the selected index to null.
-			if (index > this.items.Count) index = null;
-			// If the selected index is less than zero, set the selected index to null.
-			if (index < 0) index = null;
+			// If the selected index is greater than the number of items, set the selected index to zero or null.
+			if (index > this.items.Count) index = this.items.Count > 0 ? 0 as int? : null;
+			// If the selected index is less than zero, set the selected index to zero or null.
+			if (index < 0) index = this.items.Count > 0 ? 0 as int? : null;
 			// If the current selected index has value.
 			if (this.selectedIndex.HasValue)
 			{

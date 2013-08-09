@@ -32,7 +32,7 @@ namespace DotNetApi.Web.XmlRpc
 	{
 		private static string xmlName = "struct";
 
-		private Dictionary<string, XmlRpcMember> members = new Dictionary<string,XmlRpcMember>();
+		private Dictionary<string, XmlRpcMember> members = new Dictionary<string, XmlRpcMember>();
 
 		/// <summary>
 		/// Creates a new empty structure.
@@ -86,9 +86,23 @@ namespace DotNetApi.Web.XmlRpc
 				XmlRpcMember member = new XmlRpcMember(child);
 				// Add the member to the struct list.
 				this.members.Add(member.Name, member);
-			}
-			
+			}		
 		}
+
+		/// <summary>
+		/// Creates a new struct instance with a single member.
+		/// </summary>
+		/// <param name="name">The member name.</param>
+		/// <param name="value">The member value.</param>
+		public XmlRpcStruct(string name, object value)
+		{
+			// Create a new member with the specified name.
+			XmlRpcMember member = new XmlRpcMember(name, value);
+			// Add the member to the struct list.
+			this.members.Add(name, member);
+		}
+
+		// Public properties.
 
 		/// <summary>
 		/// Returns the XML name.
@@ -106,6 +120,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// Returns the structure members.
 		/// </summary>
 		public ICollection<KeyValuePair<string, XmlRpcMember>> Members { get { return this.members; } }
+
+		// Public methods.
 
 		/// <summary>
 		/// Returns the XML element corresponding to this object.

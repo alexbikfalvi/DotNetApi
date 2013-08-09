@@ -22,8 +22,8 @@ using DotNetApi.Windows.Controls;
 
 namespace YtAnalytics.Controls
 {
-	public delegate void ShowNotificationEventHandler(Image image, string title, string text, bool progress, int duration, NotificationTaskEventHandler task);
-	public delegate void HideNotificationEventHandler(NotificationTaskEventHandler task);
+	public delegate void ShowNotificationEventHandler(Image image, string title, string text, bool progress, int duration, NotificationTaskEventHandler task, object[] parameters);
+	public delegate void HideNotificationEventHandler(NotificationTaskEventHandler task, object[] parameters);
 
 	/// <summary>
 	/// A controls that displays a notification box.
@@ -58,17 +58,25 @@ namespace YtAnalytics.Controls
 		/// <param name="progress">The visibility of the progress bar.</param>
 		/// <param name="duration">The duration of the message in milliseconds. If negative, the message will be displayed indefinitely.</param>
 		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
-		protected void ShowMessage(Image image, string title, string text, bool progress = true, int duration = -1, NotificationTaskEventHandler task = null)
+		/// <param name="parameters">The task parameters.</param>
+		protected void ShowMessage(
+			Image image,
+			string title,
+			string text,
+			bool progress = true,
+			int duration = -1,
+			NotificationTaskEventHandler task = null,
+			object[] parameters = null)
 		{
 			// Invoke the function on the UI thread.
 			if (this.InvokeRequired)
-				this.Invoke(this.delegateShowMessage, new object[] { image, title, text, progress, duration, task });
+				this.Invoke(this.delegateShowMessage, new object[] { image, title, text, progress, duration, task, parameters });
 			else
 			{
 				// Set the message on top of all other controls.
 				this.Controls.SetChildIndex(this.notification, 0);
 				// Show the message.
-				this.notification.Show(image, title, text, progress, duration, task);
+				this.notification.Show(image, title, text, progress, duration, task, parameters);
 			}
 		}
 
@@ -76,17 +84,18 @@ namespace YtAnalytics.Controls
 		/// Hides the alerting message.
 		/// </summary>
 		/// <param name="task">A task to execute on the UI thread after the message is hidden.</param>
-		protected void HideMessage(NotificationTaskEventHandler task = null)
+		/// <param name="parameters">The task parameters.</param>
+		protected void HideMessage(NotificationTaskEventHandler task = null, object[] parameters = null)
 		{
 			// Invoke the function on the UI thread.
 			if (this.InvokeRequired)
-				this.Invoke(this.delegateHideMessage, new object[] { task });
+				this.Invoke(this.delegateHideMessage, new object[] { task, parameters });
 			else
 			{
 				// Hide the message.
 				this.notification.Hide();
 				// Execute the task on the UI thread.
-				if (task != null) task();
+				if (task != null) task(parameters);
 			}
 		}
 

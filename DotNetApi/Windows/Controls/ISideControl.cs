@@ -39,5 +39,23 @@ namespace DotNetApi.Windows.Controls
 		/// Hides the current side control and deactivates the control content.
 		/// </summary>
 		void HideSideControl();
+
+		/// <summary>
+		/// Indicates whether the control has a selectable item.
+		/// </summary>
+		/// <returns><b>True</b> if the control has a selectable item, <b>false</b> otherwise.</returns>
+		bool HasSelected();
+
+		/// <summary>
+		/// Returns the indices of the selected item.
+		/// </summary>
+		/// <returns>The indices.</returns>
+		int[] GetSelected();
+
+		/// <summary>
+		/// Sets the selected item.
+		/// </summary>
+		/// <param name="indices">The item indices.</param>
+		void SetSelected(int[] indices);
 	}
 }

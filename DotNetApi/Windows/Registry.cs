@@ -19,6 +19,7 @@
 using System;
 using System.Security;
 using Microsoft.Win32;
+using DotNetApi;
 using DotNetApi.Security;
 
 namespace DotNetApi.Windows
@@ -254,6 +255,34 @@ namespace DotNetApi.Windows
 		public static void SetBytes(string keyName, string valueName, byte[] value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value, RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Reads a 32-bit integer array value from the registry.
+		/// </summary>
+		/// <param name="keyName">The key name.</param>
+		/// <param name="valueName">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static Int32[] GetInt32Array(string keyName, string valueName, Int32[] defaultValue)
+		{
+			try
+			{
+				byte[] value;
+				return null != (value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue) as byte[]) ? value.ToInt32Array() : defaultValue;
+			}
+			catch (Exception) { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Writes an array value to the registry.
+		/// </summary>
+		/// <param name="keyName">The key name.</param>
+		/// <param name="valueName">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetInt32Array(string keyName, string valueName, Int32[] value)
+		{
+			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.GetBytes(), RegistryValueKind.Binary);
 		}
 	}
 }

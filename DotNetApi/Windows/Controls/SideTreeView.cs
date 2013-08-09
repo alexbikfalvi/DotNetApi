@@ -28,6 +28,8 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class SideTreeView : TreeView, ISideControl
 	{
+		private bool visible = false;
+
 		/// <summary>
 		/// Creates a new control instance.
 		/// </summary>
@@ -71,6 +73,8 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public void ShowSideControl()
 		{
+			// Set control as visible.
+			this.visible = true;
 			// Call the base class show method.
 			base.Show();
 			// Select this control.
@@ -90,8 +94,67 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public void HideSideControl()
 		{
+			// Set control as hidden.
+			this.visible = false;
 			// Call the base class hide method.
 			base.Hide();
+		}
+
+		/// <summary>
+		/// Indicates whether the control has a selectable item.
+		/// </summary>
+		/// <returns><b>True</b> if the control has a selectable item, <b>false</b> otherwise.</returns>
+		public bool HasSelected()
+		{
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the indices of the selected item.
+		/// </summary>
+		/// <returns>The indices.</returns>
+		public int[] GetSelected()
+		{
+			// If there is no selected node, return null.
+			if (null == this.SelectedNode) return null;
+			// Create an array corresponding to the node level.
+			int[] indices = new int[this.SelectedNode.Level + 1];
+			// Add the indices of the tree nodes.
+			for (TreeNode node = this.SelectedNode; node != null; node = node.Parent)
+			{
+				indices[node.Level] = node.Index;
+			}
+			// Return the indices array.
+			return indices;
+		}
+
+		/// <summary>
+		/// Sets the selected item.
+		/// </summary>
+		/// <param name="indices">The indices index.</param>
+		public void SetSelected(int[] indices)
+		{
+			// The current nodes collection.
+			TreeNodeCollection nodes = this.Nodes;
+			// For all indices.
+			for (int index = 0; index < indices.Length; index++)
+			{
+				// If an index is out of bounds, do nothing.
+				if ((indices[index] < 0) && (indices[index] >= nodes.Count)) return;
+				// If the last index.
+				if (index == indices.Length - 1)
+				{
+					// Select the node.
+					this.SelectedNode = nodes[indices[index]];
+					// Scroll to the selected node.
+					this.SelectedNode.EnsureVisible();
+				}
+				else
+				{
+					// Select the next collection.
+					nodes = nodes[indices[index]].Nodes;
+				}
+			}
 		}
 
 		// Protected methods.
@@ -119,7 +182,7 @@ namespace DotNetApi.Windows.Controls
 			// Get the control tag for the selected tree node.
 			Control control = node.Tag as Control;
 			// If this control is visible.
-			if (this.Visible)
+			if (this.visible)
 			{
 				// Raise a control changed event for this control.
 				if (null != this.ControlChanged) this.ControlChanged(this, control);
