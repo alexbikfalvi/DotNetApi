@@ -134,6 +134,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="indices">The indices index.</param>
 		public void SetSelected(int[] indices)
 		{
+			// If the indices is null, do nothing.
+			if (null == indices) return;
 			// The current nodes collection.
 			TreeNodeCollection nodes = this.Nodes;
 			// For all indices.
