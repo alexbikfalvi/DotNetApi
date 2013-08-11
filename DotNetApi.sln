@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApiTest", "DotNetApiT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTextBoxTest", "SecureTextBoxTest\SecureTextBoxTest.csproj", "{F20CB25C-3065-4E7B-A2B2-16701BE418A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapControlTest", "MapControlTest\MapControlTest.csproj", "{C4C5FAE6-99E1-4956-BAB4-7ACCE5BE74F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{F20CB25C-3065-4E7B-A2B2-16701BE418A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F20CB25C-3065-4E7B-A2B2-16701BE418A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F20CB25C-3065-4E7B-A2B2-16701BE418A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4C5FAE6-99E1-4956-BAB4-7ACCE5BE74F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4C5FAE6-99E1-4956-BAB4-7ACCE5BE74F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4C5FAE6-99E1-4956-BAB4-7ACCE5BE74F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4C5FAE6-99E1-4956-BAB4-7ACCE5BE74F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
