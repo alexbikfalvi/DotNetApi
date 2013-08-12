@@ -37,7 +37,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IO\ShapeFile.cs" />
+    <Compile Include="Maps.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Maps.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Maps.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Maps.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Maps\ne_110m_admin_0_countries.dbf.gz" />
+    <None Include="Maps\ne_110m_admin_0_countries.shp.gz" />
+    <None Include="Maps\ne_110m_admin_0_countries.shx.gz" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

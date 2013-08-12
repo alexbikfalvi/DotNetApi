@@ -86,6 +86,10 @@
       <Project>{a9ae40ff-1a21-414a-9fe7-3be13644cc6d}</Project>
       <Name>Newtonsoft.Json.Net40</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MapApi\MapApi.csproj">
+      <Project>{c5c1839c-4971-4781-b8fa-ff743e257a7e}</Project>
+      <Name>MapApi</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

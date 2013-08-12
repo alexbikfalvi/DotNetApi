@@ -20,23 +20,27 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
-namespace MapApi.IO
+namespace DotNetApi.IO
 {
 	/// <summary>
-	/// A class representing an ESRI shapefile.
+	/// A class used to handle ZIP compressed data.
 	/// </summary>
-	public class ShapeFile : IDisposable
+	public static class Zip
 	{
 		/// <summary>
-		/// Creates a new shapefile from the specified ZIP file.
+		/// Decompresses the data from the specified buffer.
 		/// </summary>
-		/// <param name="fileName">The file name.</param>
-		public ShapeFile(string fileName)
+		/// <param name="data">The compressed data.</param>
+		/// <returns>A buffer with the uncompressed data.</returns>
+		public static byte[] Unzip(this byte[] data)
 		{
-		}
-
-		public void Dispose()
-		{
+			using (MemoryStream memoryStream = new MemoryStream(data))
+			{
+				using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+				{
+					return zipStream.Read
+				}
+			}
 		}
 	}
 }
