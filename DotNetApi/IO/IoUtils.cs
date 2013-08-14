@@ -24,15 +24,15 @@ namespace DotNetApi.IO
 	/// <summary>
 	/// A class with input-output utility methods.
 	/// </summary>
-	public static class Io
+	public static class IoUtils
 	{
-		private const uint bufferSize = 65536;
+		private const uint bufferSize = 0x10000;
 
 		/// <summary>
 		/// Reads all the data from the specified stream into a buffer.
 		/// </summary>
 		/// <param name="stream">The input stream.</param>
-		/// <returns>The output buffer data.</returns>
+		/// <returns>The output buffer data or <b>null</b> if no data was read.</returns>
 		public static byte[] ReadToEnd(this Stream stream)
 		{
 			// Set the buffer original position.
@@ -50,21 +50,19 @@ namespace DotNetApi.IO
 			try
 			{
 				// Create a new read buffer.
-				byte[] readBuffer = new byte[Io.bufferSize];
+				byte[] readBuffer = new byte[IoUtils.bufferSize];
 				// The output buffer.
 				byte[] outputBuffer = null;
-
+			
 				// Read the stream data into the buffer.
-				for (int bytesRead; (bytesRead = stream.Read(readBuffer, 0, readBuffer.Length)) > 0; )
+				for (int bytesRead, length = 0; (bytesRead = stream.Read(readBuffer, 0, readBuffer.Length)) > 0; )
 				{
-					// Allocate a new output buffer.
-					byte[] tempBuffer = new byte[(outputBuffer != null ? outputBuffer.Length : 0) + bytesRead];
-					// Copy the previous output buffer.
-					if (null != outputBuffer)
-					{
-						Buffer.BlockCopy(outputBuffer, 0, tempBuffer, 0, outputBuffer.Length);
-					}
-					// 
+					// Resize the output buffer to append the data read.
+					Array.Resize<byte>(ref outputBuffer, length + bytesRead);
+					// Copy the bytes read to the output buffer.
+					Buffer.BlockCopy(readBuffer, 0, outputBuffer, length, bytesRead);
+					// Save the length of the output buffer.
+					length = outputBuffer.Length;
 				}
 
 				// Return the output buffer.
@@ -72,8 +70,10 @@ namespace DotNetApi.IO
 			}
 			finally
 			{
+				// If can seek in the stream.
 				if (stream.CanSeek)
 				{
+					// Restore the original stream position.
 					stream.Position = originalPosition;
 				}
 			}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using MapApi.IO;
 
 namespace MapControlTest
 {
@@ -43,12 +42,6 @@ namespace MapControlTest
 
 		private void OnTest(object sender, EventArgs e)
 		{
-			if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
-			{
-				using (ShapeFile shapeFile = new ShapeFile(this.openFileDialog.FileName))
-				{
-				}
-			}
 		}
 	}
 }

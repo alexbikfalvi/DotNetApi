@@ -17,30 +17,34 @@
  */
 
 using System;
-using System.IO;
-using System.IO.Compression;
 
-namespace DotNetApi.IO
+namespace MapApi
 {
 	/// <summary>
-	/// A class used to handle ZIP compressed data.
+	/// A structure representing a map point.
 	/// </summary>
-	public static class Zip
+	public struct MapPoint
 	{
 		/// <summary>
-		/// Decompresses the data from the specified buffer.
+		/// Creates a new map point instance.
 		/// </summary>
-		/// <param name="data">The compressed data.</param>
-		/// <returns>A buffer with the uncompressed data.</returns>
-		public static byte[] Unzip(this byte[] data)
+		/// <param name="x">The longitude.</param>
+		/// <param name="y">The latitude.</param>
+		public MapPoint(double x, double y)
 		{
-			using (MemoryStream memoryStream = new MemoryStream(data))
-			{
-				using (GZipStream zipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
-				{
-					return zipStream.Read
-				}
-			}
+			this.X = x;
+			this.Y = y;
 		}
+
+		// Public fields.
+
+		/// <summary>
+		/// Gets or sets the longitude.
+		/// </summary>
+		public double X;
+		/// <summary>
+		/// Gets or sets the latitude.
+		/// </summary>
+		public double Y;
 	}
 }

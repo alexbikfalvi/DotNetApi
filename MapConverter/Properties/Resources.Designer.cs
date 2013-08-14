@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MapApi {
+namespace MapConverter.Properties {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace MapApi {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Maps {
+    internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Maps() {
+        internal Resources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace MapApi {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MapApi.Maps", typeof(Maps).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MapConverter.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,36 +57,6 @@ namespace MapApi {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Ne110mAdmin0CountriesDbf {
-            get {
-                object obj = ResourceManager.GetObject("Ne110mAdmin0CountriesDbf", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Ne110mAdmin0CountriesShp {
-            get {
-                object obj = ResourceManager.GetObject("Ne110mAdmin0CountriesShp", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] Ne110mAdmin0CountriesShx {
-            get {
-                object obj = ResourceManager.GetObject("Ne110mAdmin0CountriesShx", resourceCulture);
-                return ((byte[])(obj));
             }
         }
     }
