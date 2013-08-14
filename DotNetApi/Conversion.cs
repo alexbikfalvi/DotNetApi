@@ -23,7 +23,7 @@ namespace DotNetApi
 	/// <summary>
 	/// A class used for data type conversions.
 	/// </summary>
-	public static class Converter
+	public static class Conversion
 	{
 		/// <summary>
 		/// Converts an array of bytes into an array of 32-bit integer values.

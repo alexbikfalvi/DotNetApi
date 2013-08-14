@@ -34,9 +34,20 @@
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Map.cs" />
+    <Compile Include="MapMetadata.cs" />
+    <Compile Include="MapPart.cs" />
+    <Compile Include="MapPartCollection.cs" />
+    <Compile Include="MapRectangle.cs" />
     <Compile Include="MapPoint.cs" />
+    <Compile Include="MapShape.cs" />
+    <Compile Include="MapShapeCollection.cs" />
+    <Compile Include="MapShapePoint.cs" />
+    <Compile Include="MapShapePolygon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

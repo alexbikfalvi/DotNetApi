@@ -17,47 +17,57 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 
 namespace MapApi
 {
 	/// <summary>
-	/// A structure representing a map point.
+	/// A class representing a map.
 	/// </summary>
-	public struct MapPoint
+	public sealed class Map
 	{
+		private MapRectangle bounds;
+		private MapShapeCollection shapes = new MapShapeCollection();
+
 		/// <summary>
-		/// Creates a new map point instance.
+		/// Craetes a map with the default bounds.
 		/// </summary>
-		/// <param name="x">The longitude.</param>
-		/// <param name="y">The latitude.</param>
-		public MapPoint(double x, double y)
+		public Map()
 		{
-			this.X = x;
-			this.Y = y;
 		}
 
-		// Public fields.
+		/// <summary>
+		/// Creates a map with the specified bounds.
+		/// </summary>
+		/// <param name="bounds">The map bounds.</param>
+		public Map(MapRectangle bounds)
+		{
+			this.bounds = bounds;
+		}
+
+		// Public properties.
 
 		/// <summary>
-		/// Gets or sets the longitude.
+		/// Gets the bounds of the current map.
 		/// </summary>
-		public double X;
+		public MapRectangle Bounds { get { return this.bounds; } }
 		/// <summary>
-		/// Gets or sets the latitude.
+		/// Gets the collection of shapes for the current map.
 		/// </summary>
-		public double Y;
+		public MapShapeCollection Shapes { get { return this.shapes; } }
+
+		// Public methods.
 
 		/// <summary>
 		/// Creates an XML element for the current map object.
 		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
 		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
+		public XElement ToXml()
 		{
-			return new XElement(name,
-				new XAttribute("X", this.X),
-				new XAttribute("Y", this.Y)
+			return new XElement("Map",
+				this.Bounds.ToXml("Bounds"),
+				this.Shapes.ToXml("Shapes")
 				);
 		}
 	}

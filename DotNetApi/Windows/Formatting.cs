@@ -30,7 +30,7 @@ namespace DotNetApi.Windows
 	{
 		private static bool fontChange = false;
 		private static FontFamily fontDefaultFamily = null;
-		static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
+		private static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
 		static Formatting()
 		{

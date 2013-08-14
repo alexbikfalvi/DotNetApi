@@ -54,7 +54,7 @@
 			this.textBox.Name = "textBox";
 			this.textBox.ReadOnly = true;
 			this.textBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-			this.textBox.Size = new System.Drawing.Size(560, 309);
+			this.textBox.Size = new System.Drawing.Size(760, 509);
 			this.textBox.TabIndex = 1;
 			this.textBox.WordWrap = false;
 			// 
@@ -67,7 +67,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(584, 362);
+			this.ClientSize = new System.Drawing.Size(784, 562);
 			this.Controls.Add(this.textBox);
 			this.Controls.Add(this.buttonProcess);
 			this.Name = "FormMain";

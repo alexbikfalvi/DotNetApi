@@ -44,8 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncResult.cs" />
-    <Compile Include="Converter.cs" />
+    <Compile Include="Conversion.cs" />
+    <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
+    <Compile Include="Validation.cs" />
     <Compile Include="Windows\Controls\Map\Projection\IMapProjection.cs" />
     <Compile Include="Windows\Controls\Map\Map.cs" />
     <Compile Include="Windows\Controls\Map\MapMarker.cs" />

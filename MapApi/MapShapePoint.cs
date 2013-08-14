@@ -22,43 +22,55 @@ using System.Xml.Linq;
 namespace MapApi
 {
 	/// <summary>
-	/// A structure representing a map point.
+	/// A class representing a point map shape.
 	/// </summary>
-	public struct MapPoint
+	public class MapShapePoint : MapShape
 	{
+		private readonly MapPoint point;
+
 		/// <summary>
-		/// Creates a new map point instance.
+		/// Creates a new point map shape.
 		/// </summary>
-		/// <param name="x">The longitude.</param>
-		/// <param name="y">The latitude.</param>
-		public MapPoint(double x, double y)
+		/// <param name="point">The map point.</param>
+		public MapShapePoint(MapPoint point)
+			: base(MapShapeType.Point)
 		{
-			this.X = x;
-			this.Y = y;
+			this.point = point;
 		}
 
-		// Public fields.
+		/// <summary>
+		/// Creates a new point map shape.
+		/// </summary>
+		/// <param name="metadata">The map metadata.</param>
+		/// <param name="point">The map point.</param>
+		public MapShapePoint(MapMetadata metadata, MapPoint point)
+			: base(MapShapeType.Point, metadata)
+		{
+			this.point = point;
+		}
+
+		// Public properties.
 
 		/// <summary>
-		/// Gets or sets the longitude.
+		/// Gets the point of the current shape.
 		/// </summary>
-		public double X;
-		/// <summary>
-		/// Gets or sets the latitude.
-		/// </summary>
-		public double Y;
+		public MapPoint Point { get { return this.point; } }
+
+		// Public methods.
 
 		/// <summary>
 		/// Creates an XML element for the current map object.
 		/// </summary>
 		/// <param name="name">The name of the XML element.</param>
 		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
+		public override System.Xml.Linq.XElement ToXml(string name)
 		{
-			return new XElement(name,
-				new XAttribute("X", this.X),
-				new XAttribute("Y", this.Y)
-				);
+			// Get the XML element from the base class method.
+			XElement element = base.ToXml(name);
+			// Add the point data.
+			element.Add(this.point.ToXml("Point"));
+			// Return the XML element.
+			return element;
 		}
 	}
 }

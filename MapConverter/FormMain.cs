@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using Catfood.Shapefile;
+using DotNetApi.Xml;
+using MapApi;
 
 namespace MapConverter
 {
@@ -62,8 +66,6 @@ namespace MapConverter
 						// Create the temporary folder.
 						Directory.CreateDirectory(tempFolder);
 
-						
-
 						this.textBox.AppendText(string.Format("Creating temporary folder \'{0}\'...{1}", tempFolder, Environment.NewLine));
 
 						try
@@ -81,8 +83,15 @@ namespace MapConverter
 
 								this.textBox.AppendText(Environment.NewLine);
 
+								// Create a map object.
+								Map map = new Map(new MapRectangle(
+									shapefile.BoundingBox.Left,
+									shapefile.BoundingBox.Top,
+									shapefile.BoundingBox.Right,
+									shapefile.BoundingBox.Bottom));
+
 								// Write the bounding box of this shape file.
-								this.textBox.AppendText(string.Format("Bounds: {0},{1} -> {2},{3} {4}",
+								this.textBox.AppendText(string.Format("Bounds: {0},{1} -> {2},{3}{4}",
 									shapefile.BoundingBox.Left,
 									shapefile.BoundingBox.Top,
 									shapefile.BoundingBox.Right,
@@ -92,15 +101,61 @@ namespace MapConverter
 								// Enumerate all shapes.
 								foreach (Shape shape in shapefile)
 								{
-									//ShapePoint
-									this.textBox.AppendText(string.Format("{0} {1} {2}", shape.Type, shape.RecordNumber, Environment.NewLine));
+									// Shape basic information.
+									//this.textBox.AppendText(string.Format("{0} {1} {2} ", shape.RecordNumber, shape.Type, shape.GetMetadata("name")));
+
+									// Create a new shape.
+									MapShape mapShape;
+									switch (shape.Type)
+									{
+										case ShapeType.Point:
+											ShapePoint shapePoint = shape as ShapePoint;
+											mapShape = new MapShapePoint(new MapPoint(shapePoint.Point.X, shapePoint.Point.Y));
+											break;
+										case ShapeType.Polygon:
+											ShapePolygon shapePolygon = shape as ShapePolygon;
+
+											//this.textBox.AppendText(string.Format(": {0}", shapePolygon.Parts.Count));
+
+											MapShapePolygon mapShapePolygon = new MapShapePolygon(new MapRectangle(
+												shapePolygon.BoundingBox.Left,
+												shapePolygon.BoundingBox.Top,
+												shapePolygon.BoundingBox.Right,
+												shapePolygon.BoundingBox.Bottom));
+											foreach(PointD[] part in shapePolygon.Parts)
+											{
+												MapPart mapPart = new MapPart();
+												foreach (PointD point in part)
+												{
+													mapPart.Add(point.X, point.Y);
+												}
+												mapShapePolygon.Parts.Add(mapPart);
+											}
+											mapShape = mapShapePolygon;
+											break;
+										default:
+											throw new NotSupportedException(string.Format("Shape type {0} is not supported.", shape.Type));
+									}
+									// Add the shape metadata.
+									foreach (string name in shape.GetMetadataNames())
+									{
+										mapShape.Metadata[name] = shape.GetMetadata(name);
+									}
+									// Add the shape to the map.
+									map.Shapes.Add(mapShape);
+									//this.textBox.AppendText(Environment.NewLine);
 								}
+
+								// Serialize the map object.
+								this.textBox.AppendText(Environment.NewLine);
+								this.textBox.AppendText(map.ToXml().ToString());
 								this.textBox.AppendText(Environment.NewLine);
 							}
 						}
 						finally
 						{
 							// Delete the temporary folder.
+							this.textBox.AppendText(Environment.NewLine);
 							Directory.Delete(tempFolder, true);
 							this.textBox.AppendText(string.Format("Temporary folder \'{0}\' deleted.{1}", tempFolder, Environment.NewLine));
 						}
@@ -111,7 +166,7 @@ namespace MapConverter
 			{
 				this.textBox.AppendText(string.Format("An exception occurred. {0}", exception.Message));
 			}
-
+			this.textBox.AppendText(Environment.NewLine);
 			this.textBox.AppendText("Done.");
 		}
 	}
