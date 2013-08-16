@@ -17,8 +17,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
@@ -46,9 +45,12 @@ namespace MapApi
 	/// <summary>
 	/// A base class for all map shapes.
 	/// </summary>
+	[Serializable]
+	[XmlInclude(typeof(MapShapePoint))]
+	[XmlInclude(typeof(MapShapePolygon))]
 	public abstract class MapShape
 	{
-		private readonly MapShapeType type;
+		private MapShapeType type;
 		private readonly MapMetadata metadata;
 
 		/// <summary>
@@ -77,25 +79,13 @@ namespace MapApi
 		/// <summary>
 		/// Gets the type of the current shape.
 		/// </summary>
+		[XmlAttribute("Type")]
 		public MapShapeType Type { get { return this.type; } }
 		/// <summary>
 		/// Gets the metadata of the current shape.
 		/// </summary>
+		[XmlArray("Metadata")]
+		[XmlArrayItem("Entry")]
 		public MapMetadata Metadata { get { return this.metadata; } }
-
-		// Public methods.
-	
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public virtual XElement ToXml(string name)
-		{
-			return new XElement(name,
-				new XAttribute("Type", (int)this.type),
-				this.metadata.ToXml("Metadata")
-				);
-		}
 	}
 }

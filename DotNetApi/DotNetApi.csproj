@@ -77,7 +77,6 @@
     <Compile Include="Web\XmlRpc\XmlRpcFault.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcInt.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcMember.cs" />
-    <Compile Include="Web\XmlRpc\XmlRpcMethodCall.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcNil.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameter.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcParameters.cs" />
@@ -142,7 +141,7 @@
     <Compile Include="Windows\Controls\GeoWorldMap.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Windows\Formatting.cs" />
+    <Compile Include="Windows\Window.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windows\Controls\SideMenu.cs">
       <SubType>Component</SubType>
@@ -154,7 +153,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Xml\XmlFilter.cs" />
-    <Compile Include="Xml\XmlObject.cs" />
     <Compile Include="Xml\XmlParse.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>

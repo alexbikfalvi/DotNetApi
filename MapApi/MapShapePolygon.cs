@@ -17,19 +17,26 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a polygon map shape.
 	/// </summary>
+	[Serializable]
 	public class MapShapePolygon : MapShape
 	{
-		private readonly MapRectangle bounds;
+		private MapRectangle bounds;
 		private readonly MapPartCollection parts = new MapPartCollection();
+
+		/// <summary>
+		/// Creates a new polygon map shape.
+		/// </summary>
+		public MapShapePolygon()
+			: base(MapShapeType.Polygon)
+		{
+		}
 
 		/// <summary>
 		/// Creates a new polygon map shape.
@@ -55,26 +62,15 @@ namespace MapApi
 		// Public properties.
 
 		/// <summary>
+		/// Gets or sets the shape bounds.
+		/// </summary>
+		[XmlElement("Bounds")]
+		public MapRectangle Bounds { get { return this.bounds; } set { this.bounds = value; } }
+		/// <summary>
 		/// Gets the point of the current shape.
 		/// </summary>
+		[XmlArray("Parts")]
+		[XmlArrayItem("Part")]
 		public MapPartCollection Parts { get { return this.parts; } }
-
-		// Public methods.
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public override System.Xml.Linq.XElement ToXml(string name)
-		{
-			// Get the XML element from the base class method.
-			XElement element = base.ToXml(name);
-			// Add the polygon data.
-			element.Add(this.bounds.ToXml("Bounds"));
-			element.Add(this.parts.ToXml("Parts"));
-			// Return the XML element.
-			return element;
-		}
 	}
 }

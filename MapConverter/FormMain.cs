@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using Catfood.Shapefile;
 using DotNetApi.Xml;
 using MapApi;
@@ -127,7 +128,7 @@ namespace MapConverter
 												MapPart mapPart = new MapPart();
 												foreach (PointD point in part)
 												{
-													mapPart.Add(point.X, point.Y);
+													mapPart.Points.Add(point.X, point.Y);
 												}
 												mapShapePolygon.Parts.Add(mapPart);
 											}
@@ -148,7 +149,18 @@ namespace MapConverter
 
 								// Serialize the map object.
 								this.textBox.AppendText(Environment.NewLine);
-								this.textBox.AppendText(map.ToXml().ToString());
+								XmlSerializer serializer = new XmlSerializer(typeof(Map));
+								using (StringWriter writer = new StringWriter())
+								{
+									serializer.Serialize(writer, map);
+									string xml = writer.ToString();
+									this.textBox.AppendText(xml);
+									using (StringReader reader = new StringReader(xml))
+									{
+										Map mapd = serializer.Deserialize(reader) as Map;
+									}
+								}
+								//this.textBox.AppendText(map.ToXml().ToString());
 								this.textBox.AppendText(Environment.NewLine);
 							}
 						}

@@ -17,18 +17,17 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a map part, that is a collection of map points.
 	/// </summary>
-	public class MapPart : IEnumerable<MapPoint>
+	[Serializable]
+	public class MapPart
 	{
-		private readonly List<MapPoint> points = new List<MapPoint>();
+		private readonly MapPointCollection points = new MapPointCollection();
 
 		/// <summary>
 		/// Creates an empty map part.
@@ -38,57 +37,8 @@ namespace MapApi
 		}
 
 		// Public properties.
-
-		/// <summary>
-		/// Gets the number of points in the collection.
-		/// </summary>
-		public int Count { get { return this.points.Count; } }
-
-		// Public methods.
-
-		/// <summary>
-		/// Returns the generic enumerator for the points collection.
-		/// </summary>
-		/// <returns>The generic enumerator.</returns>
-		public IEnumerator<MapPoint> GetEnumerator()
-		{
-			return this.points.GetEnumerator();
-		}
-
-		/// <summary>
-		/// Returns the enumerator for the points in the collection.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		/// <summary>
-		/// Adds a new map point to the map part.
-		/// </summary>
-		/// <param name="x">The X point.</param>
-		/// <param name="y">The Y point.</param>
-		public void Add(double x, double y)
-		{
-			this.points.Add(new MapPoint(x, y));
-		}
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
-		{
-			// Create the XML element.
-			XElement element = new XElement(name);
-			foreach (MapPoint point in this)
-			{
-				element.Add(point.ToXml("Point"));
-			}
-			// Return the element.
-			return element;
-		}
+		[XmlArray("Points")]
+		[XmlArrayItem("Point")]
+		public MapPointCollection Points { get { return this.points; } }
 	}
 }

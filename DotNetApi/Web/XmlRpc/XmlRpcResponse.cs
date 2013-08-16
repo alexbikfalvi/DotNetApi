@@ -31,11 +31,6 @@ namespace DotNetApi.Web.XmlRpc
 		private static string xmlParams = "params";
 		private static string xmlFault = "fault";
 
-		private XmlRpcObject value = null;
-		private XmlRpcFault fault = null;
-
-		private string xml = null;
-
 		/// <summary>
 		/// Private constructor.
 		/// </summary>
@@ -43,7 +38,7 @@ namespace DotNetApi.Web.XmlRpc
 		private XmlRpcResponse(string xml)
 		{
 			// Set the XML string.
-			this.xml = xml;
+			this.Xml = xml;
 			
 			// Parse the XML string to an XML document.
 			XDocument document = XDocument.Parse(xml);
@@ -55,14 +50,14 @@ namespace DotNetApi.Web.XmlRpc
 			// Parse the XML from the response parameter, if any.
 			if(null != (element = document.Root.Element(XmlRpcResponse.xmlParams)))
 			{
-				try { this.value = (new XmlRpcParameters(element))[0].Value.Value; }
+				try { this.Value = (new XmlRpcParameters(element))[0].Value.Value; }
 				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
 			}
 
 			// Parse the XML from the response fault, if any.
 			if (null != (element = document.Root.Element(XmlRpcResponse.xmlFault)))
 			{
-				try { this.fault = new XmlRpcFault(element); }
+				try { this.Fault = new XmlRpcFault(element); }
 				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
 			}
 		}
@@ -86,16 +81,16 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Returns the value of the current response, or <b>null</b> if no value exists.
 		/// </summary>
-		public XmlRpcObject Value { get { return this.value; } }
+		public XmlRpcObject Value { get; private set; }
 
 		/// <summary>
 		/// Returns the fault of the current response, or <b>null</b> if no fault exists.
 		/// </summary>
-		public XmlRpcFault Fault { get { return this.fault; } }
+		public XmlRpcFault Fault { get; private set; }
 
 		/// <summary>
 		/// Returns the XML string corresponding to this response.
 		/// </summary>
-		public string Xml { get { return this.xml; } }
+		public string Xml { get; private set; }
 	}
 }

@@ -17,14 +17,15 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a map.
 	/// </summary>
+	[Serializable]
+	[XmlRoot("Map")]
 	public sealed class Map
 	{
 		private MapRectangle bounds;
@@ -51,24 +52,13 @@ namespace MapApi
 		/// <summary>
 		/// Gets the bounds of the current map.
 		/// </summary>
-		public MapRectangle Bounds { get { return this.bounds; } }
+		[XmlElement("Bounds")]
+		public MapRectangle Bounds { get { return this.bounds; } set { this.bounds = value; } }
 		/// <summary>
 		/// Gets the collection of shapes for the current map.
 		/// </summary>
+		[XmlArray("Shapes")]
+		[XmlArrayItem("Shape")]
 		public MapShapeCollection Shapes { get { return this.shapes; } }
-
-		// Public methods.
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml()
-		{
-			return new XElement("Map",
-				this.Bounds.ToXml("Bounds"),
-				this.Shapes.ToXml("Shapes")
-				);
-		}
 	}
 }

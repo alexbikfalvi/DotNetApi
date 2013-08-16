@@ -23,40 +23,40 @@ using System.Collections.Generic;
 namespace MapApi
 {
 	/// <summary>
-	/// A class representing a collection of map shapes.
+	/// A class representing a collection of map points.
 	/// </summary>
 	[Serializable]
-	public class MapShapeCollection : IEnumerable<MapShape>
+	public class MapPointCollection : IEnumerable<MapPoint>
 	{
-		private List<MapShape> shapes = new List<MapShape>();
+		private readonly List<MapPoint> points = new List<MapPoint>();
 
 		/// <summary>
-		/// Creates an empty map part collection.
+		/// Creates an empty map point collection.
 		/// </summary>
-		public MapShapeCollection()
+		public MapPointCollection()
 		{
 		}
 
 		// Public properties.
 
 		/// <summary>
-		/// Gets the number of shapes in the collection.
+		/// Gets the number of points in the collection.
 		/// </summary>
-		public int Count { get { return this.shapes.Count; } }
+		public int Count { get { return this.points.Count; } }
 
 		// Public methods.
 
 		/// <summary>
-		/// Returns the generic enumerator for the shape collection.
+		/// Returns the generic enumerator for the points collection.
 		/// </summary>
 		/// <returns>The generic enumerator.</returns>
-		public IEnumerator<MapShape> GetEnumerator()
+		public IEnumerator<MapPoint> GetEnumerator()
 		{
-			return this.shapes.GetEnumerator();
+			return this.points.GetEnumerator();
 		}
 
 		/// <summary>
-		/// Returns the enumerator for the shapes in the collection.
+		/// Returns the enumerator for the points in the collection.
 		/// </summary>
 		/// <returns>The enumerator.</returns>
 		IEnumerator IEnumerable.GetEnumerator()
@@ -65,12 +65,21 @@ namespace MapApi
 		}
 
 		/// <summary>
-		/// Adds a new shape to the collection.
+		/// Adds a new empty map point to the collection.
 		/// </summary>
-		public void Add(MapShape shape)
+		public void Add(MapPoint point)
 		{
-			// Add the map part to the collection.
-			this.shapes.Add(shape);
+			this.points.Add(point);
+		}
+
+		/// <summary>
+		/// Adds a new map point to the map part.
+		/// </summary>
+		/// <param name="x">The X point.</param>
+		/// <param name="y">The Y point.</param>
+		public void Add(double x, double y)
+		{
+			this.points.Add(new MapPoint(x, y));
 		}
 	}
 }

@@ -40,8 +40,10 @@
   <ItemGroup>
     <Compile Include="Map.cs" />
     <Compile Include="MapMetadata.cs" />
+    <Compile Include="MapMetadataEntry.cs" />
     <Compile Include="MapPart.cs" />
     <Compile Include="MapPartCollection.cs" />
+    <Compile Include="MapPointCollection.cs" />
     <Compile Include="MapRectangle.cs" />
     <Compile Include="MapPoint.cs" />
     <Compile Include="MapShape.cs" />

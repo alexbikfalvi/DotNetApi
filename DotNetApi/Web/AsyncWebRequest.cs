@@ -21,6 +21,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Text;
+using DotNetApi;
 
 namespace DotNetApi.Web
 {
@@ -262,7 +263,7 @@ namespace DotNetApi.Web
 					if (!result.AsyncWaitHandle.WaitOne(this.Timeout))
 					{
 						// If no signal was received in the timeout period, throw a timeout exception.
-						throw new TimeoutException(String.Format("The web request did not complete within the timeout {0}.", this.Timeout));
+						throw new TimeoutException("The web request did not complete within the timeout {0}.".FormatWith(this.Timeout));
 					}
 				}
 
@@ -325,7 +326,7 @@ namespace DotNetApi.Web
 					if (!result.AsyncWaitHandle.WaitOne(this.Timeout))
 					{
 						// If no signal was received in the timeout period, throw a timeout exception.
-						throw new TimeoutException(String.Format("The read request did not complete within the timeout {0}.", this.Timeout));
+						throw new TimeoutException("The read request did not complete within the timeout {0}.".FormatWith(this.Timeout));
 					}
 				}
 

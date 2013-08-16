@@ -19,13 +19,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a collection of map parts.
 	/// </summary>
+	[Serializable]
 	public class MapPartCollection : IEnumerable<MapPart>
 	{
 		private readonly List<MapPart> parts = new List<MapPart>();
@@ -69,25 +69,7 @@ namespace MapApi
 		/// </summary>
 		public void Add(MapPart part)
 		{
-			// Add the map part to the collection.
 			this.parts.Add(part);
-		}
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
-		{
-			// Create the XML element.
-			XElement element = new XElement(name);
-			foreach (MapPart part in this)
-			{
-				element.Add(part.ToXml("Part"));
-			}
-			// Return the element.
-			return element;
 		}
 	}
 }

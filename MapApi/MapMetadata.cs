@@ -19,16 +19,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Linq;
+using System.Xml.Serialization;
+using DotNetApi;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a map metdata collection.
 	/// </summary>
-	public class MapMetadata : IEnumerable<KeyValuePair<string, string>>
+	[Serializable]
+	public class MapMetadata : IEnumerable<MapMetadataEntry>
 	{
-		private readonly Dictionary<string, string> metadata = new Dictionary<string, string>();
+		private readonly Dictionary<string, MapMetadataEntry> metadata = new Dictionary<string, MapMetadataEntry>();
 
 		/// <summary>
 		/// Creates an empty metadata collection.
@@ -46,8 +48,8 @@ namespace MapApi
 		/// <returns>The entry value.</returns>
 		public string this[string name]
 		{
-			get { return this.metadata[name]; }
-			set { this.metadata[name] = value; }
+			get { return this.metadata[name].Value; }
+			set { this.metadata[name] = new MapMetadataEntry(name, value); }
 		}
 
 		// Public methods.
@@ -56,9 +58,9 @@ namespace MapApi
 		/// Returns the generic enumerator for the metadata collection.
 		/// </summary>
 		/// <returns>The generic enumerator.</returns>
-		public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+		public IEnumerator<MapMetadataEntry> GetEnumerator()
 		{
-			return this.metadata.GetEnumerator();
+			return this.metadata.Values.GetEnumerator();
 		}
 
 		/// <summary>
@@ -71,24 +73,12 @@ namespace MapApi
 		}
 
 		/// <summary>
-		/// Creates an XML element for the current map object.
+		/// Adds the specified object to the metadata.
 		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
+		/// <param name="obj">The object to add.</param>
+		public void Add(MapMetadataEntry entry)
 		{
-			// Create the XML element.
-			XElement element = new XElement(name);
-			// Add the metadata values.
-			foreach (KeyValuePair<string, string> pair in this)
-			{
-				element.Add(new XElement("Entry",
-					new XAttribute("Name", pair.Key),
-					new XAttribute("Value", pair.Value)
-					));
-			}
-			// Return the XML element.
-			return element;
+			this.metadata.Add(entry.Name, entry);
 		}
 	}
 }

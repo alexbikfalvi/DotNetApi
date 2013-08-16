@@ -24,6 +24,7 @@ namespace MapApi
 	/// <summary>
 	/// A structure representing a map point.
 	/// </summary>
+	[Serializable]
 	public struct MapPoint
 	{
 		/// <summary>

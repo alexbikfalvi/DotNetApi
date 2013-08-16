@@ -56,7 +56,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// The object value;
 		/// </summary>
-		public double Value { get; set; }
+		public double Value { get; private set; }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

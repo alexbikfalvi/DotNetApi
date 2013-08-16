@@ -26,45 +26,52 @@ namespace DotNetApi.Windows
 	/// <summary>
 	/// Formats a control to the default configuration.
 	/// </summary>
-	public static class Formatting
+	public static class Window
 	{
 		private static bool fontChange = false;
 		private static FontFamily fontDefaultFamily = null;
 		private static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
-		static Formatting()
+		/// <summary>
+		/// Initializes the parameters of the static class.
+		/// </summary>
+		static Window()
 		{
 			// Check the major version of the operating system.
 			if (Environment.OSVersion.Version.Major == 5)
 			{
 				// Windows 2000 (5.0), XP (5.1) and Server 2003 (5.2): the default font is Tahoma.
-				Formatting.fontDefaultFamily = SystemFonts.DialogFont.FontFamily;
-				Formatting.fontChange = true;
+				Window.fontDefaultFamily = SystemFonts.DialogFont.FontFamily;
+				Window.fontChange = true;
 			}
 			else if (Environment.OSVersion.Version.Major >= 6)
 			{
 				// Windows Vista and above: the default font is SegoeUI.
-				Formatting.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
-				Formatting.fontChange = true;
+				Window.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
+				Window.fontChange = true;
 			}
 		}
 
+		/// <summary>
+		/// Sets the font for the specified window control.
+		/// </summary>
+		/// <param name="control">The control.</param>
 		public static void SetFont(Control control)
 		{
 			// If the control is null, exit.
 			if (null == control) return;
 			// If the font cannot be changed, return.
-			if (!Formatting.fontChange) return;
+			if (!Window.fontChange) return;
 			// Suspend the control layout.
 			control.SuspendLayout();
 			// For all child controls.
 			foreach (Control child in control.Controls)
 			{
 				// If the child font is in the replace list.
-				if (Formatting.fontReplaceList.IndexOf(child.Font.Name) > -1)
+				if (Window.fontReplaceList.IndexOf(child.Font.Name) > -1)
 				{
-					Formatting.SetFont(child);
-					child.Font = new Font(Formatting.fontDefaultFamily, child.Font.Size, child.Font.Style);
+					Window.SetFont(child);
+					child.Font = new Font(Window.fontDefaultFamily, child.Font.Size, child.Font.Style);
 				}
 			}
 			// Resume the control layout.

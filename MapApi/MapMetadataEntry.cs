@@ -17,30 +17,38 @@
  */
 
 using System;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
-namespace DotNetApi.Web.XmlRpc
+namespace MapApi
 {
 	/// <summary>
-	/// A class for an XML-RPC method call.
+	/// A structure representing a map metadata entry.
 	/// </summary>
 	[Serializable]
-	public sealed class XmlRpcMethodCall
+	public struct MapMetadataEntry
 	{
-		private string methodName;
-		private XmlRpcParameters parameters;
-
 		/// <summary>
-		/// Creates a new XML RPC method call instance.
+		/// Creates a new map metadata entry.
 		/// </summary>
-		/// <param name="methodName">The method name.</param>
-		/// <param name="parameters">The method parameters.</param>
-		public XmlRpcMethodCall(string methodName, object[] parameters = null)
+		/// <param name="name">The metadata entry name.</param>
+		/// <param name="value">The metadata entry value.</param>
+		public MapMetadataEntry(string name, string value)
 		{
-			this.methodName = methodName;
-			this.parameters = new XmlRpcParameters(parameters);
+			this.Name = name;
+			this.Value = value;
 		}
 
+		// Public fields.
 
+		/// <summary>
+		/// Gets or sets the metadata entry name.
+		/// </summary>
+		[XmlAttribute("Name")]
+		public string Name;
+		/// <summary>
+		/// Gets or sets the metadata entry value.
+		/// </summary>
+		[XmlAttribute("Value")]
+		public string Value;
 	}
 }

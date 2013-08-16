@@ -56,7 +56,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// The object value;
 		/// </summary>
-		public DateTime Value { get; set; }
+		public DateTime Value { get; private set; }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

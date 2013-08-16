@@ -17,17 +17,18 @@
  */
 
 using System;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A structure representing map bounds.
 	/// </summary>
+	[Serializable]
 	public struct MapRectangle
 	{
 		/// <summary>
-		/// Creates a new map bounds structure with the specified boundaries.
+		/// Creates a new map rectangle structure with the specified boundaries.
 		/// </summary>
 		/// <param name="left">The left boundary.</param>
 		/// <param name="top">The top boundary.</param>
@@ -46,18 +47,22 @@ namespace MapApi
 		/// <summary>
 		/// Gets or sets the left boundary.
 		/// </summary>
+		[XmlAttribute("Left")]
 		public double Left;
 		/// <summary>
 		/// Gets or sets the top boundary.
 		/// </summary>
+		[XmlAttribute("Top")]
 		public double Top;
 		/// <summary>
 		/// Gets or sets the right boundary.
 		/// </summary>
+		[XmlAttribute("Right")]
 		public double Right;
 		/// <summary>
 		/// Gets or sets the bottom boundary.
 		/// </summary>
+		[XmlAttribute("Bottom")]
 		public double Bottom;
 
 		// Public properties.
@@ -70,22 +75,5 @@ namespace MapApi
 		/// Gets the bounds height.
 		/// </summary>
 		public double Height { get { return Math.Abs(this.Top - this.Bottom); } }
-
-		// Public methods.
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
-		{
-			return new XElement(name,
-				new XAttribute("Left", this.Left),
-				new XAttribute("Top", this.Top),
-				new XAttribute("Right", this.Right),
-				new XAttribute("Bottom", this.Bottom)
-				);
-		}
 	}
 }

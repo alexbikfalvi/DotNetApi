@@ -31,9 +31,6 @@ namespace DotNetApi.Web.XmlRpc
 		private static string xmlNameName = "name";
 		private static string xmlNameValue = "value";
 
-		private string name;
-		private XmlRpcValue value;
-
 		/// <summary>
 		/// Creates a new struct member instance from the specified name and value.
 		/// </summary>
@@ -41,8 +38,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// <param name="value">The value.</param>
 		public XmlRpcMember(string name, object value)
 		{
-			this.name = name;
-			this.value = new XmlRpcValue(value);
+			this.Name = name;
+			this.Value = new XmlRpcValue(value);
 		}
 
 		/// <summary>
@@ -52,8 +49,8 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcMember(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcMember.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcMember.xmlName, element.Name.LocalName));
-			this.name = element.Element(XmlRpcMember.xmlNameName).Value;
-			this.value = new XmlRpcValue(element.Element(XmlRpcMember.xmlNameValue) as XElement);
+			this.Name = element.Element(XmlRpcMember.xmlNameName).Value;
+			this.Value = new XmlRpcValue(element.Element(XmlRpcMember.xmlNameValue) as XElement);
 		}
 
 		/// <summary>
@@ -64,12 +61,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Returns the structure name.
 		/// </summary>
-		public string Name { get { return this.name; } }
+		public string Name { get; private set; }
 
 		/// <summary>
 		/// Returns the structure value.
 		/// </summary>
-		public XmlRpcValue Value { get { return this.value; } }
+		public XmlRpcValue Value { get; private set; }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.
@@ -79,8 +76,8 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			return new XElement(
 				XmlRpcMember.xmlName,
-				new XElement(XmlRpcMember.xmlNameName, this.name),
-				this.value.GetXml()
+				new XElement(XmlRpcMember.xmlNameName, this.Name),
+				this.Value.GetXml()
 				);
 		}
 
@@ -90,7 +87,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The object value.</returns>
 		public override object GetValue()
 		{
-			return this.value;
+			return this.Value;
 		}
 	}
 }

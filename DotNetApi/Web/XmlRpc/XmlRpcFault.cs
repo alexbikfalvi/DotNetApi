@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -32,9 +33,6 @@ namespace DotNetApi.Web.XmlRpc
 		private static string xmlFaultCode = "faultCode";
 		private static string xmlFaultString = "faultString";
 
-		private int faultCode;
-		private string faultString;
-
 		/// <summary>
 		/// Creates a new XML RPC fault instance from the specified XML element.
 		/// </summary>
@@ -42,21 +40,21 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcFault(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcFault.xmlFault) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcFault.xmlFault, element.Name.LocalName));
-			using (XmlRpcStruct structFault = new XmlRpcStruct(element.Element(XmlRpcFault.xmlValue).FirstNode as XElement))
+			using (XmlRpcStruct structFault = new XmlRpcStruct(element.Elements(XmlRpcFault.xmlValue).FirstOrDefault()))
 			{
-				this.faultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
-				this.faultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;
+				this.FaultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
+				this.FaultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;
 			}
 		}
 
 		/// <summary>
 		/// Returns the fault code.
 		/// </summary>
-		public int FaultCode { get { return this.faultCode; } }
+		public int FaultCode { get; private set; }
 
 		/// <summary>
 		/// Returns the fault string.
 		/// </summary>
-		public string FaultString { get { return this.faultString; } }
+		public string FaultString { get; private set; }
 	}
 }

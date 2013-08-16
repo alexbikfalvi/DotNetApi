@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -29,15 +30,13 @@ namespace DotNetApi.Web.XmlRpc
 	{
 		private static string xmlName = "value";
 
-		private XmlRpcObject value = null;
-
 		/// <summary>
 		/// Creates a new XML RPC parameter for the specified value.
 		/// </summary>
 		/// <param name="value">The parameter value.</param>
 		public XmlRpcValue(object value)
 		{
-			this.value = XmlRpcObject.Create(value);
+			this.Value = XmlRpcObject.Create(value);
 		}
 
 		/// <summary>
@@ -48,7 +47,7 @@ namespace DotNetApi.Web.XmlRpc
 		{
 			if (element.Name.LocalName != XmlRpcValue.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcValue.xmlName, element.Name.LocalName));
 			// Create the value XML RPC object from the inner XML element.
-			this.value = XmlRpcObject.Create(element.FirstNode as XElement);
+			this.Value = XmlRpcObject.Create(element.Elements().FirstOrDefault());
 		}
 
 		/// <summary>
@@ -59,7 +58,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Gets the XML RPC object corresponding to this value.
 		/// </summary>
-		public XmlRpcObject Value { get { return this.value; } }
+		public XmlRpcObject Value { get; private set; }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.
@@ -67,7 +66,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The XML element.</returns>
 		public override XElement GetXml()
 		{
-			return new XElement(XmlRpcValue.xmlName, this.value.GetXml());
+			return new XElement(XmlRpcValue.xmlName, this.Value.GetXml());
 		}
 
 		/// <summary>
@@ -76,7 +75,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The object value.</returns>
 		public override object GetValue()
 		{
-			return this.value;
+			return this.Value;
 		}
 	}
 }

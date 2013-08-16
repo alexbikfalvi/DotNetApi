@@ -58,7 +58,7 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// The original string value (unescaped).
 		/// </summary>
-		public string Value { get; set; }
+		public string Value { get; private set; }
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

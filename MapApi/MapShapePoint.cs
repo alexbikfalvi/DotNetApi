@@ -17,16 +17,26 @@
  */
 
 using System;
-using DotNetApi.Xml;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
 	/// <summary>
 	/// A class representing a point map shape.
 	/// </summary>
+	[Serializable]
+	//[XmlRoot("ShapePoint")]
 	public class MapShapePoint : MapShape
 	{
-		private readonly MapPoint point;
+		private MapPoint point;
+
+		/// <summary>
+		/// Creates a new point map shape.
+		/// </summary>
+		public MapShapePoint()
+			: base(MapShapeType.Point)
+		{
+		}
 
 		/// <summary>
 		/// Creates a new point map shape.
@@ -54,23 +64,6 @@ namespace MapApi
 		/// <summary>
 		/// Gets the point of the current shape.
 		/// </summary>
-		public MapPoint Point { get { return this.point; } }
-
-		// Public methods.
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public override XElement ToXml(string name)
-		{
-			// Get the XML element from the base class method.
-			XElement element = base.ToXml(name);
-			// Add the point data.
-			element.Add(this.point.ToXml("Point"));
-			// Return the XML element.
-			return element;
-		}
+		public MapPoint Point { get { return this.point; } set { this.point = value; } }
 	}
 }
