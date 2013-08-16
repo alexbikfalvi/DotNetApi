@@ -17,7 +17,7 @@
  */
 
 using System;
-using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MapApi
 {
@@ -42,23 +42,12 @@ namespace MapApi
 		/// <summary>
 		/// Gets or sets the longitude.
 		/// </summary>
+		[XmlAttribute("X")]
 		public double X;
 		/// <summary>
 		/// Gets or sets the latitude.
 		/// </summary>
+		[XmlAttribute("Y")]
 		public double Y;
-
-		/// <summary>
-		/// Creates an XML element for the current map object.
-		/// </summary>
-		/// <param name="name">The name of the XML element.</param>
-		/// <returns>The XML element.</returns>
-		public XElement ToXml(string name)
-		{
-			return new XElement(name,
-				new XAttribute("X", this.X),
-				new XAttribute("Y", this.Y)
-				);
-		}
 	}
 }

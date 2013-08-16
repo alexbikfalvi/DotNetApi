@@ -17,7 +17,7 @@
  */
 
 using System;
-using System.Xml.Linq;
+using DotNetApi.Xml;
 
 namespace MapApi
 {
@@ -63,7 +63,7 @@ namespace MapApi
 		/// </summary>
 		/// <param name="name">The name of the XML element.</param>
 		/// <returns>The XML element.</returns>
-		public override System.Xml.Linq.XElement ToXml(string name)
+		public override XElement ToXml(string name)
 		{
 			// Get the XML element from the base class method.
 			XElement element = base.ToXml(name);
