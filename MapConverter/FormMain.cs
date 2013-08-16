@@ -2,10 +2,13 @@
 using System.Collections;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Catfood.Shapefile;
+using DotNetApi;
+using DotNetApi.IO;
 using DotNetApi.Xml;
 using MapApi;
 
@@ -37,10 +40,10 @@ namespace MapConverter
 			try
 			{
 				// Open a stream to the ZIP file.
-				using (FileStream fileStream = new FileStream(fileName, FileMode.Open))
+				using (FileStream fileInStream = new FileStream(fileName, FileMode.Open))
 				{
 					// Open the ZIP archive.
-					using (ZipArchive zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read))
+					using (ZipArchive zipArchive = new ZipArchive(fileInStream, ZipArchiveMode.Read))
 					{
 						// The shape file name.
 						string shapeFileName = null;
@@ -147,17 +150,38 @@ namespace MapConverter
 									//this.textBox.AppendText(Environment.NewLine);
 								}
 
-								// Serialize the map object.
 								this.textBox.AppendText(Environment.NewLine);
+
+								// Serialize the map object.
 								XmlSerializer serializer = new XmlSerializer(typeof(Map));
+								// Create a string writer.
 								using (StringWriter writer = new StringWriter())
 								{
+									// Serialize the map data.
 									serializer.Serialize(writer, map);
-									string xml = writer.ToString();
-									this.textBox.AppendText(xml);
-									using (StringReader reader = new StringReader(xml))
+									// Display the XML.
+									this.textBox.AppendText(writer.ToString());
+
+									this.textBox.AppendText(Environment.NewLine);
+									this.textBox.AppendText(Environment.NewLine);
+
+									// Display a dialog to save the file.
+									if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
 									{
-										Map mapd = serializer.Deserialize(reader) as Map;
+										// Create a file stream.
+										using (FileStream fileOutStream = File.Create(this.saveFileDialog.FileName))
+										{
+											using (MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(writer.ToString())))
+											{
+												// Compress the stream.
+												using (GZipStream zipStream = new GZipStream(fileOutStream, CompressionLevel.Optimal))
+												{
+													this.textBox.AppendText("Uncompressed data is {0} bytes.{1}".FormatWith(memoryStream.Length, Environment.NewLine));
+													memoryStream.CopyTo(zipStream);
+													this.textBox.AppendText("Compressed data is {0} bytes.{1}".FormatWith(fileOutStream.Length, Environment.NewLine));
+												}
+											}
+										}
 									}
 								}
 								//this.textBox.AppendText(map.ToXml().ToString());

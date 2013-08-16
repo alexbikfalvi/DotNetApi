@@ -31,6 +31,7 @@
 			this.buttonProcess = new System.Windows.Forms.Button();
 			this.textBox = new System.Windows.Forms.TextBox();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+			this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
 			this.SuspendLayout();
 			// 
 			// buttonProcess
@@ -63,6 +64,10 @@
 			this.openFileDialog.Filter = "Shape ZIP Files (*.zip)|*.zip";
 			this.openFileDialog.Title = "Open Shape ZIP File";
 			// 
+			// saveFileDialog
+			// 
+			this.saveFileDialog.Filter = "Map Files (*.map)|*.map";
+			// 
 			// FormMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -82,6 +87,7 @@
 		private System.Windows.Forms.Button buttonProcess;
 		private System.Windows.Forms.TextBox textBox;
 		private System.Windows.Forms.OpenFileDialog openFileDialog;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog;
 	}
 }
 
