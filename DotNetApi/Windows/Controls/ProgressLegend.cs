@@ -29,7 +29,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a progress legend.
 	/// </summary>
-	public class ProgressLegend : Component
+	public sealed class ProgressLegend : Component
 	{
 		public ProgressLegendItem.Collection items = new ProgressLegendItem.Collection();
 
@@ -65,12 +65,12 @@ namespace DotNetApi.Windows.Controls
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
 		public ProgressLegendItem.Collection Items { get { return this.items; } }
 
-		// Protected method.
+		// Private method.
 
 		/// <summary>
 		/// An event handler called before the item collection has been cleared.
 		/// </summary>
-		protected virtual void OnBeforeItemsCleared()
+		private void OnBeforeItemsCleared()
 		{
 			// Remove the event handlers for all items.
 			foreach (ProgressLegendItem item in this.items)
@@ -91,7 +91,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The item index.</param>
 		/// <param name="item">The legend item.</param>
-		protected virtual void OnAfterItemInserted(int index, ProgressLegendItem item)
+		private void OnAfterItemInserted(int index, ProgressLegendItem item)
 		{
 			// Add the item event handlers.
 			if (item != null)
@@ -109,7 +109,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The item index.</param>
 		/// <param name="item">The legend item.</param>
-		protected virtual void OnAfterItemRemoved(int index, ProgressLegendItem item)
+		private void OnAfterItemRemoved(int index, ProgressLegendItem item)
 		{
 			// Remove the item event handlers.
 			if (item != null)
@@ -128,7 +128,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="index">The item index.</param>
 		/// <param name="oldItem">The old legend item.</param>
 		/// <param name="newItem">The new legend item.</param>
-		protected virtual void OnAfterItemSet(int index, ProgressLegendItem oldItem, ProgressLegendItem newItem)
+		private void OnAfterItemSet(int index, ProgressLegendItem oldItem, ProgressLegendItem newItem)
 		{
 			// Remove the event handlers from the old item.
 			if (oldItem != null)
@@ -151,7 +151,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the color of a legend item has changed.
 		/// </summary>
 		/// <param name="item">The legend item.</param>
-		protected virtual void OnItemColorChanged(ProgressLegendItem item)
+		private void OnItemColorChanged(ProgressLegendItem item)
 		{
 			// Raise the item changed event.
 			if (this.ItemChanged != null) this.ItemChanged(this, item);
@@ -161,7 +161,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the text of a legend item has changed.
 		/// </summary>
 		/// <param name="item">The legend item.</param>
-		protected virtual void OnItemTextChanged(ProgressLegendItem item)
+		private void OnItemTextChanged(ProgressLegendItem item)
 		{
 			// Raise the item changed event.
 			if (this.ItemChanged != null) this.ItemChanged(this, item);

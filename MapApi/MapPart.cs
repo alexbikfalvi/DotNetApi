@@ -25,7 +25,7 @@ namespace MapApi
 	/// A class representing a map part, that is a collection of map points.
 	/// </summary>
 	[Serializable]
-	public class MapPart
+	public sealed class MapPart
 	{
 		private readonly MapPointCollection points = new MapPointCollection();
 

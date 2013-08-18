@@ -26,7 +26,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// Creates a tool strip drop down checked list.
 	/// </summary>
-	public class ToolStripDropDownCheckedList : ToolStripDropDown
+	public sealed class ToolStripDropDownCheckedList : ToolStripDropDown
 	{
 		private CheckedListBox listBox = new CheckedListBox();
 		private int minimumVisibleItems = 10;

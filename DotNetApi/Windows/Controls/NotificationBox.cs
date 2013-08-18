@@ -27,7 +27,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A control that displays a message box overlayed on a given control.
 	/// </summary>
-	public class NotificationBox : ThreadSafeControl
+	public sealed class NotificationBox : ThreadSafeControl
 	{
 		private string title = null;
 		private Image image = null;

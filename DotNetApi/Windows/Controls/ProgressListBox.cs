@@ -30,7 +30,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// An progress list box control.
 	/// </summary>
-	public class ProgressListBox : ListBox
+	public sealed class ProgressListBox : ListBox
 	{
 		private ProgressItem.Collection items = new ProgressItem.Collection();
 

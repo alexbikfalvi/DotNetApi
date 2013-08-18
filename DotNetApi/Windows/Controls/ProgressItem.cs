@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// An progress list box item.
 	/// </summary>
 	[DesignTimeVisible(false)]
-	public class ProgressItem : Component
+	public sealed class ProgressItem : Component
 	{
 		/// <summary>
 		/// An internal class representing the geometric characteristics of the progress item.
@@ -58,7 +58,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// A collection of progress navigator item items.
 		/// </summary>
-		public class Collection : CollectionBase
+		public sealed class Collection : CollectionBase
 		{
 			// Public delegates.
 			public delegate void ClearedEventHandler();
@@ -415,12 +415,12 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
-		// Protected methods.
+		// Private methods.
 
 		/// <summary>
 		/// An event handler called when the item text has changed.
 		/// </summary>
-		protected virtual void OnTextChanged()
+		private void OnTextChanged()
 		{
 			// Raise the event.
 			if (null != this.TextChanged) this.TextChanged(this);
@@ -431,7 +431,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="oldProgress">The old progress object.</param>
 		/// <param name="newProgress">The new progress object.</param>
-		protected virtual void OnProgressChanged(ProgressInfo oldProgress, ProgressInfo newProgress)
+		private void OnProgressChanged(ProgressInfo oldProgress, ProgressInfo newProgress)
 		{
 			// Remove the old progress event handlers.
 			if (oldProgress != null)
@@ -459,7 +459,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the progress level has changed.
 		/// </summary>
 		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressLevelChanged(ProgressInfo progress)
+		private void OnProgressLevelChanged(ProgressInfo progress)
 		{
 			// If the progress info is not the current progress info, do nothing.
 			if (progress != this.progress) return;
@@ -471,7 +471,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the progress default has changed.
 		/// </summary>
 		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressDefaultChanged(ProgressInfo progress)
+		private void OnProgressDefaultChanged(ProgressInfo progress)
 		{
 			// If the progress info is not the current progress info, do nothing.
 			if (progress != this.progress) return;
@@ -483,7 +483,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the progress count has changed.
 		/// </summary>
 		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressCountChanged(ProgressInfo progress)
+		private void OnProgressCountChanged(ProgressInfo progress)
 		{
 			// If the progress info is not the current progress info, do nothing.
 			if (progress != this.progress) return;
@@ -497,7 +497,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="progress">The progress info.</param>
 		/// <param name="oldLegend">The old legend.</param>
 		/// <param name="newLegend">The new legend.</param>
-		protected virtual void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
+		private void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
 		{
 			// If the progress info is not the current progress info, do nothing.
 			if (progress != this.progress) return;
@@ -510,7 +510,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="progress">The progress info.</param>
 		/// <param name="legend">The progress legend.</param>
-		protected virtual void OnProgressLegendChanged(ProgressInfo progress, ProgressLegend legend)
+		private void OnProgressLegendChanged(ProgressInfo progress, ProgressLegend legend)
 		{
 			// If the progress info is not the current progress info, do nothing.
 			if (progress != this.progress) return;
@@ -523,7 +523,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="oldEnabled">The old enabled state.</param>
 		/// <param name="newEnabled">The new enabled state.</param>
-		protected virtual void OnEnabledChanged(bool oldEnabled, bool newEnabled)
+		private void OnEnabledChanged(bool oldEnabled, bool newEnabled)
 		{
 			// If the enabled state has not changed, do nothing.
 			if (oldEnabled == newEnabled) return;

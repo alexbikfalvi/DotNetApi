@@ -152,35 +152,32 @@ namespace MapConverter
 
 								this.textBox.AppendText(Environment.NewLine);
 
-								// Serialize the map object.
-								XmlSerializer serializer = new XmlSerializer(typeof(Map));
-								// Create a string writer.
-								using (StringWriter writer = new StringWriter())
+								// Create a memory stream.
+								using (MemoryStream memoryStream = new MemoryStream())
 								{
 									// Serialize the map data.
-									serializer.Serialize(writer, map);
+									map.Write(memoryStream);
 									// Display the XML.
-									this.textBox.AppendText(writer.ToString());
+									this.textBox.AppendText(Encoding.UTF8.GetString(memoryStream.ReadToEnd()));
 
 									this.textBox.AppendText(Environment.NewLine);
 									this.textBox.AppendText(Environment.NewLine);
 
+									// Set the stream position to zero.
+									memoryStream.Position = 0;
 									// Display a dialog to save the file.
 									if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
 									{
 										// Create a file stream.
 										using (FileStream fileOutStream = File.Create(this.saveFileDialog.FileName))
 										{
-											using (MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(writer.ToString())))
-											{
-												// Compress the stream.
-												using (GZipStream zipStream = new GZipStream(fileOutStream, CompressionLevel.Optimal))
-												{
-													this.textBox.AppendText("Uncompressed data is {0} bytes.{1}".FormatWith(memoryStream.Length, Environment.NewLine));
-													memoryStream.CopyTo(zipStream);
-													this.textBox.AppendText("Compressed data is {0} bytes.{1}".FormatWith(fileOutStream.Length, Environment.NewLine));
-												}
-											}
+											// Compress the stream.
+											//using (GZipStream zipStream = new GZipStream(fileOutStream, CompressionLevel.Optimal))
+											//{
+												this.textBox.AppendText("Uncompressed data is {0} bytes.{1}".FormatWith(memoryStream.Length, Environment.NewLine));
+												memoryStream.CopyTo(fileOutStream);
+												this.textBox.AppendText("Compressed data is {0} bytes.{1}".FormatWith(fileOutStream.Length, Environment.NewLine));
+											//}
 										}
 									}
 								}

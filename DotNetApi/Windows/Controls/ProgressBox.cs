@@ -25,7 +25,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a progress box.
 	/// </summary>
-	public class ProgressBox : ThreadSafeControl
+	public sealed class ProgressBox : ThreadSafeControl
 	{
 		private ProgressInfo progress = null;
 
@@ -110,103 +110,6 @@ namespace DotNetApi.Windows.Controls
 		// Protected methods.
 
 		/// <summary>
-		/// An event handler called when a new progress info has been set.
-		/// </summary>
-		/// <param name="oldProgress">The old progress info.</param>
-		/// <param name="newProgress">The new progress info.</param>
-		protected virtual void OnProgressSet(ProgressInfo oldProgress, ProgressInfo newProgress)
-		{
-			// If the object has been disposed, do nothing.
-			if (this.IsDisposed) return;
-			// Remove the event handler for the old progress info.
-			if (null != oldProgress)
-			{
-				oldProgress.CountChanged -= this.OnProgressCountChanged;
-				oldProgress.DefaultChanged -= this.OnProgressDefaultChanged;
-				oldProgress.LevelChanged -= this.OnProgressLevelChanged;
-				oldProgress.LegendSet -= OnProgressLegendSet;
-				oldProgress.LegendChanged -= OnProgressLegendChanged;
-			}
-			// Add the event handler for the new progress info.
-			if (null != newProgress)
-			{
-				newProgress.CountChanged += this.OnProgressCountChanged;
-				newProgress.DefaultChanged += this.OnProgressDefaultChanged;
-				newProgress.LevelChanged += this.OnProgressLevelChanged;
-				newProgress.LegendSet += this.OnProgressLegendSet;
-				newProgress.LegendChanged += this.OnProgressLegendChanged;
-			}
-			// Update the progress.
-			this.OnUpdateProgress();
-			// Update the legend.
-			this.OnUpdateLegend();
-			// Update the geometric measurements.
-			this.OnUpdateGeometrics();
-			// Refresh the control.
-			this.Invalidate(this.controlBorder);
-		}
-
-		/// <summary>
-		/// An event handler called when the progress count has changed.
-		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressCountChanged(ProgressInfo progress)
-		{
-			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
-		}
-
-		/// <summary>
-		/// An event handler called when the progress default has changed.
-		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressDefaultChanged(ProgressInfo progress)
-		{
-			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
-		}
-
-		/// <summary>
-		/// An event handler called when the progress level has changed.
-		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		protected virtual void OnProgressLevelChanged(ProgressInfo progress)
-		{
-			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
-		}
-
-		/// <summary>
-		/// An event handler called when the progress legend is being set.
-		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		/// <param name="oldLegend">The old legend.</param>
-		/// <param name="newLegend">The new legend.</param>
-		protected virtual void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
-		{
-			// If the old legend is the same as the new legend, do nothing.
-			if (oldLegend == newLegend) return;
-		}
-
-		/// <summary>
-		/// An event handler called when the progress legend has changed.
-		/// </summary>
-		/// <param name="progress">The old legend.</param>
-		/// <param name="legend">The new legend.</param>
-		protected virtual void OnProgressLegendChanged(ProgressInfo progress, ProgressLegend legend)
-		{
-		}
-
-		/// <summary>
-		/// An event handler called when a new progress bar height has been set.
-		/// </summary>
-		/// <param name="oldHeight">The old height.</param>
-		/// <param name="newHeight">The new height.</param>
-		protected virtual void OnProgressHeightSet(int oldHeight, int newHeight)
-		{
-		}
-
-		/// <summary>
 		/// An event handler called when the control is being painted.
 		/// </summary>
 		/// <param name="e">The event arguments.</param>
@@ -277,8 +180,105 @@ namespace DotNetApi.Windows.Controls
 			base.OnTextChanged(e);
 		}
 
-
 		// Private methods.
+
+		/// <summary>
+		/// An event handler called when a new progress info has been set.
+		/// </summary>
+		/// <param name="oldProgress">The old progress info.</param>
+		/// <param name="newProgress">The new progress info.</param>
+		private void OnProgressSet(ProgressInfo oldProgress, ProgressInfo newProgress)
+		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
+			// Remove the event handler for the old progress info.
+			if (null != oldProgress)
+			{
+				oldProgress.CountChanged -= this.OnProgressCountChanged;
+				oldProgress.DefaultChanged -= this.OnProgressDefaultChanged;
+				oldProgress.LevelChanged -= this.OnProgressLevelChanged;
+				oldProgress.LegendSet -= OnProgressLegendSet;
+				oldProgress.LegendChanged -= OnProgressLegendChanged;
+			}
+			// Add the event handler for the new progress info.
+			if (null != newProgress)
+			{
+				newProgress.CountChanged += this.OnProgressCountChanged;
+				newProgress.DefaultChanged += this.OnProgressDefaultChanged;
+				newProgress.LevelChanged += this.OnProgressLevelChanged;
+				newProgress.LegendSet += this.OnProgressLegendSet;
+				newProgress.LegendChanged += this.OnProgressLegendChanged;
+			}
+			// Update the progress.
+			this.OnUpdateProgress();
+			// Update the legend.
+			this.OnUpdateLegend();
+			// Update the geometric measurements.
+			this.OnUpdateGeometrics();
+			// Refresh the control.
+			this.Invalidate(this.controlBorder);
+		}
+
+		/// <summary>
+		/// An event handler called when the progress count has changed.
+		/// </summary>
+		/// <param name="progress">The progress info.</param>
+		private void OnProgressCountChanged(ProgressInfo progress)
+		{
+			// If the event is not for the current progress info, do nothing.
+			if (progress != this.progress) return;
+		}
+
+		/// <summary>
+		/// An event handler called when the progress default has changed.
+		/// </summary>
+		/// <param name="progress">The progress info.</param>
+		private void OnProgressDefaultChanged(ProgressInfo progress)
+		{
+			// If the event is not for the current progress info, do nothing.
+			if (progress != this.progress) return;
+		}
+
+		/// <summary>
+		/// An event handler called when the progress level has changed.
+		/// </summary>
+		/// <param name="progress">The progress info.</param>
+		private void OnProgressLevelChanged(ProgressInfo progress)
+		{
+			// If the event is not for the current progress info, do nothing.
+			if (progress != this.progress) return;
+		}
+
+		/// <summary>
+		/// An event handler called when the progress legend is being set.
+		/// </summary>
+		/// <param name="progress">The progress info.</param>
+		/// <param name="oldLegend">The old legend.</param>
+		/// <param name="newLegend">The new legend.</param>
+		private void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
+		{
+			// If the old legend is the same as the new legend, do nothing.
+			if (oldLegend == newLegend) return;
+		}
+
+		/// <summary>
+		/// An event handler called when the progress legend has changed.
+		/// </summary>
+		/// <param name="progress">The old legend.</param>
+		/// <param name="legend">The new legend.</param>
+		private void OnProgressLegendChanged(ProgressInfo progress, ProgressLegend legend)
+		{
+		}
+
+		/// <summary>
+		/// An event handler called when a new progress bar height has been set.
+		/// </summary>
+		/// <param name="oldHeight">The old height.</param>
+		/// <param name="newHeight">The new height.</param>
+		private void OnProgressHeightSet(int oldHeight, int newHeight)
+		{
+		}
+
 
 		/// <summary>
 		/// An event handler called when the progress information is being updated.

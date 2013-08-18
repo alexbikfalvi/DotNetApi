@@ -48,11 +48,9 @@
     <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
     <Compile Include="Validation.cs" />
-    <Compile Include="Windows\Controls\Map\Projection\IMapProjection.cs" />
-    <Compile Include="Windows\Controls\Map\Map.cs" />
-    <Compile Include="Windows\Controls\Map\MapMarker.cs" />
-    <Compile Include="Windows\Controls\Map\Projection\MapProjection.cs" />
-    <Compile Include="Windows\Controls\Map\MapRegion.cs" />
+    <Compile Include="Windows\Controls\MapControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
     <Compile Include="Security\SecureStringExtensions.cs" />
@@ -207,7 +205,12 @@
   <ItemGroup>
     <None Include="Resources\WorldMap4000x2024.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\MapApi\MapApi.csproj">
+      <Project>{c5c1839c-4971-4781-b8fa-ff743e257a7e}</Project>
+      <Name>MapApi</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

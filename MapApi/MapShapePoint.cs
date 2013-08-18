@@ -25,8 +25,7 @@ namespace MapApi
 	/// A class representing a point map shape.
 	/// </summary>
 	[Serializable]
-	//[XmlRoot("ShapePoint")]
-	public class MapShapePoint : MapShape
+	public sealed class MapShapePoint : MapShape
 	{
 		private MapPoint point;
 

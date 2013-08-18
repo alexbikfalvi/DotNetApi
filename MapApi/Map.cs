@@ -17,6 +17,8 @@
  */
 
 using System;
+using System.IO;
+using System.IO.Compression;
 using System.Xml.Serialization;
 
 namespace MapApi
@@ -60,5 +62,52 @@ namespace MapApi
 		[XmlArray("Shapes")]
 		[XmlArrayItem("Shape")]
 		public MapShapeCollection Shapes { get { return this.shapes; } }
+
+		// Public methods.
+
+		/// <summary>
+		/// Writes the current object to the specified stream as ZIP compressed data.
+		/// </summary>
+		/// <param name="stream">The output stream.</param>
+		public void Write(Stream stream)
+		{
+			// Create an XML serializer for the map type.
+			XmlSerializer xmlSerializer = new XmlSerializer(typeof(Map));
+			// Compress the stream.
+			using (GZipStream zipStream = new GZipStream(stream, CompressionMode.Compress, true))
+			{
+				// Serialize the map object using the XML serializer.
+				xmlSerializer.Serialize(zipStream, this);
+			}
+		}
+
+		/// <summary>
+		/// Reads a new map object from ZIP compressed data.
+		/// </summary>
+		/// <param name="data">The ZIP compressed data.</param>
+		/// <returns>The map object.</returns>
+		public static Map Read(byte[] data)
+		{
+			// Create a memory stream to store the compressed map data.
+			using (MemoryStream memoryInStream = new MemoryStream(data))
+			{
+				// Create a memory stream to store the uncompressed map data.
+				using (MemoryStream memoryOutStream = new MemoryStream())
+				{
+					// Create a ZIP stream to decompress the data.
+					using (GZipStream zipStream = new GZipStream(memoryInStream, CompressionMode.Decompress, true))
+					{
+						// Copy the ZIP stream to the output stream.
+						zipStream.CopyTo(memoryOutStream);
+						// Create an XML serializer for the map type.
+						XmlSerializer xmlSerializer = new XmlSerializer(typeof(Map));
+						// Set the position of the output memory stream to zero.
+						memoryOutStream.Position = 0;
+						// Deserialize the map object using the XML serializer.
+						return xmlSerializer.Deserialize(memoryOutStream) as Map;
+					}
+				}
+			}
+		}
 	}
 }

@@ -33,7 +33,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a side menu.
 	/// </summary>
-	public class SideMenu : ContainerControl
+	public sealed class SideMenu : ContainerControl
 	{
 		// Private members
 		private SideMenuItem.Collection items = new SideMenuItem.Collection();
@@ -524,11 +524,13 @@ namespace DotNetApi.Windows.Controls
 			this.OnRefresh();
 		}
 
+		// Private methods.
+
 		/// <summary>
 		/// Sets the side menu item height.
 		/// </summary>
 		/// <param name="itemHeight">The item height.</param>
-		protected virtual void OnSetItemHeight(int itemHeight)
+		private void OnSetItemHeight(int itemHeight)
 		{
 			// If the item height has not changed, do nothing.
 			if (itemHeight == this.itemHeight) return;
@@ -540,7 +542,7 @@ namespace DotNetApi.Windows.Controls
 		/// Sets the side menu minimized item width.
 		/// </summary>
 		/// <param name="minimizedItemWidth">The minimized item width.</param>
-		protected virtual void OnSetMinimizedItemWidth(int minimizedItemWidth)
+		private void OnSetMinimizedItemWidth(int minimizedItemWidth)
 		{
 			// If the item width has not changed, do nothing.
 			if (minimizedItemWidth == this.minimizedItemWidth) return;
@@ -552,7 +554,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the selected index is set.
 		/// </summary>
 		/// <param name="index">The selected index.</param>
-		protected virtual void OnSetSelectedIndex(int? index)
+		private void OnSetSelectedIndex(int? index)
 		{
 			// If the selected index is greater than the number of items, set the selected index to zero or null.
 			if (index > this.items.Count) index = this.items.Count > 0 ? 0 as int? : null;
@@ -580,7 +582,7 @@ namespace DotNetApi.Windows.Controls
 		/// Changes the current selected item.
 		/// </summary>
 		/// <param name="item">The new selected item.</param>
-		protected virtual void OnSetSelectedItem(SideMenuItem item)
+		private void OnSetSelectedItem(SideMenuItem item)
 		{
 			// Get the index of the specified item.
 			int index = this.items.IndexOf(item);
@@ -596,7 +598,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="visibleItems">The number of visible items.</param>
 		/// <returns><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</returns>
-		protected virtual bool OnSetVisibleItems(int visibleItems)
+		private bool OnSetVisibleItems(int visibleItems)
 		{
 			// Ignore negative values.
 			if (visibleItems < 0) return false;
@@ -630,7 +632,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="minimizedItems">The number of minimized items to set.</param>
 		/// <return><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</return>
-		protected virtual bool OnSetMinimizedItems(int minimizedItems)
+		private bool OnSetMinimizedItems(int minimizedItems)
 		{
 			// Ignore negative values.
 			if (minimizedItems < 0) return false;
@@ -659,7 +661,7 @@ namespace DotNetApi.Windows.Controls
 		/// Sets the specified number of hidden items.
 		/// </summary>
 		/// <returns><b>True</b> if the control refreshes and generates an item visibility changed event, <b>false</b> otherwise.</returns>
-		protected virtual bool OnSetHiddenItems()
+		private bool OnSetHiddenItems()
 		{
 			// Ignore negative values.
 			if (hiddenItems < 0) return false;
@@ -680,8 +682,6 @@ namespace DotNetApi.Windows.Controls
 
 			return true;
 		}
-
-		// Private methods.
 
 		/// <summary>
 		/// Computes the global index of a menu item, based on the visible index.

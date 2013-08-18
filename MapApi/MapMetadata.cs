@@ -20,7 +20,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using DotNetApi;
 
 namespace MapApi
 {
@@ -28,7 +27,7 @@ namespace MapApi
 	/// A class representing a map metdata collection.
 	/// </summary>
 	[Serializable]
-	public class MapMetadata : IEnumerable<MapMetadataEntry>
+	public sealed class MapMetadata : IEnumerable<MapMetadataEntry>
 	{
 		private readonly Dictionary<string, MapMetadataEntry> metadata = new Dictionary<string, MapMetadataEntry>();
 

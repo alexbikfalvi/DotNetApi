@@ -26,7 +26,7 @@ namespace MapApi
 	/// A class representing a collection of map parts.
 	/// </summary>
 	[Serializable]
-	public class MapPartCollection : IEnumerable<MapPart>
+	public sealed class MapPartCollection : IEnumerable<MapPart>
 	{
 		private readonly List<MapPart> parts = new List<MapPart>();
 

@@ -29,12 +29,12 @@ namespace DotNetApi.Windows.Controls
 	/// A class representing a progress legend item.
 	/// </summary>
 	[DesignTimeVisible(false)]
-	public class ProgressLegendItem : Component
+	public sealed class ProgressLegendItem : Component
 	{
 		/// <summary>
 		/// A collection of progress navigator item items.
 		/// </summary>
-		public class Collection : CollectionBase
+		public sealed class Collection : CollectionBase
 		{
 			// Public delegates.
 			public delegate void ClearedEventHandler();
@@ -327,12 +327,12 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
-		// Protected methods.
+		// Private methods.
 
 		/// <summary>
 		/// An event handler called when the legend item text has changed.
 		/// </summary>
-		protected virtual void OnTextChanged()
+		private void OnTextChanged()
 		{
 			// Raise the event.
 			if (this.TextChanged != null) this.TextChanged(this);
@@ -341,7 +341,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the legend item color has changed.
 		/// </summary>
-		protected virtual void OnColorChanged()
+		private void OnColorChanged()
 		{
 			// Raise the event.
 			if (this.ColorChanged != null) this.ColorChanged(this);

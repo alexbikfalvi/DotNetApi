@@ -26,7 +26,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a secure text box.
 	/// </summary>
-	public class SecureTextBox : TextBox
+	public sealed class SecureTextBox : TextBox
 	{
 		private const int WM_CUT = 0x300;
 		private const int WM_COPY = 0x301;
@@ -245,11 +245,13 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		// Private methods.
+
 		/// <summary>
 		/// An event handler called when the text of the secure text box has been set.
 		/// </summary>
 		/// <param name="text">The new text.</param>
-		protected virtual void OnSecureTextSet(SecureString text)
+		private void OnSecureTextSet(SecureString text)
 		{
 			// If the secure text is null.
 			if (null == text)
@@ -274,7 +276,7 @@ namespace DotNetApi.Windows.Controls
 		/// Pastes the specified text into the secure text box control.
 		/// </summary>
 		/// <param name="text">The text to paste.</param>
-		protected virtual void OnPaste(string text)
+		private void OnPaste(string text)
 		{
 			// Get the caret position.
 			int position = this.SelectionStart;

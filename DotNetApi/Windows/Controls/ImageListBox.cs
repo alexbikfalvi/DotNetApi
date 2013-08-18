@@ -30,7 +30,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// An image list box control.
 	/// </summary>
-	public class ImageListBox : ListBox
+	public sealed class ImageListBox : ListBox
 	{
 		private int imageWidth = 64;
 

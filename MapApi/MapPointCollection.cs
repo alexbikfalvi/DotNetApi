@@ -26,7 +26,7 @@ namespace MapApi
 	/// A class representing a collection of map points.
 	/// </summary>
 	[Serializable]
-	public class MapPointCollection : IEnumerable<MapPoint>
+	public sealed class MapPointCollection : IEnumerable<MapPoint>
 	{
 		private readonly List<MapPoint> points = new List<MapPoint>();
 

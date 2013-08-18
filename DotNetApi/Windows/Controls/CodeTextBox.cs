@@ -8,7 +8,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// Represents a code text box control.
 	/// </summary>
-	public class CodeTextBox : RichTextBox
+	public sealed class CodeTextBox : RichTextBox
 	{
 		public CodeTextBox()
 		{

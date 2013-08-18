@@ -46,6 +46,11 @@
     <Compile Include="MapPointCollection.cs" />
     <Compile Include="MapRectangle.cs" />
     <Compile Include="MapPoint.cs" />
+    <Compile Include="Maps.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Maps.resx</DependentUpon>
+    </Compile>
     <Compile Include="MapShape.cs" />
     <Compile Include="MapShapeCollection.cs" />
     <Compile Include="MapShapePoint.cs" />
@@ -53,10 +58,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotNetApi\DotNetApi.csproj">
-      <Project>{475f767e-2288-4e56-9b90-179a10dcab49}</Project>
-      <Name>DotNetApi</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="Maps.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Maps.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Ne110mAdmin0Countries.map" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

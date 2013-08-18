@@ -26,7 +26,7 @@ namespace MapApi
 	/// A class representing a collection of map shapes.
 	/// </summary>
 	[Serializable]
-	public class MapShapeCollection : IEnumerable<MapShape>
+	public sealed class MapShapeCollection : IEnumerable<MapShape>
 	{
 		private List<MapShape> shapes = new List<MapShape>();
 

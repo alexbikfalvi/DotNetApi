@@ -27,7 +27,7 @@ namespace DotNetApi.Windows.Controls
 	/// An image list box item.
 	/// </summary>
 	[DesignTimeVisible(false)]
-	public class ImageListBoxItem : Component
+	public sealed class ImageListBoxItem : Component
 	{
 		private string text;
 		private Image image;

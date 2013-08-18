@@ -25,7 +25,7 @@ namespace MapApi
 	/// A class representing a polygon map shape.
 	/// </summary>
 	[Serializable]
-	public class MapShapePolygon : MapShape
+	public sealed class MapShapePolygon : MapShape
 	{
 		private MapRectangle bounds;
 		private readonly MapPartCollection parts = new MapPartCollection();

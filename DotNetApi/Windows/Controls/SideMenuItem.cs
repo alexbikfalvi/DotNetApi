@@ -31,7 +31,7 @@ namespace DotNetApi.Windows.Controls
 	/// A class representing side menu item.
 	/// </summary>
 	[DesignTimeVisible(false)]
-	public class SideMenuItem : MenuItem
+	public sealed class SideMenuItem : MenuItem
 	{
 		/// <summary>
 		/// A collection of progress navigator item items.
@@ -454,11 +454,13 @@ namespace DotNetApi.Windows.Controls
 			base.Dispose(disposing);
 		}
 
+		// Private methods.
+
 		/// <summary>
 		/// An event handler called when the text is set.
 		/// </summary>
 		/// <param name="text">The menu item text.</param>
-		protected virtual void OnTextSet(string text)
+		private void OnTextSet(string text)
 		{
 			// Set the text for this menu item.
 			base.Text = text;
@@ -472,7 +474,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the small image is set.
 		/// </summary>
 		/// <param name="image">The small image.</param>
-		protected virtual void OnSmallImageSet(Image image)
+		private void OnSmallImageSet(Image image)
 		{
 			// Set the image for the menu item.
 			this.imageSmall = image;
@@ -486,7 +488,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the large image is set.
 		/// </summary>
 		/// <param name="image">The large image.</param>
-		protected virtual void OnLargeImageSet(Image image)
+		private void OnLargeImageSet(Image image)
 		{
 			// Set the image for this menu item.
 			this.imageLarge = image;
@@ -498,7 +500,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the control is set.
 		/// </summary>
 		/// <param name="control">The control.</param>
-		protected virtual void OnControlSet(ISideControl control)
+		private void OnControlSet(ISideControl control)
 		{
 			// Save the old control for this item.
 			ISideControl old = this.control;
@@ -513,7 +515,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		protected void OnHiddenClick(object sender, EventArgs e)
+		private void OnHiddenClick(object sender, EventArgs e)
 		{
 			// Call the hidden click event handler to update the item selection..
 			if (this.HiddenClick != null) this.HiddenClick(this);

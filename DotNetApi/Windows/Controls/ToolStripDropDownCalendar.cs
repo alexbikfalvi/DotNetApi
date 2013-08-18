@@ -24,7 +24,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// Creates a tool strip drop down calendar.
 	/// </summary>
-	public class ToolStripDropDownCalendar : ToolStripDropDown
+	public sealed class ToolStripDropDownCalendar : ToolStripDropDown
 	{
 		private MonthCalendar calendar = new MonthCalendar();
 

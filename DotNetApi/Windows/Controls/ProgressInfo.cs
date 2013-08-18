@@ -28,7 +28,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing multi-level progress information.
 	/// </summary>
-	public class ProgressInfo : Component
+	public sealed class ProgressInfo : Component
 	{
 		private ProgressLegend legend = null;
 		private int count = 0;
@@ -181,12 +181,12 @@ namespace DotNetApi.Windows.Controls
 			this.OnLevelChanged();
 		}
 
-		// Protected methods.
+		// Private methods.
 		
 		/// <summary>
 		/// An event handler called when the progress level has changed.
 		/// </summary>
-		protected virtual void OnLevelChanged()
+		private void OnLevelChanged()
 		{
 			// Raise the event.
 			if (null != this.LevelChanged) this.LevelChanged(this);
@@ -195,7 +195,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the progress default has changed.
 		/// </summary>
-		protected virtual void OnDefaultChanged()
+		private void OnDefaultChanged()
 		{
 			// Raise the event.
 			if (null != this.DefaultChanged) this.DefaultChanged(this);
@@ -204,7 +204,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the count value has changed.
 		/// </summary>
-		protected virtual void OnCountChanged()
+		private void OnCountChanged()
 		{
 			// Raise the event.
 			if (null != this.CountChanged) this.CountChanged(this);
@@ -215,7 +215,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="oldLegend">The old legend.</param>
 		/// <param name="newLegend">The new legend.</param>
-		protected virtual void OnLegendSet(ProgressLegend oldLegend, ProgressLegend newLegend)
+		private void OnLegendSet(ProgressLegend oldLegend, ProgressLegend newLegend)
 		{
 			// Remove the old legend event handlers.
 			if (oldLegend != null)
@@ -238,7 +238,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the legend items have changed.
 		/// </summary>
 		/// <param name="legend">The legend.</param>
-		protected virtual void OnLegendItemsChanged(ProgressLegend legend)
+		private void OnLegendItemsChanged(ProgressLegend legend)
 		{
 			// If the legend is not the current legend, do nothing.
 			if (legend != this.legend) return;
@@ -253,15 +253,13 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="legend">The progress legend.</param>
 		/// <param name="item">The legend item.</param>
-		protected virtual void OnLegendItemChanged(ProgressLegend legend, ProgressLegendItem item)
+		private void OnLegendItemChanged(ProgressLegend legend, ProgressLegendItem item)
 		{
 			// If the legend is not the current legend, do nothing.
 			if (legend != this.legend) return;
 			// Raise the legend changed event.
 			if (null != this.LegendChanged) this.LegendChanged(this, legend);
 		}
-
-		// Private methods.
 
 		/// <summary>
 		/// An event handler called when the progress information is initialized.
