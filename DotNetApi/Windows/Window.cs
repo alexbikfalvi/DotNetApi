@@ -32,6 +32,8 @@ namespace DotNetApi.Windows
 		private static FontFamily fontDefaultFamily = null;
 		private static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
+		private static Font defaultFont;
+
 		/// <summary>
 		/// Initializes the parameters of the static class.
 		/// </summary>
@@ -50,13 +52,29 @@ namespace DotNetApi.Windows
 				Window.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
 				Window.fontChange = true;
 			}
+
+			// Create static fonts.
+			Window.defaultFont = new Font(Window.fontDefaultFamily, SystemFonts.DefaultFont.Size, SystemFonts.DefaultFont.Style);
 		}
+
+		// Public properties.
+		
+		/// <summary>
+		/// Gets the default font.
+		/// </summary>
+		public static Font DefaultFont
+		{
+			get { return Window.defaultFont; }
+		}
+
+		// Public methods.
 
 		/// <summary>
 		/// Sets the font for the specified window control.
 		/// </summary>
 		/// <param name="control">The control.</param>
-		public static void SetFont(Control control)
+		/// <param name="font">The parent font.</param>
+		public static void SetFont(Control control, Font font = null)
 		{
 			// If the control is null, exit.
 			if (null == control) return;
@@ -64,16 +82,38 @@ namespace DotNetApi.Windows
 			if (!Window.fontChange) return;
 			// Suspend the control layout.
 			control.SuspendLayout();
+			// Get the font of the current control.
+			Font oldFont = control.Font;
+			// The new font for the current control.
+			Font newFont;
+			// If the parent font has the same size and style as the old font.
+			if (null != font ? (oldFont.Size == font.Size) && (oldFont.Style == font.Style) : false)
+			{
+				// Use the same font as the parent.
+				newFont = font;
+			}
+			else if ((Window.defaultFont.Size == font.Size) && (Window.defaultFont.Style == font.Style))
+			{
+				// Use the default font.
+				newFont = Window.defaultFont;
+			}
+			else
+			{
+				// Create a new font for the current control.
+				newFont = new Font(Window.fontDefaultFamily, oldFont.Size, oldFont.Style);
+			}
 			// For all child controls.
 			foreach (Control child in control.Controls)
 			{
 				// If the child font is in the replace list.
 				if (Window.fontReplaceList.IndexOf(child.Font.Name) > -1)
 				{
+					// Set the font for the child control.
 					Window.SetFont(child);
-					child.Font = new Font(Window.fontDefaultFamily, child.Font.Size, child.Font.Style);
 				}
 			}
+			// Set the font for the current control.
+			control.Font = newFont;
 			// Resume the control layout.
 			control.ResumeLayout();
 		}

@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DotNetApi.Drawing;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -28,16 +29,53 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class MapControl : ThreadSafeControl
 	{
+		private const string messageNoMap = "No map";
+
 		private Map map = null; // The current map.
 
-		private Bitmap bitmap = null;
+		private Color colorMessageBorder = Color.DarkGray;
+		private Color colorMessageFill = Color.LightGray;
+
+		private Bitmap bitmapBackground = new Bitmap(20, 20);
+		private Bitmap bitmap;
+
+		private TextureBrush brushBackground;
+
+		private Shadow shadow = new Shadow(Color.Black, 0, 8, 0.8);
+
+		private string message = MapControl.messageNoMap;
+
+		private Font fontMessage = Window.DefaultFont;
+
+		private Padding paddingMessage = new Padding(4);
+
+		private Rectangle rectangleMessage;
 
 		/// <summary>
 		/// Creates a new control instance.
 		/// </summary>
 		public MapControl()
 		{
+			// Set the default properties.
 			this.DoubleBuffered = true;
+
+			// Create the background bitmap.
+			using (Graphics graphics = Graphics.FromImage(this.bitmapBackground))
+			{
+				using (SolidBrush brush = new SolidBrush(Color.LightGray))
+				{
+					// Draw the gray checker board.
+					graphics.FillRectangle(brush, 0, 0, 10, 10);
+					graphics.FillRectangle(brush, 10, 10, 20, 20);
+					// Draw the white checker board.
+					brush.Color = Color.White;
+					graphics.FillRectangle(brush, 10, 0, 20, 10);
+					graphics.FillRectangle(brush, 0, 10, 10, 20);
+				}
+			}
+
+			// Create the background brush.
+			this.brushBackground = new TextureBrush(this.bitmapBackground);
 		}
 
 		// Protected methods.
@@ -53,6 +91,11 @@ namespace DotNetApi.Windows.Controls
 			// If the object is being disposed.
 			if (disposing)
 			{
+				// Dispose the brushes.
+				this.brushBackground.Dispose();
+
+				// Dispose the bitmaps.
+				this.bitmapBackground.Dispose();
 			}
 		}
 
@@ -62,9 +105,21 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="e">The event arguments.</param>
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			using (SolidBrush brush = new SolidBrush(Color.Gray))
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
+
+			// If the current map bitmap is null.
+			if (null == this.bitmap)
 			{
-				e.Graphics.FillRectangle(brush, this.ClientRectangle);
+				// Draw the checkerboard background.
+				e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
+			}
+
+			// If the current message is not null or empty.
+			if (!string.IsNullOrEmpty(this.message))
+			{
+				// Draw the message.
+				this.DrawMessage(e.Graphics);
 			}
 
 			// Call the base class event handler.
@@ -79,6 +134,62 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class event handler.
 			base.OnResize(e);
+			// Refresh the control.
+			this.Refresh();
+		}
+
+		// Private methods.
+
+		/// <summary>
+		/// Sets the specified message on the control.
+		/// </summary>
+		/// <param name="message"></param>
+		private void SetMessage(string message)
+		{
+		}
+
+		/// <summary>
+		/// Draws the current message on the control.
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		private void DrawMessage(Graphics graphics)
+		{
+			// Measure the message text.
+			Size size = TextRenderer.MeasureText(message, this.fontMessage);
+
+			// Create the border rectangle.
+			Rectangle rectangleBorder = new Rectangle(
+				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.paddingMessage.Left,
+				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.paddingMessage.Top,
+				size.Width + this.paddingMessage.Left + this.paddingMessage.Right,
+				size.Height + this.paddingMessage.Top + this.paddingMessage.Bottom);
+			// Create the fill rectangle.
+			Rectangle rectangleFill = new Rectangle(
+				rectangleBorder.X + 1,
+				rectangleBorder.Y + 1,
+				rectangleBorder.Width - 1,
+				rectangleBorder.Height - 1);
+
+			// Create the pen.
+			using (Pen pen = new Pen(this.colorMessageBorder))
+			{
+				// Create the brush.
+				using (SolidBrush brush = new SolidBrush(this.colorMessageFill))
+				{
+					// Draw the shadow.
+					graphics.DrawShadow(this.shadow, rectangleBorder);
+					// Draw the border.
+					graphics.DrawRectangle(pen, rectangleBorder);
+					// Draw the rectangle.
+					graphics.FillRectangle(brush, rectangleFill);
+				}
+			}
+			
+			// Display a message.
+			TextRenderer.DrawText(graphics, this.message, Window.DefaultFont, rectangleBorder, Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+			// Set the message rectangle.
+			this.rectangleMessage = rectangleBorder;
 		}
 	}
 }

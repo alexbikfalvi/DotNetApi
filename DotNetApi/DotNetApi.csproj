@@ -45,6 +45,13 @@
   <ItemGroup>
     <Compile Include="Async\AsyncResult.cs" />
     <Compile Include="Conversion.cs" />
+    <Compile Include="Drawing\Effect.cs" />
+    <Compile Include="Drawing\Effects.cs" />
+    <Compile Include="Drawing\Imaging\Kernel1D.cs" />
+    <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
+    <Compile Include="Drawing\Imaging\Kernel2D.cs" />
+    <Compile Include="Drawing\Imaging\Kernel2DGauss.cs" />
+    <Compile Include="Drawing\Shadow.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
     <Compile Include="Validation.cs" />
