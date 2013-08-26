@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using DotNetApi.Drawing;
@@ -30,26 +31,32 @@ namespace DotNetApi.Windows.Controls
 	public sealed class MapControl : ThreadSafeControl
 	{
 		private const string messageNoMap = "No map";
+		private const string messageRefreshing = "Refreshing map...";
 
-		private Map map = null; // The current map.
+		// The current map.
+
+		private Map map = null;
+
+		// Colors.
 
 		private Color colorMessageBorder = Color.DarkGray;
 		private Color colorMessageFill = Color.LightGray;
+
+		// Bitmaps.
 
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
 		private Bitmap bitmap;
 
 		private TextureBrush brushBackground;
 
-		private Shadow shadow = new Shadow(Color.Black, 0, 8, 0.8);
+		private Shadow shadow = new Shadow(Color.Black, 0, 10);
+
+		// Message.
 
 		private string message = MapControl.messageNoMap;
-
-		private Font fontMessage = Window.DefaultFont;
-
-		private Padding paddingMessage = new Padding(4);
-
-		private Rectangle rectangleMessage;
+		private Font messageFont = Window.DefaultFont;
+		private Padding messagePadding = new Padding(4);
+		private bool messageVisible = true;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -78,6 +85,38 @@ namespace DotNetApi.Windows.Controls
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
 		}
 
+		// Public properties.
+
+		/// <summary>
+		/// Gets or sets the current message.
+		/// </summary>
+		[DefaultValue(MapControl.messageNoMap)]
+		public string Message
+		{
+			get { return this.message; }
+			set { this.OnMessageChanged(value); }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the message is visible.
+		/// </summary>
+		[DefaultValue(true)]
+		public bool MessageVisible
+		{
+			get { return this.messageVisible; }
+			set { this.OnMessageVisibleChanged(value); }
+		}
+
+		/// <summary>
+		/// Gets or sets the current map.
+		/// </summary>
+		[DefaultValue(null)]
+		public Map Map
+		{
+			get { return this.map; }
+			set { this.OnMapChanged(value); }
+		}
+
 		// Protected methods.
 
 		/// <summary>
@@ -95,7 +134,11 @@ namespace DotNetApi.Windows.Controls
 				this.brushBackground.Dispose();
 
 				// Dispose the bitmaps.
+				if (this.bitmap != null) this.bitmap.Dispose();
 				this.bitmapBackground.Dispose();
+
+				// Dispose the shadow.
+				this.shadow.Dispose();
 			}
 		}
 
@@ -114,12 +157,18 @@ namespace DotNetApi.Windows.Controls
 				// Draw the checkerboard background.
 				e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 			}
+			else
+			{
+				// Draw the map bitmap.
+				//e.Graphics.Fil
+			}
 
-			// If the current message is not null or empty.
-			if (!string.IsNullOrEmpty(this.message))
+
+			// If the current message is not null or empty and the message is visible.
+			if (!string.IsNullOrEmpty(this.message) && this.messageVisible)
 			{
 				// Draw the message.
-				this.DrawMessage(e.Graphics);
+				this.OnDrawMessage(e.Graphics);
 			}
 
 			// Call the base class event handler.
@@ -143,26 +192,67 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Sets the specified message on the control.
 		/// </summary>
-		/// <param name="message"></param>
-		private void SetMessage(string message)
+		/// <param name="message">The new message.</param>
+		private void OnMessageChanged(string message)
 		{
+			// Get the shadow rectangle for the old message.
+			Rectangle rectangleOld = this.shadow.GetShadowRectangle(this.MeasureMessage(this.message));
+			// Get the shadow rectangle for the new message.
+			Rectangle rectangleNew = this.shadow.GetShadowRectangle(this.MeasureMessage(message));
+			// Set the new message.
+			this.message = message;
+			// Invalidate the maximum region between the two rectangles.
+			this.Invalidate(Geometry.Merge(rectangleOld, rectangleNew));
+		}
+
+		/// <summary>
+		/// Set the message visibility.
+		/// </summary>
+		/// <param name="visible"><b>True</b> if the message is visible or <b>false</b> otherwise.</param>
+		private void OnMessageVisibleChanged(bool visible)
+		{
+			// Get the shadow rectangle for the current message.
+			Rectangle rectangle = this.shadow.GetShadowRectangle(this.MeasureMessage(this.message));
+			// Set the new message visibility.
+			this.messageVisible = visible;
+			// Invalidate the maximum region between the two rectangles.
+			this.Invalidate(rectangle);
+		}
+
+		/// <summary>
+		/// Sets the current map.
+		/// </summary>
+		/// <param name="map">The map.</param>
+		private void OnMapChanged(Map map)
+		{
+			// If the map has not changed, do nothing.
+			if (this.map == map) return;
+
+			// Set the current map.
+			this.map = map;
+			
+			// If the curernt bitmap is not null, dispose the current bitmap.
+			if (null != this.bitmap)
+			{
+				this.bitmap.Dispose();
+				this.bitmap = null;
+			}
+
+			// Set a new message.
+			this.message = MapControl.messageRefreshing;
+
+			// Refresh the control.
+			this.Refresh();
 		}
 
 		/// <summary>
 		/// Draws the current message on the control.
 		/// </summary>
 		/// <param name="graphics">The graphics object.</param>
-		private void DrawMessage(Graphics graphics)
+		private void OnDrawMessage(Graphics graphics)
 		{
-			// Measure the message text.
-			Size size = TextRenderer.MeasureText(message, this.fontMessage);
-
 			// Create the border rectangle.
-			Rectangle rectangleBorder = new Rectangle(
-				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.paddingMessage.Left,
-				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.paddingMessage.Top,
-				size.Width + this.paddingMessage.Left + this.paddingMessage.Right,
-				size.Height + this.paddingMessage.Top + this.paddingMessage.Bottom);
+			Rectangle rectangleBorder = this.MeasureMessage(this.message);
 			// Create the fill rectangle.
 			Rectangle rectangleFill = new Rectangle(
 				rectangleBorder.X + 1,
@@ -187,9 +277,24 @@ namespace DotNetApi.Windows.Controls
 			
 			// Display a message.
 			TextRenderer.DrawText(graphics, this.message, Window.DefaultFont, rectangleBorder, Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+		}
 
-			// Set the message rectangle.
-			this.rectangleMessage = rectangleBorder;
+		/// <summary>
+		/// Returns the drawing rectangle for the specified message.
+		/// </summary>
+		/// <param name="message">The message.</param>
+		/// <returns>The drawing rectangle.</returns>
+		private Rectangle MeasureMessage(string message)
+		{
+			// Measure the message text.
+			Size size = TextRenderer.MeasureText(message, this.messageFont);
+
+			// Return the message rectangle.
+			return new Rectangle(
+				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.messagePadding.Left,
+				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.messagePadding.Top,
+				size.Width + this.messagePadding.Left + this.messagePadding.Right,
+				size.Height + this.messagePadding.Top + this.messagePadding.Bottom);
 		}
 	}
 }

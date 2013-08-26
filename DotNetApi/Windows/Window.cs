@@ -92,7 +92,7 @@ namespace DotNetApi.Windows
 				// Use the same font as the parent.
 				newFont = font;
 			}
-			else if ((Window.defaultFont.Size == font.Size) && (Window.defaultFont.Style == font.Style))
+			else if (null != font ? (Window.defaultFont.Size == font.Size) && (Window.defaultFont.Style == font.Style) : false)
 			{
 				// Use the default font.
 				newFont = Window.defaultFont;

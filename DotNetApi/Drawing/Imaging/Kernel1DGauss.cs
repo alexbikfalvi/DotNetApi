@@ -17,6 +17,7 @@
  */
 
 using System;
+using DotNetApi.Numeric;
 
 namespace DotNetApi.Drawing.Imaging
 {
@@ -28,24 +29,29 @@ namespace DotNetApi.Drawing.Imaging
 		private double[] kernel;
 		private int offset;
 
+		private const double precision = 0.99;
+
 		/// <summary>
 		/// Creates a gaussian kernel instance.
 		/// </summary>
 		/// <param name="size">The kernel size.</param>
-		/// <param name="sigma">The standard deviation of the gaussian distribution. The default value is <b>1.0</b>.</param>
-		public Kernel1DGauss(int size, double sigma = 1.0)
+		public Kernel1DGauss(int size)
 			: base(size)
 		{
 			// Create the kernel offset;
 			this.offset = this.size >> 1;
+			// Compute the maximum standard deviation such that the sum of all kernel elements approximates to one.
+			double sigma = this.offset / (Math.Sqrt(2) * SpecialFunctions.InvErf(Kernel1DGauss.precision));
 			// Create the constants.
 			double invTwoSigmaSq = -1.0 / (2 * sigma * sigma);
 			double invSqrtTwoPiSigmaSq = Math.Sqrt(-invTwoSigmaSq / Math.PI);
 			// Create the kernel.
+			double sum = 0;
 			this.kernel = new double[size];
 			for (int i = 0, x = -this.offset; i < size; i++, x++)
 			{
 				this.kernel[i] = invSqrtTwoPiSigmaSq * Math.Exp(invTwoSigmaSq * (x * x));
+				sum += kernel[i];
 			}
 		}
 

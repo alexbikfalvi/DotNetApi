@@ -47,13 +47,14 @@
     <Compile Include="Conversion.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
+    <Compile Include="Drawing\Geometry.cs" />
     <Compile Include="Drawing\Imaging\Kernel1D.cs" />
     <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
-    <Compile Include="Drawing\Imaging\Kernel2D.cs" />
-    <Compile Include="Drawing\Imaging\Kernel2DGauss.cs" />
     <Compile Include="Drawing\Shadow.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
+    <Compile Include="Numeric\SpecialFunctions.cs" />
+    <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Windows\Controls\MapControl.cs">
       <SubType>UserControl</SubType>
@@ -218,6 +219,7 @@
       <Name>MapApi</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

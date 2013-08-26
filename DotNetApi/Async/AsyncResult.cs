@@ -24,7 +24,7 @@ namespace DotNetApi.Async
 	/// <summary>
 	/// A class representing the state for a database asynchronous operation.
 	/// </summary>
-	public class AsyncResult : IAsyncResult
+	public class AsyncResult : IAsyncResult, IDisposable
 	{
 		private object state;
 		private AutoResetEvent wait = new AutoResetEvent(false);
@@ -69,6 +69,17 @@ namespace DotNetApi.Async
 		// Public methods.
 
 		/// <summary>
+		/// Disposes the current request.
+		/// </summary>
+		public void Dispose()
+		{
+			// Call the event handler.
+			this.Dispose(true);
+			// Supress the finalizer.
+			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
 		/// Completes the asynchronous operation by setting the completed property and the wait handle
 		/// to <b>true</b>.
 		/// </summary>
@@ -76,6 +87,21 @@ namespace DotNetApi.Async
 		{
 			this.completed = true;
 			this.wait.Set();
+		}
+
+		// Protected methods.
+
+		/// <summary>
+		/// An event handler called when the object is being disposed.
+		/// </summary>
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected virtual void Dispose(bool disposed)
+		{
+			if (disposed)
+			{
+				// Dispose the wait event.
+				this.wait.Dispose();
+			}
 		}
 	}
 }

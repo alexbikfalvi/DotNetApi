@@ -17,32 +17,21 @@
  */
 
 using System;
+using System.Runtime.InteropServices;
 
-namespace DotNetApi.Web.XmlRpc
+namespace DotNetApi
 {
 	/// <summary>
-	/// An XML RPC exception.
+	/// A class with unsafe native methods.
 	/// </summary>
-	[Serializable]
-	public class XmlRpcException : Exception
+	public static class UnsafeNativeMethods
 	{
 		/// <summary>
-		/// Creates a new XML RPC exception instance.
+		/// Use the external Windows function to get the length of a Unicode zero-terminated string.
 		/// </summary>
-		/// <param name="message">The exception message.</param>
-		public XmlRpcException(string message)
-			: base(message)
-		{
-		}
-
-		/// <summary>
-		/// Creates a new XML RPC exception instance.
-		/// </summary>
-		/// <param name="message">The exception message.</param>
-		/// <param name="innerException">The inner exception.</param>
-		public XmlRpcException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
+		/// <param name="str">The zero-terminated Unicode string.</param>
+		/// <returns>The string length.</returns>
+		[DllImport("kernel32.dll", EntryPoint="lstrlen", CharSet = CharSet.Unicode)]
+		internal static extern unsafe int StrLen(char* str);
 	}
 }

@@ -24,6 +24,9 @@ namespace MapControlTest
 				Map map = Map.Read(Maps.Ne110mAdmin0Countries);
 
 				this.textBox.AppendText("Map created.{0}".FormatWith(Environment.NewLine));
+
+				// Set the map.
+				this.mapControl.Map = map;
 			}
 			catch (Exception exception)
 			{
@@ -33,6 +36,16 @@ namespace MapControlTest
 
 		private void OnProcess(object sender, EventArgs e)
 		{
+		}
+
+		private void OnLongMessage(object sender, EventArgs e)
+		{
+			this.mapControl.Message = "TeX is a computer program for typesetting documents, created by Donald Knuth.";
+		}
+
+		private void OnShortMessage(object sender, EventArgs e)
+		{
+			this.mapControl.Message = "Blah";
 		}
 	}
 }

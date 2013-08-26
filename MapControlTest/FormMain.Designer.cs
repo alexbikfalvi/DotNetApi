@@ -32,6 +32,8 @@
 			this.textBox = new System.Windows.Forms.TextBox();
 			this.buttonTest = new System.Windows.Forms.Button();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+			this.buttonLongMessage = new System.Windows.Forms.Button();
+			this.buttonShortMessage = new System.Windows.Forms.Button();
 			this.mapControl = new DotNetApi.Windows.Controls.MapControl();
 			this.SuspendLayout();
 			// 
@@ -72,6 +74,26 @@
 			// 
 			this.openFileDialog.Filter = "ZIP files (*.zip)|*.zip";
 			// 
+			// buttonLongMessage
+			// 
+			this.buttonLongMessage.Location = new System.Drawing.Point(174, 12);
+			this.buttonLongMessage.Name = "buttonLongMessage";
+			this.buttonLongMessage.Size = new System.Drawing.Size(75, 23);
+			this.buttonLongMessage.TabIndex = 4;
+			this.buttonLongMessage.Text = "Long msg";
+			this.buttonLongMessage.UseVisualStyleBackColor = true;
+			this.buttonLongMessage.Click += new System.EventHandler(this.OnLongMessage);
+			// 
+			// buttonShortMessage
+			// 
+			this.buttonShortMessage.Location = new System.Drawing.Point(255, 12);
+			this.buttonShortMessage.Name = "buttonShortMessage";
+			this.buttonShortMessage.Size = new System.Drawing.Size(75, 23);
+			this.buttonShortMessage.TabIndex = 5;
+			this.buttonShortMessage.Text = "Short msg";
+			this.buttonShortMessage.UseVisualStyleBackColor = true;
+			this.buttonShortMessage.Click += new System.EventHandler(this.OnShortMessage);
+			// 
 			// mapControl
 			// 
 			this.mapControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -87,6 +109,8 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(784, 562);
+			this.Controls.Add(this.buttonShortMessage);
+			this.Controls.Add(this.buttonLongMessage);
 			this.Controls.Add(this.mapControl);
 			this.Controls.Add(this.buttonTest);
 			this.Controls.Add(this.textBox);
@@ -105,6 +129,8 @@
 		private System.Windows.Forms.Button buttonTest;
 		private System.Windows.Forms.OpenFileDialog openFileDialog;
 		private DotNetApi.Windows.Controls.MapControl mapControl;
+		private System.Windows.Forms.Button buttonLongMessage;
+		private System.Windows.Forms.Button buttonShortMessage;
 
 	}
 }

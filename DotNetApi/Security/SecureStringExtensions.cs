@@ -20,6 +20,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using DotNetApi;
 
 namespace DotNetApi.Security
 {
@@ -198,7 +199,7 @@ namespace DotNetApi.Security
 					// Get a pointer to the null terminated unmanaged string.
 					char* chars = (char*)unmanagedString.ToPointer();
 					// Get the length of the null terminated unmanaged string.
-					int charCount = lstrlen(chars);
+					int charCount = UnsafeNativeMethods.StrLen(chars);
 					// Get the number of bytes needed for the byte array.
 					int byteCount = encoding.GetByteCount(chars, secureString.Length);
 					// Create a byte array to contain the unsecure data.
@@ -223,13 +224,5 @@ namespace DotNetApi.Security
 				Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
 			}
 		}
-
-		/// <summary>
-		/// Use the external Windows function to get the length of a Unicode zero-terminated string.
-		/// </summary>
-		/// <param name="str">The zero-terminated Unicode string.</param>
-		/// <returns>The string length.</returns>
-		[DllImport("kernel32.dll", CharSet=CharSet.Unicode)]
-		static extern unsafe int lstrlen(char* str);
 	}
 }

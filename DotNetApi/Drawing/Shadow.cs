@@ -63,7 +63,29 @@ namespace DotNetApi.Drawing
 				(int)(this.distance * Math.Cos(this.angle)),
 				(int)(this.distance * Math.Sin(this.angle)));
 			// Create the blur kernel.
-			this.blur = new Kernel1DGauss(softness % 2 == 0 ? softness + 1 : softness, 2.0);
+			this.blur = new Kernel1DGauss(softness % 2 == 0 ? softness + 1 : softness);
+		}
+
+		// Public methods.
+
+		/// <summary>
+		/// Returns the shadow size for the given object size.
+		/// </summary>
+		/// <param name="size">The size of the foreground object.</param>
+		/// <returns>The shadow size.</returns>
+		public Size GetShadowSize(Size size)
+		{
+			return new Size(size.Width + this.softness + 1, size.Height + this.softness + 1);
+		}
+
+		/// <summary>
+		/// Returns the shadow rectange for the given object rectangle.
+		/// </summary>
+		/// <param name="rectangle">The rectangle of the foreground object.</param>
+		/// <returns>The shadow rectangle.</returns>
+		public Rectangle GetShadowRectangle(Rectangle rectangle)
+		{
+			return new Rectangle(rectangle.X - (this.softness >> 1), rectangle.Y - (this.softness >> 1), rectangle.Width + this.softness + 1, rectangle.Height + this.softness + 1);
 		}
 
 		// Internal methods.
@@ -102,12 +124,17 @@ namespace DotNetApi.Drawing
 		/// <summary>
 		/// An event handler called when the object is being disposed.
 		/// </summary>
-		protected override void OnDisposed()
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected override void Dispose(bool disposed)
 		{
 			// Call the base class event handler.
-			base.OnDisposed();
-			// Dispose current objects.
-			this.bitmap.Dispose();
+			base.Dispose(disposed);
+
+			if (disposed)
+			{
+				// Dispose current objects.
+				this.bitmap.Dispose();
+			}
 		}
 
 		// Private methods.
@@ -126,7 +153,7 @@ namespace DotNetApi.Drawing
 			// Save the rectangle size.
 			this.size = size;
 			// Create the shadow rectangle.
-			this.rectangle = new Rectangle(0, 0, size.Width + this.softness + 1, size.Height + this.softness + 1);
+			this.rectangle = new Rectangle(new Point(0, 0), this.GetShadowSize(size));
 			// Create the shadow bitmap.
 			this.bitmap = new Bitmap(this.rectangle.Width, this.rectangle.Height, PixelFormat.Format32bppArgb);
 			
@@ -147,30 +174,41 @@ namespace DotNetApi.Drawing
 					int offset = this.blur.Size >> 1;
 					// Perform a horizontal blur.
 					{
+						// The column index.
 						int i = 0;
-						double sum = this.blur[-offset];
-						for (; i < blur.Size; i++)
+						// Set the sum of the gaussian blur.
+						double sum = 0.0;
+						// Compute the margin of the beginning and end of the gaussian blur.
+						int margin = data.Width > (blur.Size << 1) ? blur.Size : (int)Math.Ceiling(data.Width / 2.0);
+						// The beginning of the horizontal blur.
+						for (; i < margin; i++)
+						{
+							// Increment the blur sum for each column.
+							sum += this.blur[i - offset];
+							// Compute the alpha channel for the specified pixel.
+							value = ((uint)Math.Ceiling(alpha * sum)) & 0xFF;
+							// Set the column blur.
+							for (int j = 0; j < data.Height; j++)
+							{
+								image[j * data.Width + i] = value;
+							}
+						}
+						// The middle of the horizontal blur, all rows and columns have the default value alpha.
+						for (; i < data.Width - margin; i++)
+						{
+							for (int j = 0; j < data.Height; j++)
+							{
+								image[j * data.Width + i] = alpha;
+							}
+						}
+						// The end of the horizontal blur.
+						for (int k = 0; i < data.Width; i++, k++)
 						{
 							// Compute the alpha channel for the specified pixel.
 							value = ((uint)Math.Ceiling(alpha * sum)) & 0xFF;
-							sum += this.blur[i - offset];
-							for (int j = 0; j < data.Height; j++)
-							{
-								image[j * data.Width + i] = value;
-							}
-						}
-						for (; i < data.Width - blur.Size; i++)
-						{
-							value = ((uint)Math.Ceiling(alpha * sum)) & 0xFF;
-							for (int j = 0; j < data.Height; j++)
-							{
-								image[j * data.Width + i] = value;
-							}
-						}
-						for (int k = 0; i < data.Width; i++, k++)
-						{
-							value = ((uint)Math.Ceiling(alpha * sum)) & 0xFF;
+							// Decrement the blur sum for each column.
 							sum -= this.blur[k - offset];
+							// Set the column blur.
 							for (int j = 0; j < data.Height; j++)
 							{
 								image[j * data.Width + i] = value;
@@ -179,32 +217,41 @@ namespace DotNetApi.Drawing
 					}
 					// Perform a vertical blur.
 					{
+						// The line index.
 						int j = 0;
-						double sum = this.blur[-offset];
-						for (; j < blur.Size; j++)
+						// Set the sum of the gaussian blur.
+						double sum = 0.0;
+						// Compute the margin of the beginning and end of the gaussian blur.
+						int margin = data.Height > (blur.Size << 1) ? blur.Size : (int)Math.Ceiling(data.Height / 2.0);
+						// The beginning of the vertical blur.
+						for (; j < margin; j++)
 						{
-							// Compute the alpha channel for the specified pixel.
-							for (int i = 0; i < data.Width; i++)
-							{
-								image[j * data.Width + i] = ((((uint)Math.Ceiling(image[j * data.Width + i] * sum)) & 0xFF) << 24) | rgb;
-							}
+							// Increment the blur sum for each line.
 							sum += this.blur[j - offset];
-						}
-						for (; j < data.Height - blur.Size; j++)
-						{
-							// Compute the alpha channel for the specified pixel.
+							// Compute the alpha channel for each column.
 							for (int i = 0; i < data.Width; i++)
 							{
 								image[j * data.Width + i] = ((((uint)Math.Ceiling(image[j * data.Width + i] * sum)) & 0xFF) << 24) | rgb;
 							}
 						}
+						// The middle of the vertical blur.
+						for (; j < data.Height - margin; j++)
+						{
+							// Compute the alpha channel for each column.
+							for (int i = 0; i < data.Width; i++)
+							{
+								image[j * data.Width + i] = (((image[j * data.Width + i]) & 0xFF) << 24) | rgb;
+							}
+						}
+						// The end of the vertical blur.
 						for (int k = 0; j < data.Height; j++, k++)
 						{
-							// Compute the alpha channel for the specified pixel.
+							// Compute the alpha channel for each column.
 							for (int i = 0; i < data.Width; i++)
 							{
 								image[j * data.Width + i] = ((((uint)Math.Ceiling(image[j * data.Width + i] * sum)) & 0xFF) << 24) | rgb;
 							}
+							// Decrement the blur sum for each line.
 							sum -= this.blur[k - offset];
 						}
 					}

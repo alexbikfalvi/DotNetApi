@@ -17,32 +17,29 @@
  */
 
 using System;
+using System.Drawing;
 
-namespace DotNetApi.Web.XmlRpc
+namespace DotNetApi.Drawing
 {
 	/// <summary>
-	/// An XML RPC exception.
+	/// A class with useful geometric methods.
 	/// </summary>
-	[Serializable]
-	public class XmlRpcException : Exception
+	public static class Geometry
 	{
 		/// <summary>
-		/// Creates a new XML RPC exception instance.
+		/// Returns the rectangle region encompassing the two rectangles.
 		/// </summary>
-		/// <param name="message">The exception message.</param>
-		public XmlRpcException(string message)
-			: base(message)
+		/// <param name="rectangle1">The first rectangle.</param>
+		/// <param name="rectangle2">The second rectangle.</param>
+		/// <returns>The merged rectangle region.</returns>
+		public static Rectangle Merge(Rectangle rectangle1, Rectangle rectangle2)
 		{
-		}
+			int left = rectangle1.X < rectangle2.X ? rectangle1.X : rectangle2.X;
+			int top = rectangle1.Y < rectangle2.Y ? rectangle1.Y : rectangle2.Y;
+			int right = rectangle1.Right > rectangle2.Right ? rectangle1.Right : rectangle2.Right;
+			int bottom = rectangle1.Bottom > rectangle2.Bottom ? rectangle1.Bottom : rectangle2.Bottom;
 
-		/// <summary>
-		/// Creates a new XML RPC exception instance.
-		/// </summary>
-		/// <param name="message">The exception message.</param>
-		/// <param name="innerException">The inner exception.</param>
-		public XmlRpcException(string message, Exception innerException)
-			: base(message, innerException)
-		{
+			return new Rectangle(left, top, right - left, bottom - top);
 		}
 	}
 }

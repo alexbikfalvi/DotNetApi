@@ -245,6 +245,8 @@ namespace DotNetApi.Windows.Controls
 				{
 					item.Dispose();
 				}
+				// Dispose the image attributes.
+				this.imageAttributesGrayscale.Dispose();
 			}
 			// Call the base class method.
 			base.Dispose(disposing);

@@ -39,10 +39,10 @@ namespace DotNetApi.Drawing
 		/// </summary>
 		public void Dispose()
 		{
-			// Set the disposed flag to true.
-			this.disposed = true;
 			// Call the event handler.
-			this.OnDisposed();
+			this.Dispose(true);
+			// Supress the finalizer.
+			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>
@@ -57,8 +57,14 @@ namespace DotNetApi.Drawing
 		/// <summary>
 		/// An event handler called when the object is being disposed.
 		/// </summary>
-		protected virtual void OnDisposed()
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected virtual void Dispose(bool disposed)
 		{
+			if (disposed)
+			{
+				// Set the disposed flag to true.
+				this.disposed = true;
+			}
 		}
 	}
 }

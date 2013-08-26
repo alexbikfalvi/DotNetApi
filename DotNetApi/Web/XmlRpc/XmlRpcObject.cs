@@ -91,7 +91,13 @@ namespace DotNetApi.Web.XmlRpc
 		/// <summary>
 		/// Disposes the current object.
 		/// </summary>
-		public void Dispose() { }
+		public void Dispose()
+		{
+			// Call the event handler.
+			this.Dispose(true);
+			// Supress the finalizer.
+			GC.SuppressFinalize(this);
+		}
 
 		// Public properties.
 
@@ -137,6 +143,16 @@ namespace DotNetApi.Web.XmlRpc
 		public T[] AsArray<T>()
 		{
 			return this is XmlRpcArray ? (this as XmlRpcArray).GetArray<T>() : null;
+		}
+
+		// Protected methods.
+
+		/// <summary>
+		/// An event handler called when the object is being disposed.
+		/// </summary>
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected virtual void Dispose(bool disposed)
+		{
 		}
 	}
 }
