@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
 			this.buttonProcess = new System.Windows.Forms.Button();
 			this.textBox = new System.Windows.Forms.TextBox();
 			this.buttonTest = new System.Windows.Forms.Button();
@@ -35,6 +36,7 @@
 			this.buttonLongMessage = new System.Windows.Forms.Button();
 			this.buttonShortMessage = new System.Windows.Forms.Button();
 			this.mapControl = new DotNetApi.Windows.Controls.MapControl();
+			this.checkBoxVisible = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// buttonProcess
@@ -104,11 +106,25 @@
 			this.mapControl.Size = new System.Drawing.Size(760, 410);
 			this.mapControl.TabIndex = 3;
 			// 
+			// checkBoxVisible
+			// 
+			this.checkBoxVisible.AutoSize = true;
+			this.checkBoxVisible.Checked = true;
+			this.checkBoxVisible.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxVisible.Location = new System.Drawing.Point(336, 16);
+			this.checkBoxVisible.Name = "checkBoxVisible";
+			this.checkBoxVisible.Size = new System.Drawing.Size(78, 17);
+			this.checkBoxVisible.TabIndex = 6;
+			this.checkBoxVisible.Text = "Visible msg";
+			this.checkBoxVisible.UseVisualStyleBackColor = true;
+			this.checkBoxVisible.CheckedChanged += new System.EventHandler(this.OnMessageVisibleChanged);
+			// 
 			// FormMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(784, 562);
+			this.Controls.Add(this.checkBoxVisible);
 			this.Controls.Add(this.buttonShortMessage);
 			this.Controls.Add(this.buttonLongMessage);
 			this.Controls.Add(this.mapControl);
@@ -131,6 +147,7 @@
 		private DotNetApi.Windows.Controls.MapControl mapControl;
 		private System.Windows.Forms.Button buttonLongMessage;
 		private System.Windows.Forms.Button buttonShortMessage;
+		private System.Windows.Forms.CheckBox checkBoxVisible;
 
 	}
 }

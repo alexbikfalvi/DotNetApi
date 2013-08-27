@@ -94,10 +94,10 @@ namespace DotNetApi.Async
 		/// <summary>
 		/// An event handler called when the object is being disposed.
 		/// </summary>
-		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
-		protected virtual void Dispose(bool disposed)
+		/// <param name="disposing">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected virtual void Dispose(bool disposing)
 		{
-			if (disposed)
+			if (disposing)
 			{
 				// Dispose the wait event.
 				this.wait.Dispose();

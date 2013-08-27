@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace MapApi
@@ -25,6 +26,7 @@ namespace MapApi
 	/// A structure representing map bounds.
 	/// </summary>
 	[Serializable]
+	[TypeConverter(typeof(ExpandableObjectConverter))]
 	public struct MapRectangle
 	{
 		/// <summary>
@@ -35,6 +37,7 @@ namespace MapApi
 		/// <param name="right">The right boundary.</param>
 		/// <param name="bottom">The bottom boundary.</param>
 		public MapRectangle(double left, double top, double right, double bottom)
+			: this()
 		{
 			this.Left = left;
 			this.Top = top;
@@ -42,31 +45,28 @@ namespace MapApi
 			this.Bottom = bottom;
 		}
 
-		// Public fields.
+		// Public properties.
 
 		/// <summary>
 		/// Gets or sets the left boundary.
 		/// </summary>
 		[XmlAttribute("Left")]
-		public double Left;
+		public double Left { get; set; }
 		/// <summary>
 		/// Gets or sets the top boundary.
 		/// </summary>
 		[XmlAttribute("Top")]
-		public double Top;
+		public double Top { get; set; }
 		/// <summary>
 		/// Gets or sets the right boundary.
 		/// </summary>
 		[XmlAttribute("Right")]
-		public double Right;
+		public double Right { get; set; }
 		/// <summary>
 		/// Gets or sets the bottom boundary.
 		/// </summary>
 		[XmlAttribute("Bottom")]
-		public double Bottom;
-
-		// Public properties.
-
+		public double Bottom { get; set; }
 		/// <summary>
 		/// Gets the bounds width.
 		/// </summary>

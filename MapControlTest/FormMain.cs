@@ -47,5 +47,10 @@ namespace MapControlTest
 		{
 			this.mapControl.Message = "Blah";
 		}
+
+		private void OnMessageVisibleChanged(object sender, EventArgs e)
+		{
+			this.mapControl.MessageVisible = this.checkBoxVisible.Checked;
+		}
 	}
 }

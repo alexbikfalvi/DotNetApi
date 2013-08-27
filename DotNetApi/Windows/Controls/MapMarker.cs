@@ -23,15 +23,15 @@ using System.Drawing;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void MarkerChangedEventHandler(GeoMarker marker);
-	public delegate void MarkerCoordinatesChangedEventHandler(GeoMarker marker, PointF oldCoordinates, PointF newCoordinates);
-	public delegate void MarkerSizeChangedEventHandler(GeoMarker marker, Size oldSize, Size newSize);
-	public delegate void MarkerEmphasisChangedEventHandler(GeoMarker marker, bool oldEmphasis, bool newEmphasis);
+	public delegate void MarkerChangedEventHandler(MapMarker marker);
+	public delegate void MarkerCoordinatesChangedEventHandler(MapMarker marker, PointF oldCoordinates, PointF newCoordinates);
+	public delegate void MarkerSizeChangedEventHandler(MapMarker marker, Size oldSize, Size newSize);
+	public delegate void MarkerEmphasisChangedEventHandler(MapMarker marker, bool oldEmphasis, bool newEmphasis);
 
 	/// <summary>
 	/// A class representing a geo marker.
 	/// </summary>
-	public abstract class GeoMarker : Component
+	public abstract class MapMarker : Component
 	{
 		/// <summary>
 		/// A collection of progress navigator item items.
@@ -40,8 +40,8 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Public delegates.
 			public delegate void ClearedEventHandler();
-			public delegate void ChangedEventHandler(int index, GeoMarker item);
-			public delegate void SetEventHandler(int index, GeoMarker oldItem, GeoMarker newItem);
+			public delegate void ChangedEventHandler(int index, MapMarker item);
+			public delegate void SetEventHandler(int index, MapMarker oldItem, MapMarker newItem);
 
 			// Public properties.
 
@@ -50,9 +50,9 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="index">The index.</param>
 			/// <returns>The item.</returns>
-			public GeoMarker this[int index]
+			public MapMarker this[int index]
 			{
-				get { return this.List[index] as GeoMarker; }
+				get { return this.List[index] as MapMarker; }
 				set { this.List[index] = value; }
 			}
 
@@ -99,7 +99,7 @@ namespace DotNetApi.Windows.Controls
 			/// <param name="item">The item.</param>
 			/// <returns>The position into which the new item was inserted,
 			/// or -1 to indicate that the item was not inserted into the collection.</returns>
-			public int Add(GeoMarker item)
+			public int Add(MapMarker item)
 			{
 				// Add the item.
 				int result = this.List.Add(item);
@@ -111,10 +111,10 @@ namespace DotNetApi.Windows.Controls
 			/// Adds a range of items to the collection.
 			/// </summary>
 			/// <param name="items">The range of items.</param>
-			public void AddRange(GeoMarker[] items)
+			public void AddRange(MapMarker[] items)
 			{
 				// Add the items.
-				foreach (GeoMarker item in items)
+				foreach (MapMarker item in items)
 				{
 					this.Add(item);
 				}
@@ -125,7 +125,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="item">The item.</param>
 			/// <returns>The index of value if found in the list; otherwise, -1.</returns>
-			public int IndexOf(GeoMarker item)
+			public int IndexOf(MapMarker item)
 			{
 				return this.List.IndexOf(item);
 			}
@@ -135,7 +135,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="index">The index.</param>
 			/// <param name="item">The item</param>
-			public void Insert(int index, GeoMarker item)
+			public void Insert(int index, MapMarker item)
 			{
 				// Insert the item.
 				this.List.Insert(index, item);
@@ -145,7 +145,7 @@ namespace DotNetApi.Windows.Controls
 			/// Removes the item from the collection.
 			/// </summary>
 			/// <param name="item">The item.</param>
-			public void Remove(GeoMarker item)
+			public void Remove(MapMarker item)
 			{
 				// Remove the item.
 				this.List.Remove(item);
@@ -156,7 +156,7 @@ namespace DotNetApi.Windows.Controls
 			/// </summary>
 			/// <param name="item">The item.</param>
 			/// <returns><b>True</b> if the element is found in the collection, or <b>false</b> otherwise.</returns>
-			public bool Contains(GeoMarker item)
+			public bool Contains(MapMarker item)
 			{
 				return this.List.Contains(item);
 			}
@@ -169,7 +169,7 @@ namespace DotNetApi.Windows.Controls
 			/// <param name="value">The value to validate.</param>
 			protected override void OnValidate(Object value)
 			{
-				if (value.GetType().BaseType != typeof(GeoMarker))
+				if (value.GetType().BaseType != typeof(MapMarker))
 					throw new ArgumentException("Value must be a geo marker.", "value");
 			}
 
@@ -206,7 +206,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnInsert(index, value);
 				// Raise the event.
-				if (this.BeforeItemInserted != null) this.BeforeItemInserted(index, value as GeoMarker);
+				if (this.BeforeItemInserted != null) this.BeforeItemInserted(index, value as MapMarker);
 			}
 
 			/// <summary>
@@ -219,7 +219,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnInsertComplete(index, value);
 				// Raise the event.
-				if (this.AfterItemInserted != null) this.AfterItemInserted(index, value as GeoMarker);
+				if (this.AfterItemInserted != null) this.AfterItemInserted(index, value as MapMarker);
 			}
 
 			/// <summary>
@@ -232,7 +232,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnRemove(index, value);
 				// Raise the event.
-				if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(index, value as GeoMarker);
+				if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(index, value as MapMarker);
 			}
 
 			/// <summary>
@@ -245,7 +245,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnRemoveComplete(index, value);
 				// Raise the event.
-				if (this.AfterItemRemoved != null) this.AfterItemRemoved(index, value as GeoMarker);
+				if (this.AfterItemRemoved != null) this.AfterItemRemoved(index, value as MapMarker);
 			}
 
 			/// <summary>
@@ -259,7 +259,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnSet(index, oldValue, newValue);
 				// Raise the event.
-				if (this.BeforeItemSet != null) this.BeforeItemSet(index, oldValue as GeoMarker, newValue as GeoMarker);
+				if (this.BeforeItemSet != null) this.BeforeItemSet(index, oldValue as MapMarker, newValue as MapMarker);
 			}
 
 			/// <summary>
@@ -273,7 +273,7 @@ namespace DotNetApi.Windows.Controls
 				// Call the base class method.
 				base.OnSetComplete(index, oldValue, newValue);
 				// Raise the event.
-				if (this.AfterItemSet != null) this.AfterItemSet(index, oldValue as GeoMarker, newValue as GeoMarker);
+				if (this.AfterItemSet != null) this.AfterItemSet(index, oldValue as MapMarker, newValue as MapMarker);
 			}
 		}
 
@@ -287,7 +287,7 @@ namespace DotNetApi.Windows.Controls
 		/// Creates a new geo marker instance.
 		/// </summary>
 		/// <param name="coordinates">The marker coordinates as longitude and latitude in degrees.</param>
-		public GeoMarker(PointF coordinates)
+		public MapMarker(PointF coordinates)
 		{
 			this.coordinates = coordinates;
 		}

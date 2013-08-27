@@ -120,4 +120,13 @@
   <metadata name="openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="mapControl.MapBounds" mimetype="application/x-microsoft.net.object.binary.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAD1NYXBBcGksIFZlcnNpb249MS4wLjAuMCwgQ3VsdHVyZT1uZXV0
+        cmFsLCBQdWJsaWNLZXlUb2tlbj1udWxsBQEAAAATTWFwQXBpLk1hcFJlY3RhbmdsZQQAAAAVPExlZnQ+
+        a19fQmFja2luZ0ZpZWxkFDxUb3A+a19fQmFja2luZ0ZpZWxkFjxSaWdodD5rX19CYWNraW5nRmllbGQX
+        PEJvdHRvbT5rX19CYWNraW5nRmllbGQAAAAABgYGBgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAAs=
+</value>
+  </data>
 </root>

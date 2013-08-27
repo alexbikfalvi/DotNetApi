@@ -26,13 +26,13 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a circular geo marker.
 	/// </summary>
-	public class GeoMarkerCircle : GeoMarker
+	public class MapMarkerCircle : MapMarker
 	{
 		/// <summary>
 		/// Creates a new circular geo marker instance.
 		/// </summary>
 		/// <param name="coordinates">The marker coordinates as longitude and latitude in degrees.</param>
-		public GeoMarkerCircle(PointF coordinates)
+		public MapMarkerCircle(PointF coordinates)
 			: base(coordinates)
 		{
 		}

@@ -50,7 +50,7 @@ namespace DotNetApi.Windows.Controls
 		};
 		private int mapIndex = 0;
 
-		private GeoMarker.Collection markers = new GeoMarker.Collection();
+		private MapMarker.Collection markers = new MapMarker.Collection();
 
 		// Property variables.
 
@@ -155,7 +155,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public GeoMarker.Collection Markers { get { return this.markers; } }
+		public MapMarker.Collection Markers { get { return this.markers; } }
 
 		// Protected methods.
 
@@ -208,12 +208,12 @@ namespace DotNetApi.Windows.Controls
 			// Set smooth drawing.
 			e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
 			// Draw the non-emphasized markers.
-			foreach (GeoMarker marker in this.markers)
+			foreach (MapMarker marker in this.markers)
 			{
 				if (!marker.Emphasis) marker.Paint(e.Graphics, this.GetCoordinatesRectangle(marker.Coordinates, marker.Size));
 			}
 			// Draw the emphasized markers.
-			foreach (GeoMarker marker in this.markers)
+			foreach (MapMarker marker in this.markers)
 			{
 				if (marker.Emphasis) marker.Paint(e.Graphics, this.GetCoordinatesRectangle(marker.Coordinates, marker.Size));
 			}
@@ -279,7 +279,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnBeforeMarkersCleared()
 		{
 			// Remove the marker event handlers.
-			foreach (GeoMarker marker in this.markers)
+			foreach (MapMarker marker in this.markers)
 			{
 				marker.Changed -= this.OnMarkerChanged;
 				marker.CoordinatesChanged -= this.OnMarkerCoordinatesChanged;
@@ -302,7 +302,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <param name="item">The marker.</param>
-		private void OnAfterMarkerInserted(int index, GeoMarker item)
+		private void OnAfterMarkerInserted(int index, MapMarker item)
 		{
 			// Add the marker event handler.
 			item.Changed += this.OnMarkerChanged;
@@ -318,7 +318,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <param name="item">The marker.</param>
-		private void OnAfterMarkerRemoved(int index, GeoMarker item)
+		private void OnAfterMarkerRemoved(int index, MapMarker item)
 		{
 			// Remove the marker event handler.
 			item.Changed -= this.OnMarkerChanged;
@@ -335,7 +335,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="index">The index.</param>
 		/// <param name="oldItem">The old marker.</param>
 		/// <param name="newItem">The new marker.</param>
-		private void OnAfterMarkerSet(int index, GeoMarker oldItem, GeoMarker newItem)
+		private void OnAfterMarkerSet(int index, MapMarker oldItem, MapMarker newItem)
 		{
 			// If the marker has not changed, do nothing.
 			if (oldItem == newItem) return;
@@ -368,7 +368,7 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when a marker has changed.
 		/// </summary>
 		/// <param name="marker">The marker.</param>
-		private void OnMarkerChanged(GeoMarker marker)
+		private void OnMarkerChanged(MapMarker marker)
 		{
 			// Refresh the control at the marker rectangle.
 			this.Invalidate(this.GetCoordinatesRectangle(marker.Coordinates, new Size(marker.Size.Width + 2, marker.Size.Height + 2)));
@@ -380,7 +380,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="marker">The marker.</param>
 		/// <param name="oldCoordinates">The old coordinates.</param>
 		/// <param name="newCoordinates">The new coordinates.</param>
-		private void OnMarkerCoordinatesChanged(GeoMarker marker, PointF oldCoordinates, PointF newCoordinates)
+		private void OnMarkerCoordinatesChanged(MapMarker marker, PointF oldCoordinates, PointF newCoordinates)
 		{
 			// If the coordinates have not changed, do nothing.
 			if (oldCoordinates == newCoordinates) return;
@@ -395,7 +395,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="marker">The marker.</param>
 		/// <param name="oldSize">The old size.</param>
 		/// <param name="newSize">The new size.</param>
-		private void OnMarkerSizeChanged(GeoMarker marker, Size oldSize, Size newSize)
+		private void OnMarkerSizeChanged(MapMarker marker, Size oldSize, Size newSize)
 		{
 			// If the size has not changed, do nothing.
 			if (oldSize == newSize) return;
@@ -414,7 +414,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="marker">The marker.</param>
 		/// <param name="oldEmphasis"></param>
 		/// <param name="newEmphasis"></param>
-		private void OnMarkerEmphasisChanged(GeoMarker marker, bool oldEmphasis, bool newEmphasis)
+		private void OnMarkerEmphasisChanged(MapMarker marker, bool oldEmphasis, bool newEmphasis)
 		{
 			// If the emphasis has not changed, do nothing.
 			if (oldEmphasis == newEmphasis) return;
@@ -432,7 +432,7 @@ namespace DotNetApi.Windows.Controls
 			// If the value has not changed, do nothing.
 			if (oldShow == newShow) return;
 			//  Invalidate the region for all markers.
-			foreach (GeoMarker marker in this.markers)
+			foreach (MapMarker marker in this.markers)
 			{
 				// Refresh the control at the marker rectangle.
 				this.Invalidate(this.GetCoordinatesRectangle(marker.Coordinates, new Size(marker.Size.Width + 2, marker.Size.Height + 2)));

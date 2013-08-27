@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Async\AsyncResult.cs" />
+    <Compile Include="Async\AsyncState.cs" />
+    <Compile Include="Async\AsyncTask.cs" />
     <Compile Include="Conversion.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
@@ -95,10 +98,10 @@
     <Compile Include="Windows\Controls\CodeTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\GeoMarker.cs">
+    <Compile Include="Windows\Controls\MapMarker.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\GeoMarkerCircle.cs">
+    <Compile Include="Windows\Controls\MapMarkerCircle.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ImageListBox.cs">

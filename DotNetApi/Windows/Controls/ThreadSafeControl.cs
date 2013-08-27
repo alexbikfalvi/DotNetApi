@@ -37,6 +37,8 @@ namespace DotNetApi.Windows.Controls
 		{
 		}
 
+		// Protected methods.
+
 		/// <summary>
 		/// Waits for the window handle of the current control to be created.
 		/// </summary>
@@ -46,6 +48,21 @@ namespace DotNetApi.Windows.Controls
 			while (!this.IsHandleCreated)
 			{
 				this.eventHandleCreated.WaitOne();
+			}
+		}
+
+		/// <summary>
+		/// Disposes the current object.
+		/// </summary>
+		/// <param name="disposing">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected override void Dispose(bool disposing)
+		{
+			// Call the base class method.
+			base.Dispose(disposing);
+			// Dispose the current resources.
+			if (disposing)
+			{
+				this.eventHandleCreated.Dispose();
 			}
 		}
 
