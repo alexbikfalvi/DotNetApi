@@ -62,7 +62,7 @@ namespace DotNetApi.Windows.Controls
 		private Mutex mutex = new Mutex();
 
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
-		private Bitmap bitmap;
+		private Bitmap bitmap = null;
 
 		private TextureBrush brushBackground;
 
@@ -80,6 +80,7 @@ namespace DotNetApi.Windows.Controls
 		private bool showMarkers = true;
 		private bool showMajorGrid = true;
 		private bool showMinorGrid = true;
+		private bool showStreched = true;
 
 		// Asynchronous.
 		private AsyncTask task = new AsyncTask();
@@ -257,8 +258,8 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class event handler.
 			base.OnResize(e);
-			// Refresh the control.
-			this.Refresh();
+			// Refresh the map.
+			this.OnRefreshMap();
 		}
 
 		// Private methods.
@@ -305,51 +306,8 @@ namespace DotNetApi.Windows.Controls
 			// Set the current map.
 			this.map = map;
 			
-			// If the map is not null.
-			if (null != this.map)
-			{
-				// Create a new bitmap and draw the bitmap on an asynchronous task.
-				this.task.ExecuteAlways((AsyncState asyncState) =>
-					{
-						// Lock the drawing mutex.
-						this.mutex.WaitOne();
-						try
-						{
-							// If the current bitmap is not null, dispose the current bitmap.
-							if (null != this.bitmap)
-							{
-								this.bitmap.Dispose();
-								this.bitmap = null;
-							}
-							// Create a new bitmap corresponding to the current map.
-							this.bitmap = this.DrawMap(this.ClientSize, asyncState);
-							// Return if the asynchronous operation has been canceled.
-							if (asyncState.IsCanceled) return;
-							// Hide the message.
-							this.showMessage = false;
-						}
-						finally
-						{
-							// Unlock the mutex.
-							this.mutex.ReleaseMutex();
-						}
-						// Refresh the control.
-						this.Refresh();
-					});
-
-				// Set a new message.
-				this.message = MapControl.messageRefreshing;
-				this.showMessage = true;
-			}
-			else
-			{
-				// Set a new message.
-				this.message = MapControl.messageNoMap;
-				this.showMessage = true;
-			}
-
-			// Refresh the control.
-			this.Refresh();
+			// Refresh the current map.
+			this.OnRefreshMap();
 		}
 
 		/// <summary>
@@ -387,21 +345,55 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Returns the drawing rectangle for the specified message.
+		/// Refreshes the current map.
 		/// </summary>
-		/// <param name="message">The message.</param>
-		/// <returns>The drawing rectangle.</returns>
-		private Rectangle MeasureMessage(string message)
+		private void OnRefreshMap()
 		{
-			// Measure the message text.
-			Size size = TextRenderer.MeasureText(message, this.messageFont);
+			// If the map is not null.
+			if (null != this.map)
+			{
+				// Create a new bitmap and draw the bitmap on an asynchronous task.
+				this.task.ExecuteAlways((AsyncState asyncState) =>
+				{
+					// Lock the drawing mutex.
+					this.mutex.WaitOne();
+					try
+					{
+						// If the current bitmap is not null, dispose the current bitmap.
+						if (null != this.bitmap)
+						{
+							this.bitmap.Dispose();
+							this.bitmap = null;
+						}
+						// Create a new bitmap corresponding to the current map.
+						this.bitmap = this.OnDrawMap(this.ClientSize, asyncState);
+						// Return if the asynchronous operation has been canceled.
+						if (asyncState.IsCanceled) return;
+						// Hide the message.
+						this.showMessage = false;
+					}
+					finally
+					{
+						// Unlock the mutex.
+						this.mutex.ReleaseMutex();
+					}
+					// Refresh the control.
+					this.Refresh();
+				});
 
-			// Return the message rectangle.
-			return new Rectangle(
-				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.messagePadding.Left,
-				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.messagePadding.Top,
-				size.Width + this.messagePadding.Left + this.messagePadding.Right,
-				size.Height + this.messagePadding.Top + this.messagePadding.Bottom);
+				// Set a new message.
+				this.message = MapControl.messageRefreshing;
+				this.showMessage = true;
+			}
+			else
+			{
+				// Set a new message.
+				this.message = MapControl.messageNoMap;
+				this.showMessage = true;
+			}
+
+			// Refresh the control.
+			this.Refresh();
 		}
 
 		/// <summary>
@@ -410,7 +402,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="size">The bitmap minimum size.</param>
 		/// <param name="asyncState">The asynchrnous state.</param>
 		/// <returns>The map bitmap.</returns>
-		private Bitmap DrawMap(Size size, AsyncState asyncState)
+		private Bitmap OnDrawMap(Size size, AsyncState asyncState)
 		{
 			// Save the map object in a local variable.
 			Map map = this.map;
@@ -427,22 +419,27 @@ namespace DotNetApi.Windows.Controls
 				double scaleWidth = this.ClientSize.Width / mapWidth;
 				double scaleHeight = this.ClientSize.Height / mapHeight;
 				// The bitmap size.
-				int width;
-				int height;
-				// If the width scale is greater.
-				if (scaleWidth > scaleHeight)
+				int width = this.ClientSize.Width;
+				int height = this.ClientSize.Height;
+
+				// If the map is not streched.
+				if (!this.showStreched)
 				{
-					// Align along the width.
-					scaleHeight = scaleWidth;
-					width = this.ClientSize.Width;
-					height = (int)Math.Round(mapHeight * scaleWidth);
-				}
-				else
-				{
-					// Align along the height.
-					scaleWidth = scaleHeight;
-					width = (int)Math.Round(mapWidth * scaleHeight);
-					height = this.ClientSize.Height;
+					// If the width scale is greater.
+					if (scaleWidth > scaleHeight)
+					{
+						// Align along the width.
+						scaleHeight = scaleWidth;
+						width = this.ClientSize.Width;
+						height = (int)Math.Round(mapHeight * scaleWidth);
+					}
+					else
+					{
+						// Align along the height.
+						scaleWidth = scaleHeight;
+						width = (int)Math.Round(mapWidth * scaleHeight);
+						height = this.ClientSize.Height;
+					}
 				}
 
 				// Create a new bitmap.
@@ -489,7 +486,7 @@ namespace DotNetApi.Windows.Controls
 											for (int index = 0; index < part.Points.Count; index++)
 											{
 												points[index].X = (float)((part.Points[index].X - mapLeft) * scaleWidth);
-												points[index].Y = (float)((mapTop - part.Points[index].Y) * scaleHeight); 
+												points[index].Y = (float)((mapTop - part.Points[index].Y) * scaleHeight);
 											}
 											// Draw the part land.
 											graphics.FillPolygon(brush, points);
@@ -507,6 +504,24 @@ namespace DotNetApi.Windows.Controls
 				// Return the bitmap.
 				return bitmap;
 			}
+		}
+
+		/// <summary>
+		/// Returns the drawing rectangle for the specified message.
+		/// </summary>
+		/// <param name="message">The message.</param>
+		/// <returns>The drawing rectangle.</returns>
+		private Rectangle MeasureMessage(string message)
+		{
+			// Measure the message text.
+			Size size = TextRenderer.MeasureText(message, this.messageFont);
+
+			// Return the message rectangle.
+			return new Rectangle(
+				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.messagePadding.Left,
+				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.messagePadding.Top,
+				size.Width + this.messagePadding.Left + this.messagePadding.Right,
+				size.Height + this.messagePadding.Top + this.messagePadding.Bottom);
 		}
 	}
 }
