@@ -51,10 +51,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Maps.resx</DependentUpon>
     </Compile>
+    <Compile Include="MapScale.cs" />
     <Compile Include="MapShape.cs" />
     <Compile Include="MapShapeCollection.cs" />
     <Compile Include="MapShapePoint.cs" />
     <Compile Include="MapShapePolygon.cs" />
+    <Compile Include="MapSize.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

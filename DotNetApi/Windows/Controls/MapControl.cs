@@ -62,11 +62,15 @@ namespace DotNetApi.Windows.Controls
 		private Mutex mutex = new Mutex();
 
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
-		private Bitmap bitmap = null;
-
 		private TextureBrush brushBackground;
 
 		private Shadow shadow = new Shadow(Color.Black, 0, 10);
+
+		// Map.
+
+		private Bitmap bitmapMap = null;
+
+		//private List
 
 		// Message.
 
@@ -187,7 +191,7 @@ namespace DotNetApi.Windows.Controls
 				this.brushBackground.Dispose();
 
 				// Dispose the bitmaps.
-				if (this.bitmap != null) this.bitmap.Dispose();
+				if (this.bitmapMap != null) this.bitmapMap.Dispose();
 				this.bitmapBackground.Dispose();
 
 				// Dispose the shadow.
@@ -216,10 +220,10 @@ namespace DotNetApi.Windows.Controls
 				try
 				{
 					// If the current map bitmap is null.
-					if (null != this.bitmap)
+					if (null != this.bitmapMap)
 					{
 						// Draw the map bitmap.
-						e.Graphics.DrawImage(this.bitmap, new Point(0, 0));
+						e.Graphics.DrawImage(this.bitmapMap, new Point(0, 0));
 					}
 					else
 					{
@@ -360,13 +364,13 @@ namespace DotNetApi.Windows.Controls
 					try
 					{
 						// If the current bitmap is not null, dispose the current bitmap.
-						if (null != this.bitmap)
+						if (null != this.bitmapMap)
 						{
-							this.bitmap.Dispose();
-							this.bitmap = null;
+							this.bitmapMap.Dispose();
+							this.bitmapMap = null;
 						}
 						// Create a new bitmap corresponding to the current map.
-						this.bitmap = this.OnDrawMap(this.ClientSize, asyncState);
+						this.bitmapMap = this.OnDrawMap(this.ClientSize, asyncState);
 						// Return if the asynchronous operation has been canceled.
 						if (asyncState.IsCanceled) return;
 						// Hide the message.
@@ -410,40 +414,45 @@ namespace DotNetApi.Windows.Controls
 			// Acquire an exclusive access to the map.
 			lock (map)
 			{
-				// Determine the width of the map bounds.
-				double mapLeft = this.mapBounds.Left;
-				double mapTop = this.mapBounds.Top;
-				double mapWidth = this.mapBounds.Width != 0 ? this.mapBounds.Width : MapControl.mapBoundsDefault.Width;
-				double mapHeight = this.mapBounds.Height != 0 ? this.mapBounds.Height : MapControl.mapBoundsDefault.Height;
+				// Compute the map size to use the default values in case the width and height are zero.
+				MapSize mapSize = new MapSize(
+					this.mapBounds.Width != 0 ? this.mapBounds.Width : MapControl.mapBoundsDefault.Width,
+					this.mapBounds.Height != 0 ? this.mapBounds.Height : MapControl.mapBoundsDefault.Height
+					);
+				// Compute the map bounds.
+				MapRectangle mapBounds = new MapRectangle(
+					new MapPoint(this.mapBounds.Left, this.mapBounds.Top),
+					mapSize
+					);
 				// Compute the scale factors.
-				double scaleWidth = this.ClientSize.Width / mapWidth;
-				double scaleHeight = this.ClientSize.Height / mapHeight;
+				MapScale mapScale = new MapScale(
+					this.ClientSize.Width / mapBounds.Width,
+					this.ClientSize.Height / mapBounds.Height
+					);
+				
 				// The bitmap size.
-				int width = this.ClientSize.Width;
-				int height = this.ClientSize.Height;
+				Size bitmapSize = new Size(this.ClientSize.Width, this.ClientSize.Height);
 
 				// If the map is not streched.
 				if (!this.showStreched)
 				{
 					// If the width scale is greater.
-					if (scaleWidth > scaleHeight)
+					if (mapScale.Width > mapScale.Height)
 					{
 						// Align along the width.
-						scaleHeight = scaleWidth;
-						width = this.ClientSize.Width;
-						height = (int)Math.Round(mapHeight * scaleWidth);
+						mapScale.Height = mapScale.Width;
+						bitmapSize.Height = (int)Math.Round(mapBounds.Height * mapScale.Height);
 					}
 					else
 					{
 						// Align along the height.
-						scaleWidth = scaleHeight;
-						width = (int)Math.Round(mapWidth * scaleHeight);
-						height = this.ClientSize.Height;
+						mapScale.Width = mapScale.Height;
+						bitmapSize.Width = (int)Math.Round(mapBounds.Width * mapScale.Width);
 					}
 				}
 
 				// Create a new bitmap.
-				Bitmap bitmap = new Bitmap(width, height);
+				Bitmap bitmap = new Bitmap(bitmapSize.Width, bitmapSize.Height);
 
 				// Draw the bitmap.
 				using (Graphics graphics = Graphics.FromImage(bitmap))
@@ -455,7 +464,7 @@ namespace DotNetApi.Windows.Controls
 						using (Pen pen = new Pen(this.colorMapCountryBorder))
 						{
 							// Fill the background.
-							graphics.FillRectangle(brush, 0, 0, width, height);
+							graphics.FillRectangle(brush, 0, 0, bitmapSize.Width, bitmapSize.Height);
 
 							// Draw the map shapes.
 							foreach (MapShape shape in map.Shapes)
@@ -485,8 +494,8 @@ namespace DotNetApi.Windows.Controls
 											// Set the list of points.
 											for (int index = 0; index < part.Points.Count; index++)
 											{
-												points[index].X = (float)((part.Points[index].X - mapLeft) * scaleWidth);
-												points[index].Y = (float)((mapTop - part.Points[index].Y) * scaleHeight);
+												points[index].X = (float)((part.Points[index].X - mapBounds.Left) * scaleWidth);
+												points[index].Y = (float)((mapBounds.Top - part.Points[index].Y) * scaleHeight);
 											}
 											// Draw the part land.
 											graphics.FillPolygon(brush, points);
