@@ -34,9 +34,9 @@ namespace DotNetApi.Drawing
 		private double angle;
 
 		private Bitmap bitmap;
-		private Size size;
+		private Polygon polygon = null;
 		private Size offset;
-		private Rectangle rectangle;
+		//private Rectangle rectangle;
 
 		private Kernel1D blur;
 
@@ -97,26 +97,17 @@ namespace DotNetApi.Drawing
 		/// <param name="rectangle">The shadow rectangle.</param>
 		internal override void Draw(Graphics graphics, Rectangle rectangle)
 		{
+		}
+
+		/// <summary>
+		/// Draws a shadow centered on the specified polygon.
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		/// <param name="points">The polygon points.</param>
+		internal override void Draw(Graphics graphics, Point[] points)
+		{
 			// If the object is disposed, do nothing.
 			if (this.IsDisposed) return;
-
-			// If the rectangle size is different from the previous size, or if the shadow bitmap is null.
-			if ((rectangle.Size != this.size) || (null == this.bitmap))
-			{
-				// Create a new shadow bitmap.
-				this.CreateShadow(rectangle.Size);
-			}
-			// Compute the shadow location.
-			Point location = new Point(rectangle.X - (this.softness >> 1), rectangle.Y - (this.softness >> 1));
-			// If the shadow position has changed.
-			if (location != this.rectangle.Location)
-			{
-				// Update the shadow position.
-				this.rectangle.Location = location;
-			}
-
-			// Draw the shadow bitmap.
-			graphics.DrawImage(this.bitmap, this.rectangle);
 		}
 
 		// Protected methods.
@@ -139,10 +130,34 @@ namespace DotNetApi.Drawing
 
 		// Private methods.
 
+		private void Draw(Graphics graphics, Polygon polygon)
+		{
+			// If the object is disposed, do nothing.
+			if (this.IsDisposed) return;
+
+			// If the current shadow bitmap is null or if the current poligon is different from the new polygon.
+			if ((null == this.bitmap) || (this.polygon != null ? !this.polygon.IsEqual(polygon) : false))
+			{
+				// Create a new shadow bitmap.
+				this.CreateShadow(rectangle.Size);
+			}
+			// Compute the shadow location.
+			Point location = new Point(rectangle.X - (this.softness >> 1), rectangle.Y - (this.softness >> 1));
+			// If the shadow position has changed.
+			if (location != this.rectangle.Location)
+			{
+				// Update the shadow position.
+				this.rectangle.Location = location;
+			}
+
+			// Draw the shadow bitmap.
+			graphics.DrawImage(this.bitmap, this.rectangle);
+		}
+
 		/// <summary>
-		/// Creates a shadow bitmap of the specified size.
+		/// Creates a shadow bitmap for the specified polygon.
 		/// </summary>
-		private void CreateShadow(Size size)
+		private void CreateShadow(Polygon polygon)
 		{
 			// If there exists a current shadow bitmap, dispose the bitmap.
 			if (null != this.bitmap)
@@ -259,7 +274,7 @@ namespace DotNetApi.Drawing
 			}
 			finally
 			{
-				// Unlock the bitmap dta.
+				// Unlock the bitmap data.
 				this.bitmap.UnlockBits(data);
 			}
 		}

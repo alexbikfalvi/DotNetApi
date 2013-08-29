@@ -53,6 +53,7 @@
     <Compile Include="Drawing\Geometry.cs" />
     <Compile Include="Drawing\Imaging\Kernel1D.cs" />
     <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
+    <Compile Include="Drawing\Polygon.cs" />
     <Compile Include="Drawing\Shadow.cs" />
     <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
@@ -61,6 +62,9 @@
     <Compile Include="Validation.cs" />
     <Compile Include="Windows\Controls\MapControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\MapItem.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapRegion.cs">
       <SubType>Component</SubType>

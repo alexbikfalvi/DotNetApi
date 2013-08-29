@@ -82,12 +82,16 @@ namespace MapApi
 		// Public properties.
 
 		/// <summary>
-		/// Gets the bounds width.
+		/// Gets the rectangle width.
 		/// </summary>
 		public double Width { get { return Math.Abs(this.Left - this.Right); } }
 		/// <summary>
-		/// Gets the bounds height.
+		/// Gets the rectangle height.
 		/// </summary>
 		public double Height { get { return Math.Abs(this.Top - this.Bottom); } }
+		/// <summary>
+		/// Gets the rectangle size.
+		/// </summary>
+		public MapSize Size { get { return new MapSize(this.Width, this.Height); } }
 	}
 }

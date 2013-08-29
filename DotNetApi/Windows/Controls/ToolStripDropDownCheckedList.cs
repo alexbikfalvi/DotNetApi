@@ -109,12 +109,14 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		// Private methods.
+
 		/// <summary>
 		/// An event handler called when the checked state of an item has changed.
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		protected void OnItemCheck(object sender, ItemCheckEventArgs e)
+		private void OnItemCheck(object sender, ItemCheckEventArgs e)
 		{
 			// Update the items pair at the specified index.
 			CheckedListItem pair = this.items[e.Index];

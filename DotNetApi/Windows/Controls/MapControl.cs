@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading;
@@ -35,24 +36,37 @@ namespace DotNetApi.Windows.Controls
 	{
 		private delegate void RefreshEventHandler();
 
+		private const int mapLevels = 4;
+
 		private const string messageNoMap = "No map";
 		private const string messageRefreshing = "Refreshing map...";
 
-		// The current map.
+		private static readonly MapRectangle mapBoundsDefault = new MapRectangle(-180, 90, 180, -90);
+
+		// Map.
 
 		private Map map = null;
 
-		private static readonly MapRectangle mapBoundsDefault = new MapRectangle(-180, 90, 180, -90);
+		private List<MapRegion> regions = new List<MapRegion>();
+
 		private MapRectangle mapBounds = MapControl.mapBoundsDefault;
+		private MapSize mapSize = MapControl.mapBoundsDefault.Size;
+		private MapScale mapScale = new MapScale(1.0, 1.0);
+
+		private Bitmap bitmapMap = null;
+		private Size bitmapSize;
+
+		private MapRegion highlightRegion = null;
 
 		// Colors.
 
 		private Color colorMessageBorder = Color.DarkGray;
 		private Color colorMessageFill = Color.LightGray;
 
-		private Color colorMapSea = Color.FromArgb(153, 204, 255);
-		private Color colorMapCountryBorder = Color.FromArgb(255, 255, 255);
-		private Color colorMapCountryLand = Color.FromArgb(51, 153, 51);
+		private Color colorMapSea = Color.SkyBlue;
+		private Color colorMapRegionBorder = Color.FromArgb(255, 255, 255);
+		private Color colorMapRegion = Color.Green;
+		private Color colorMapRegionHighlight = Color.YellowGreen;
 
 		private Color colorGridMajor = Color.FromArgb(128, Color.Gray);
 		private Color colorGridMinor = Color.FromArgb(48, Color.Gray);
@@ -64,13 +78,7 @@ namespace DotNetApi.Windows.Controls
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
 		private TextureBrush brushBackground;
 
-		private Shadow shadow = new Shadow(Color.Black, 0, 10);
-
-		// Map.
-
-		private Bitmap bitmapMap = null;
-
-		//private List
+		private Shadow shadow = new Shadow(Color.Black, 0, 14);
 
 		// Message.
 
@@ -159,7 +167,7 @@ namespace DotNetApi.Windows.Controls
 		public MapRectangle MapBounds
 		{
 			get { return this.mapBounds; }
-			set { this.mapBounds = value; }
+			set { this.OnMapBoundsChanged(value); }
 		}
 
 		// Protected methods.
@@ -191,7 +199,10 @@ namespace DotNetApi.Windows.Controls
 				this.brushBackground.Dispose();
 
 				// Dispose the bitmaps.
-				if (this.bitmapMap != null) this.bitmapMap.Dispose();
+				if (null != this.bitmapMap)
+				{
+					this.bitmapMap.Dispose();
+				}
 				this.bitmapBackground.Dispose();
 
 				// Dispose the shadow.
@@ -202,6 +213,12 @@ namespace DotNetApi.Windows.Controls
 
 				// Dispose the drawing mutex.
 				this.mutex.Dispose();
+
+				// Dispose the map regions.
+				foreach (MapRegion region in this.regions)
+				{
+					region.Dispose();
+				}
 			}
 		}
 
@@ -214,6 +231,9 @@ namespace DotNetApi.Windows.Controls
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 
+			// Set the graphics smoothing mode to high quality.
+			e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+
 			// Try and lock the drawing mutex.
 			if (this.mutex.WaitOne(0))
 			{
@@ -224,6 +244,21 @@ namespace DotNetApi.Windows.Controls
 					{
 						// Draw the map bitmap.
 						e.Graphics.DrawImage(this.bitmapMap, new Point(0, 0));
+						// Draw any highlighted region.
+						if (null != this.highlightRegion)
+						{
+							// Create a new pen.
+							using (Pen pen = new Pen(this.colorMapRegionBorder))
+							{
+								// Create a new brush.
+								using (SolidBrush brush = new SolidBrush(this.colorMapRegionHighlight))
+								{
+
+									// Draw the highlighted region.
+									this.highlightRegion.Draw(e.Graphics, brush, pen);
+								}
+							}
+						}
 					}
 					else
 					{
@@ -262,8 +297,70 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class event handler.
 			base.OnResize(e);
-			// Refresh the map.
+			// Call the size changed event handler.
+			this.OnMapSizeChanged();
+			// Call the refresh map event handler.
 			this.OnRefreshMap();
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse moves over the control.
+		/// </summary>
+		/// <param name="e">The </param>
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			// Call the base class event handler.
+			base.OnMouseMove(e);
+			// The current highlighted region.
+			MapRegion highlightRegion = null;
+			// Compute the new highlight region.
+			foreach (MapRegion region in this.regions)
+			{
+				// If the region contains the mouse location.
+				if (region.IsVisible(e.Location))
+				{
+					// Set the current highlighted region.
+					highlightRegion = region;
+					// Stop the iteration.
+					break;
+				}
+			}
+			// If the highlighted region has changed.
+			if (this.highlightRegion != highlightRegion)
+			{
+				// If there exists a previous highlighted region.
+				if (null != this.highlightRegion)
+				{
+					// Invalidate the bounds of that region.
+					this.Invalidate(this.highlightRegion.Bounds);
+				}
+				// If there exists a curernt highlighted region.
+				if (null != highlightRegion)
+				{
+					// Invalidate the bounds of that region.
+					this.Invalidate(highlightRegion.Bounds);
+				}
+				// Set the new highlighted region.
+				this.highlightRegion = highlightRegion;
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse leaves the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseLeave(EventArgs e)
+		{
+			// Call the base class methods.
+			base.OnMouseLeave(e);
+			// If there exists a highlighted region.
+			if (null != this.highlightRegion)
+			{
+				// Invalidate the bounds of that region.
+				this.Invalidate(this.highlightRegion.Bounds);
+				// Set the highlighted region to null.
+				this.highlightRegion = null;
+			}
 		}
 
 		// Private methods.
@@ -310,42 +407,101 @@ namespace DotNetApi.Windows.Controls
 			// Set the current map.
 			this.map = map;
 			
+			// Clear the existing map regions.
+			foreach (MapRegion region in this.regions)
+			{
+				region.Dispose();
+			}
+			this.regions.Clear();
+
+			// If the current map is not null.
+			if (null != this.map)
+			{
+				// Create the map shapes.
+				foreach (MapShape shape in map.Shapes)
+				{
+					// Switch according to the shape type.
+					switch (shape.Type)
+					{
+						case MapShapeType.Polygon:
+							// Get the polygon shape.
+							MapShapePolygon shapePolygon = shape as MapShapePolygon;
+							// Create a map region for this shape.
+							MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
+							// Add the map region to the region items.
+							this.regions.Add(region);
+							break;
+						default: continue;
+					}
+				}
+			}
 			// Refresh the current map.
 			this.OnRefreshMap();
 		}
 
 		/// <summary>
-		/// Draws the current message on the control.
+		/// An event handler called when the map bounds have changed.
 		/// </summary>
-		/// <param name="graphics">The graphics object.</param>
-		private void OnDrawMessage(Graphics graphics)
+		/// <param name="mapBounds">The map bounds.</param>
+		private void OnMapBoundsChanged(MapRectangle mapBounds)
 		{
-			// Create the border rectangle.
-			Rectangle rectangleBorder = this.MeasureMessage(this.message);
-			// Create the fill rectangle.
-			Rectangle rectangleFill = new Rectangle(
-				rectangleBorder.X + 1,
-				rectangleBorder.Y + 1,
-				rectangleBorder.Width - 1,
-				rectangleBorder.Height - 1);
+			// Compute the map size to use the default values in case the width and height are zero.
+			this.mapSize = new MapSize(
+				mapBounds.Width != 0 ? mapBounds.Width : MapControl.mapBoundsDefault.Width,
+				mapBounds.Height != 0 ? mapBounds.Height : MapControl.mapBoundsDefault.Height
+				);
+			// Compute the map bounds.
+			this.mapBounds = new MapRectangle(
+				new MapPoint(mapBounds.Left, mapBounds.Top),
+				this.mapSize
+				);
+			// Recompute the map scale and bitmap size.
+			this.OnMapSizeChanged();
+		}
 
-			// Create the pen.
-			using (Pen pen = new Pen(this.colorMessageBorder))
+		/// <summary>
+		/// An event handler called when the map size has changed.
+		/// </summary>
+		private void OnMapSizeChanged()
+		{
+			// Compute the map scale.
+			this.mapScale = new MapScale(
+				this.ClientSize.Width / mapBounds.Width,
+				this.ClientSize.Height / mapBounds.Height
+				);
+			// Compute the bitmap size.
+			this.bitmapSize = this.ClientSize;
+			// If the map is not streched.
+			if (!this.showStreched)
 			{
-				// Create the brush.
-				using (SolidBrush brush = new SolidBrush(this.colorMessageFill))
+				// If the width scale is greater.
+				if (this.mapScale.Width > this.mapScale.Height)
 				{
-					// Draw the shadow.
-					graphics.DrawShadow(this.shadow, rectangleBorder);
-					// Draw the border.
-					graphics.DrawRectangle(pen, rectangleBorder);
-					// Draw the rectangle.
-					graphics.FillRectangle(brush, rectangleFill);
+					// Align along the width.
+					this.mapScale.Height = this.mapScale.Width;
+					this.bitmapSize.Height = (int)Math.Round(this.mapBounds.Height * this.mapScale.Height);
+				}
+				else
+				{
+					// Align along the height.
+					this.mapScale.Width = this.mapScale.Height;
+					this.bitmapSize.Width = (int)Math.Round(this.mapBounds.Width * this.mapScale.Width);
 				}
 			}
-			
-			// Display a message.
-			TextRenderer.DrawText(graphics, this.message, Window.DefaultFont, rectangleBorder, Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+			// Update the map items.
+			this.OnUpdateItems();
+		}
+
+		/// <summary>
+		/// Updates all the map items to the current map bounds and scale.
+		/// </summary>
+		private void OnUpdateItems()
+		{
+			// Update all map regions.
+			foreach (MapRegion region in this.regions)
+			{
+				region.Update(this.mapBounds, this.mapScale);
+			}
 		}
 
 		/// <summary>
@@ -414,43 +570,6 @@ namespace DotNetApi.Windows.Controls
 			// Acquire an exclusive access to the map.
 			lock (map)
 			{
-				// Compute the map size to use the default values in case the width and height are zero.
-				MapSize mapSize = new MapSize(
-					this.mapBounds.Width != 0 ? this.mapBounds.Width : MapControl.mapBoundsDefault.Width,
-					this.mapBounds.Height != 0 ? this.mapBounds.Height : MapControl.mapBoundsDefault.Height
-					);
-				// Compute the map bounds.
-				MapRectangle mapBounds = new MapRectangle(
-					new MapPoint(this.mapBounds.Left, this.mapBounds.Top),
-					mapSize
-					);
-				// Compute the scale factors.
-				MapScale mapScale = new MapScale(
-					this.ClientSize.Width / mapBounds.Width,
-					this.ClientSize.Height / mapBounds.Height
-					);
-				
-				// The bitmap size.
-				Size bitmapSize = new Size(this.ClientSize.Width, this.ClientSize.Height);
-
-				// If the map is not streched.
-				if (!this.showStreched)
-				{
-					// If the width scale is greater.
-					if (mapScale.Width > mapScale.Height)
-					{
-						// Align along the width.
-						mapScale.Height = mapScale.Width;
-						bitmapSize.Height = (int)Math.Round(mapBounds.Height * mapScale.Height);
-					}
-					else
-					{
-						// Align along the height.
-						mapScale.Width = mapScale.Height;
-						bitmapSize.Width = (int)Math.Round(mapBounds.Width * mapScale.Width);
-					}
-				}
-
 				// Create a new bitmap.
 				Bitmap bitmap = new Bitmap(bitmapSize.Width, bitmapSize.Height);
 
@@ -461,13 +580,15 @@ namespace DotNetApi.Windows.Controls
 					graphics.SmoothingMode = SmoothingMode.HighQuality;
 					using (SolidBrush brush = new SolidBrush(this.colorMapSea))
 					{
-						using (Pen pen = new Pen(this.colorMapCountryBorder))
+						using (Pen pen = new Pen(this.colorMapRegionBorder))
 						{
 							// Fill the background.
 							graphics.FillRectangle(brush, 0, 0, bitmapSize.Width, bitmapSize.Height);
 
-							// Draw the map shapes.
-							foreach (MapShape shape in map.Shapes)
+							// Change the brush color.
+							brush.Color = this.colorMapRegion;
+							// Draw the map regions.
+							foreach (MapRegion region in this.regions)
 							{
 								// If the asynchronous operation has been canceled.
 								if (asyncState.IsCanceled)
@@ -478,33 +599,8 @@ namespace DotNetApi.Windows.Controls
 									return null;
 								}
 
-								// Switch according to the shape type.
-								switch (shape.Type)
-								{
-									case MapShapeType.Polygon:
-										// Change the brush.
-										brush.Color = this.colorMapCountryLand;
-										// Get the polygon shape.
-										MapShapePolygon shapePolygon = shape as MapShapePolygon;
-										// For all shape parts.
-										foreach (MapPart part in shapePolygon.Parts)
-										{
-											// Create the list of points for the polygon.
-											PointF[] points = new PointF[part.Points.Count];
-											// Set the list of points.
-											for (int index = 0; index < part.Points.Count; index++)
-											{
-												points[index].X = (float)((part.Points[index].X - mapBounds.Left) * scaleWidth);
-												points[index].Y = (float)((mapBounds.Top - part.Points[index].Y) * scaleHeight);
-											}
-											// Draw the part land.
-											graphics.FillPolygon(brush, points);
-											// Draw the part border.
-											graphics.DrawPolygon(pen, points);
-										}
-										break;
-									default: continue;
-								}
+								// Draw the region.
+								region.Draw(graphics, brush, pen);
 							}
 						}
 					}
@@ -513,6 +609,42 @@ namespace DotNetApi.Windows.Controls
 				// Return the bitmap.
 				return bitmap;
 			}
+		}
+
+		/// <summary>
+		/// Draws the current message on the control.
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		private void OnDrawMessage(Graphics graphics)
+		{
+			// Use a normal smoothing mode.
+			graphics.SmoothingMode = SmoothingMode.Default;
+			// Create the border rectangle.
+			Rectangle rectangleBorder = this.MeasureMessage(this.message);
+			// Create the fill rectangle.
+			Rectangle rectangleFill = new Rectangle(
+				rectangleBorder.X + 1,
+				rectangleBorder.Y + 1,
+				rectangleBorder.Width - 1,
+				rectangleBorder.Height - 1);
+
+			// Create the pen.
+			using (Pen pen = new Pen(this.colorMessageBorder))
+			{
+				// Create the brush.
+				using (SolidBrush brush = new SolidBrush(this.colorMessageFill))
+				{
+					// Draw the shadow.
+					graphics.DrawShadow(this.shadow, rectangleBorder);
+					// Draw the border.
+					graphics.DrawRectangle(pen, rectangleBorder);
+					// Draw the rectangle.
+					graphics.FillRectangle(brush, rectangleFill);
+				}
+			}
+
+			// Display a message.
+			TextRenderer.DrawText(graphics, this.message, Window.DefaultFont, rectangleBorder, Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 		}
 
 		/// <summary>

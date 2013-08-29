@@ -40,6 +40,12 @@ namespace MapApi
 		// Public properties.
 
 		/// <summary>
+		/// Gets the part map part at the specified index.
+		/// </summary>
+		/// <param name="index">The index.</param>
+		/// <returns>The map part.</returns>
+		public MapPart this[int index] { get { return this.parts[index]; } }
+		/// <summary>
 		/// Gets the number of points in the collection.
 		/// </summary>
 		public int Count { get { return this.parts.Count; } }
