@@ -51,6 +51,7 @@
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
     <Compile Include="Drawing\Geometry.cs" />
+    <Compile Include="Drawing\IAnchor.cs" />
     <Compile Include="Drawing\Imaging\Kernel1D.cs" />
     <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
     <Compile Include="Drawing\Polygon.cs" />
@@ -61,7 +62,7 @@
     <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Validation.cs" />
     <Compile Include="Windows\Controls\MapControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapItem.cs">
       <SubType>Component</SubType>
@@ -122,13 +123,13 @@
     </Compile>
     <Compile Include="Windows\Controls\ISideControl.cs" />
     <Compile Include="Windows\Controls\NotificationBox.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\NotificationControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ProgressBox.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ProgressInfo.cs">
       <SubType>Component</SubType>
@@ -152,13 +153,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ThreadSafeControl.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ToolStripDropDownCalendar.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\Controls\GeoWorldMap.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Window.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

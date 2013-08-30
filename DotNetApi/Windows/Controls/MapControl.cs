@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A control that displays a geographic map.
 	/// </summary>
-	public sealed class MapControl : ThreadSafeControl
+	public sealed class MapControl : ThreadSafeControl, IAnchor
 	{
 		private delegate void RefreshEventHandler();
 
@@ -123,7 +123,7 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// Create the map message.
-			this.message = new MapMessage(MapControl.
+			//this.message = new MapMessage(MapControl.
 
 			// Create the background brush.
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
@@ -140,7 +140,7 @@ namespace DotNetApi.Windows.Controls
 		[DefaultValue(MapControl.messageNoMap)]
 		public string Message
 		{
-			get { return this.message; }
+			get { return this.message.Text; }
 			set { this.OnMessageChanged(value); }
 		}
 
@@ -171,6 +171,14 @@ namespace DotNetApi.Windows.Controls
 		{
 			get { return this.mapBounds; }
 			set { this.OnMapBoundsChanged(value); }
+		}
+
+		/// <summary>
+		/// Gets the anchor bounds.
+		/// </summary>
+		public Rectangle AnchorBounds
+		{
+			get { return this.ClientRectangle; }
 		}
 
 		// Protected methods.
@@ -282,11 +290,11 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// If the current message is not null or empty and the message is visible.
-			if (!string.IsNullOrEmpty(this.message) && this.showMessage)
-			{
+			//if (!string.IsNullOrEmpty(this.message) && this.showMessage)
+			//{
 				// Draw the message.
-				this.OnDrawMessage(e.Graphics);
-			}
+			//	this.OnDrawMessage(e.Graphics);
+			//}
 
 			// Call the base class event handler.
 			base.OnPaint(e);
@@ -381,18 +389,18 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="message">The message.</param>
 		private void OnShowMessage(string message)
 		{
-			// If there exists a visible message.
-			if (this.showMessage)
-			{
-				// Invalidate the region for the old message.
-				this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-			}
-			// Set the message visibility to true.
-			this.showMessage = true;
-			// Set the message text.
-			this.message = message;
-			// Invalidated the region for the new message.
-			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			//// If there exists a visible message.
+			//if (this.showMessage)
+			//{
+			//	// Invalidate the region for the old message.
+			//	this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			//}
+			//// Set the message visibility to true.
+			//this.showMessage = true;
+			//// Set the message text.
+			//this.message = message;
+			//// Invalidated the region for the new message.
+			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 		}
 
 		/// <summary>
@@ -404,7 +412,7 @@ namespace DotNetApi.Windows.Controls
 			if (this.showMessage)
 			{
 				// Invalidate the region for the old message.
-				this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+				//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 			}
 			// Set the message visibility to false.
 			this.showMessage = false;
@@ -417,11 +425,11 @@ namespace DotNetApi.Windows.Controls
 		private void OnMessageChanged(string message)
 		{
 			// Invalidate the region for the old message.
-			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 			// Set the new message.
-			this.message = message;
+			//this.message = message;
 			// Invalidated the region for the new message.
-			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 		}
 
 		/// <summary>
@@ -433,7 +441,7 @@ namespace DotNetApi.Windows.Controls
 			// Set the new message visibility.
 			this.showMessage = visible;
 			// Invalidate the message region.
-			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 		}
 
 		/// <summary>
@@ -583,13 +591,13 @@ namespace DotNetApi.Windows.Controls
 				});
 
 				// Set a new message.
-				this.message = MapControl.messageRefreshing;
+				//this.message = MapControl.messageRefreshing;
 				this.showMessage = true;
 			}
 			else
 			{
 				// Set a new message.
-				this.message = MapControl.messageNoMap;
+				//this.message = MapControl.messageNoMap;
 				this.showMessage = true;
 			}
 

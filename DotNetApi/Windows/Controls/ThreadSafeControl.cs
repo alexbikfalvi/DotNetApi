@@ -26,7 +26,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A base class for thread-safe controls.
 	/// </summary>
-	public class ThreadSafeControl : UserControl
+	public class ThreadSafeControl : Control
 	{
 		private AutoResetEvent eventHandleCreated = new AutoResetEvent(false);
 

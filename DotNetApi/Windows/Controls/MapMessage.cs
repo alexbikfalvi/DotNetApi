@@ -28,41 +28,63 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a map message.
 	/// </summary>
-	public class MapMessage : Component
+	public sealed class MapMessage : Component
 	{
-		private string message;
+		private MapControl parent;
+
+		private string text;
 
 		private Font font;
 		private Shadow shadow;
+		private Padding padding;
 
 		private Size sizeBorder;
 		private Rectangle rectangleText;
 		private Rectangle rectangleBorder;
 		private Rectangle rectanglePaint;
 
+		private HorizontalAlign horizontalAlignment = HorizontalAlign.Center;
+		
+
 		/// <summary>
 		/// Creates a new map message.
 		/// </summary>
-		/// <param name="message">The message.</param>
+		/// <param name="text">The message.</param>
 		/// <param name="anchor">The anchor rectangle.</param>
 		/// <param name="horizontalAlignment">The message horizontal alignment with respect to the anchor.</param>
 		/// <param name="verticalAlignment">The message vertical alignment with respect to the anchor.</param>
 		/// <param name="font">The message font.</param>
 		/// <param name="padding">The message padding.</param>
 		/// <param name="shadow">The message shadow.</param>
-		public MapMessage(string message, Rectangle anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment, Font font, Padding padding, Shadow shadow)
+		public MapMessage(string text, IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment, Font font, Padding padding, Shadow shadow)
 		{
 			// Set the message properties.
-			this.message = message;
+			this.text = text;
 			this.font = font;
 			this.shadow = shadow;
+			this.padding = padding;
 
+			// Update the message geometry.
+			//this.Update(anchor, horizontalAlignment, verticalAlignment);
+		}
+
+		// Public properties.
+
+		/// <summary>
+		/// Gets the text of the current map message.
+		/// </summary>
+		public string Text { get { return this.text; } }
+
+		// Public methods.
+
+		public void Update(IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
+		{
 			// Compute the text size.
-			Size sizeText = TextRenderer.MeasureText(this.message, font);
+			Size sizeText = TextRenderer.MeasureText(this.text, this.font);
 			// Compute the border size.
 			this.sizeBorder = sizeText.Add(padding);
 			// Compute the border rectangle.
-			this.rectangleBorder = sizeBorder.Align(anchor, horizontalAlignment, verticalAlignment);
+			this.rectangleBorder = sizeBorder.Align(anchor.AnchorBounds, horizontalAlignment, verticalAlignment);
 			// Compute the text rectangle.
 			this.rectangleText = this.rectangleBorder.Add(padding.Left, padding.Top);
 			// Compute the shadow rectangle.
@@ -99,7 +121,7 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// Display a message.
-			TextRenderer.DrawText(graphics, this.message, this.font, this.rectangleText, colorText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+			TextRenderer.DrawText(graphics, this.text, this.font, this.rectangleText, colorText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 		}
 	}
 }

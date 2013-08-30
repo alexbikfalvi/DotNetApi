@@ -217,7 +217,7 @@ namespace DotNetApi.Drawing
 		public static Rectangle Align(this Size size, Rectangle anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
 		{
 			// Declare the location.
-			Point location;
+			Point location = default(Point);
 			// Compute the X coordinate.
 			switch (horizontalAlignment)
 			{
