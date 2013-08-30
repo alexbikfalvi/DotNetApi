@@ -35,6 +35,8 @@ namespace DotNetApi.Windows.Controls
 
 		private Rectangle bounds;
 
+		private string name;
+
 		/// <summary>
 		/// Creates a new map region from the specified map shape, given the geographic map bounds and map scale.
 		/// </summary>
@@ -55,6 +57,8 @@ namespace DotNetApi.Windows.Controls
 			this.path = new GraphicsPath();
 			// Update the map region to the specified bounds and scale.
 			this.Update(bounds, scale);
+			// Get the region metadata.
+			this.name = shape.Metadata["name"];
 		}
 
 		// Public properties.
@@ -63,6 +67,10 @@ namespace DotNetApi.Windows.Controls
 		/// Returns a rectangle that bounds this region.
 		/// </summary>
 		public Rectangle Bounds { get { return this.bounds; } }
+		/// <summary>
+		/// Returns the region name.
+		/// </summary>
+		public string Name { get { return this.name; } }
 
 		// Public methods.
 

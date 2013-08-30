@@ -10,6 +10,7 @@ namespace DotNetApi.Drawing
 	{
 		private Point location;
 		private readonly Point[] points;
+		private Size size;
 
 		/// <summary>
 		/// Creates a polygon shape form the specified rectangle.
@@ -19,6 +20,8 @@ namespace DotNetApi.Drawing
 		{
 			// Set the location.
 			this.location = rectangle.Location;
+			// Set the size.
+			this.size = rectangle.Size;
 			// Set the points.
 			this.points = new Point[4];
 			this.points[0] = new Point(0, 0);
@@ -35,6 +38,8 @@ namespace DotNetApi.Drawing
 		{
 			// Set the location.
 			this.location = points.Min();
+			// Set the size.
+			this.size = new Size(points.Max().Subtract(this.location));
 			// Set the points.
 			this.points = new Point[points.Length];
 			for (int index = 0; index < points.Length; index++)
@@ -46,6 +51,14 @@ namespace DotNetApi.Drawing
 		// Public properties.
 
 		/// <summary>
+		/// Gets the number of points the current polygon.
+		/// </summary>
+		public int Count
+		{
+			get { return this.points.Length; }
+		}
+
+		/// <summary>
 		/// Gets or sets the polygon location.
 		/// </summary>
 		public Point Location
@@ -55,11 +68,11 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
-		/// Gets the number of points the current polygon.
+		/// Gets the polygon size.
 		/// </summary>
-		public int Count
+		public Size Size
 		{
-			get { return this.points.Length; }
+			get { return this.size; }
 		}
 
 		// Public methods.
@@ -79,6 +92,22 @@ namespace DotNetApi.Drawing
 				if ((this.points[index].X != polygon.points[index].Y) || (this.points[index].X != polygon.points[index].Y)) return false;
 			}
 			return true;
+		}
+
+		/// <summary>
+		/// Returns the points of the current polygon by adding the specified offset on the X and Y axes.
+		/// </summary>
+		/// <param name="offset">The offset.</param>
+		/// <returns>The polygon points.</returns>
+		public Point[] GetPoints(int offset)
+		{
+			// Compute the new points.
+			Point[] points = new Point[this.points.Length];
+			for (int index = 0; index < this.points.Length; index++)
+			{
+				points[index] = this.points[index].Add(offset);
+			}
+			return points;
 		}
 	}
 }

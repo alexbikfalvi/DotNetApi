@@ -66,6 +66,9 @@
     <Compile Include="Windows\Controls\MapItem.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Windows\Controls\MapMessage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\MapRegion.cs">
       <SubType>Component</SubType>
     </Compile>

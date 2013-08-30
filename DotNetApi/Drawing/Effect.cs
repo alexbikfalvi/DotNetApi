@@ -46,11 +46,18 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
-		/// Draws the effect on the specified graphics object and at the given rectangle.
+		/// Draws the effect on the specified graphics object for the given rectangle.
 		/// </summary>
 		/// <param name="graphics">The graphics object.</param>
 		/// <param name="rectangle">The rectangle.</param>
 		internal abstract void Draw(Graphics graphics, Rectangle rectangle);
+
+		/// <summary>
+		/// Draws the effect on the specified graphics object for the given polygon.
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		/// <param name="points">The polygon points.</param>
+		internal abstract void Draw(Graphics graphics, Point[] points);
 
 		// Protected methods.
 

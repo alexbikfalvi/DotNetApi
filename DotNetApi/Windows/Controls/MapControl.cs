@@ -82,7 +82,7 @@ namespace DotNetApi.Windows.Controls
 
 		// Message.
 
-		private string message = MapControl.messageNoMap;
+		private MapMessage message = null;
 		private Font messageFont = Window.DefaultFont;
 		private Padding messagePadding = new Padding(4);
 
@@ -121,6 +121,9 @@ namespace DotNetApi.Windows.Controls
 					graphics.FillRectangle(brush, 0, 10, 10, 20);
 				}
 			}
+
+			// Create the map message.
+			this.message = new MapMessage(MapControl.
 
 			// Create the background brush.
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
@@ -339,6 +342,13 @@ namespace DotNetApi.Windows.Controls
 				{
 					// Invalidate the bounds of that region.
 					this.Invalidate(highlightRegion.Bounds);
+					// Show a message.
+					this.OnShowMessage(highlightRegion.Name);
+				}
+				else
+				{
+					// Hide the message.
+					this.OnHideMessage();
 				}
 				// Set the new highlighted region.
 				this.highlightRegion = highlightRegion;
@@ -366,19 +376,52 @@ namespace DotNetApi.Windows.Controls
 		// Private methods.
 
 		/// <summary>
+		/// Shows the specified message.
+		/// </summary>
+		/// <param name="message">The message.</param>
+		private void OnShowMessage(string message)
+		{
+			// If there exists a visible message.
+			if (this.showMessage)
+			{
+				// Invalidate the region for the old message.
+				this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			}
+			// Set the message visibility to true.
+			this.showMessage = true;
+			// Set the message text.
+			this.message = message;
+			// Invalidated the region for the new message.
+			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+		}
+
+		/// <summary>
+		/// Hides the current message.
+		/// </summary>
+		private void OnHideMessage()
+		{
+			// If there exists a visible message.
+			if (this.showMessage)
+			{
+				// Invalidate the region for the old message.
+				this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
+			}
+			// Set the message visibility to false.
+			this.showMessage = false;
+		}
+
+		/// <summary>
 		/// Sets the specified message on the control.
 		/// </summary>
 		/// <param name="message">The new message.</param>
 		private void OnMessageChanged(string message)
 		{
-			// Get the shadow rectangle for the old message.
-			Rectangle rectangleOld = this.shadow.GetShadowRectangle(this.MeasureMessage(this.message));
-			// Get the shadow rectangle for the new message.
-			Rectangle rectangleNew = this.shadow.GetShadowRectangle(this.MeasureMessage(message));
+			// Invalidate the region for the old message.
+			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 			// Set the new message.
 			this.message = message;
-			// Invalidate the maximum region between the two rectangles.
-			this.Invalidate(Geometry.Merge(rectangleOld, rectangleNew));
+			// Invalidated the region for the new message.
+			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 		}
 
 		/// <summary>
@@ -387,12 +430,10 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="visible"><b>True</b> if the message is visible or <b>false</b> otherwise.</param>
 		private void OnMessageVisibleChanged(bool visible)
 		{
-			// Get the shadow rectangle for the current message.
-			Rectangle rectangle = this.shadow.GetShadowRectangle(this.MeasureMessage(this.message));
 			// Set the new message visibility.
 			this.showMessage = visible;
-			// Invalidate the maximum region between the two rectangles.
-			this.Invalidate(rectangle);
+			// Invalidate the message region.
+			this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
 		}
 
 		/// <summary>
@@ -609,42 +650,6 @@ namespace DotNetApi.Windows.Controls
 				// Return the bitmap.
 				return bitmap;
 			}
-		}
-
-		/// <summary>
-		/// Draws the current message on the control.
-		/// </summary>
-		/// <param name="graphics">The graphics object.</param>
-		private void OnDrawMessage(Graphics graphics)
-		{
-			// Use a normal smoothing mode.
-			graphics.SmoothingMode = SmoothingMode.Default;
-			// Create the border rectangle.
-			Rectangle rectangleBorder = this.MeasureMessage(this.message);
-			// Create the fill rectangle.
-			Rectangle rectangleFill = new Rectangle(
-				rectangleBorder.X + 1,
-				rectangleBorder.Y + 1,
-				rectangleBorder.Width - 1,
-				rectangleBorder.Height - 1);
-
-			// Create the pen.
-			using (Pen pen = new Pen(this.colorMessageBorder))
-			{
-				// Create the brush.
-				using (SolidBrush brush = new SolidBrush(this.colorMessageFill))
-				{
-					// Draw the shadow.
-					graphics.DrawShadow(this.shadow, rectangleBorder);
-					// Draw the border.
-					graphics.DrawRectangle(pen, rectangleBorder);
-					// Draw the rectangle.
-					graphics.FillRectangle(brush, rectangleFill);
-				}
-			}
-
-			// Display a message.
-			TextRenderer.DrawText(graphics, this.message, Window.DefaultFont, rectangleBorder, Color.Black, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 		}
 
 		/// <summary>

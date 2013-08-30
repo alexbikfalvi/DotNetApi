@@ -18,9 +18,34 @@
 
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace DotNetApi.Drawing
 {
+	/// <summary>
+	/// An enumeration representing horizontal alignments.
+	/// </summary>
+	public enum HorizontalAlign
+	{
+		LeftOutside,
+		LeftInside,
+		Center,
+		RightOutside,
+		RightInside
+	}
+
+	/// <summary>
+	/// An enumeration representing vertical alignments.
+	/// </summary>
+	public enum VerticalAlign
+	{
+		TopOutside,
+		TopInside,
+		Center,
+		BottomOutside,
+		BottomInside
+	}
+
 	/// <summary>
 	/// A class with useful geometric methods.
 	/// </summary>
@@ -38,6 +63,63 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Adds to the current point the specified offset on both the X and Y axes.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <param name="offset">The offset.</param>
+		/// <returns>The new point.</returns>
+		public static Point Add(this Point point, int offset)
+		{
+			return new Point(point.X + offset, point.Y + offset);
+		}
+
+		/// <summary>
+		/// Adds to the current point the specified X and Y offset values.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <param name="x">The X offset.</param>
+		/// <param name="y">The Y offset.</param>
+		/// <returns>The new point.</returns>
+		public static Point Add(this Point point, int x, int y)
+		{
+			return new Point(point.X + x, point.Y + y);
+		}
+
+		/// <summary>
+		/// Increments the current size with the specified delta on both the X and Y axes.
+		/// </summary>
+		/// <param name="size">The size.</param>
+		/// <param name="delta">The delta.</param>
+		/// <returns>The new size.</returns>
+		public static Size Add(this Size size, int delta)
+		{
+			return new Size(size.Width + delta, size.Height + delta);
+		}
+
+		/// <summary>
+		/// Adds to the current size the specified padding.
+		/// </summary>
+		/// <param name="size">The size.</param>
+		/// <param name="padding">The padding.</param>
+		/// <returns>The new size.</returns>
+		public static Size Add(this Size size, Padding padding)
+		{
+			return new Size(size.Width + padding.Horizontal, size.Height + padding.Vertical);
+		}
+
+		/// <summary>
+		/// Adds to the current rectangle location the specified X and Y offset values.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="x">The X offset.</param>
+		/// <param name="y">The Y offset.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle Add(this Rectangle rectangle, int x, int y)
+		{
+			return new Rectangle(rectangle.Location.Add(x, y), rectangle.Size);
+		}
+
+		/// <summary>
 		/// Subtracts from the current point the specified offset.
 		/// </summary>
 		/// <param name="point">The point.</param>
@@ -46,6 +128,40 @@ namespace DotNetApi.Drawing
 		public static Point Subtract(this Point point, Point offset)
 		{
 			return new Point(point.X - offset.X, point.Y - offset.Y);
+		}
+
+		/// <summary>
+		/// Subtracts from the current point the specified offset on both the X and Y axes.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <param name="offset">The offset.</param>
+		/// <returns>The new point.</returns>
+		public static Point Subtract(this Point point, int offset)
+		{
+			return new Point(point.X - offset, point.Y - offset);
+		}
+
+		/// <summary>
+		/// Subtracts from the current point the specified X and Y offset values.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <param name="x">The X offset.</param>
+		/// <param name="y">The Y offset.</param>
+		/// <returns>The new point.</returns>
+		public static Point Subtract(this Point point, int x, int y)
+		{
+			return new Point(point.X - x, point.Y - y);
+		}
+
+		/// <summary>
+		/// Decrements the current size with the specified delta on both the X and Y axes.
+		/// </summary>
+		/// <param name="size">The size.</param>
+		/// <param name="delta">The delta.</param>
+		/// <returns>The new size.</returns>
+		public static Size Subtract(this Size size, int delta)
+		{
+			return new Size(size.Width - delta, size.Height - delta);
 		}
 
 		/// <summary>
@@ -70,12 +186,87 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Returns the point with the maximum X and Y coordinates between the given number of points.
+		/// </summary>
+		/// <param name="points">The points.</param>
+		/// <returns>The point.</returns>
+		public static Point Max(this Point[] points)
+		{
+			points.ValidateNotNull("points");
+
+			int x = int.MinValue;
+			int y = int.MinValue;
+
+			foreach (Point point in points)
+			{
+				if (x < point.X) x = point.X;
+				if (y < point.Y) y = point.Y;
+			}
+
+			return new Point(x, y);
+		}
+
+		/// <summary>
+		/// Computes the location of a rectangle of the specified size, align to the given anchor.
+		/// </summary>
+		/// <param name="size">The rectangle size.</param>
+		/// <param name="anchor">The anchor rectangle.</param>
+		/// <param name="horizontalAlignment">The horizontal alignment.</param>
+		/// <param name="verticalAlignment">The vertical alignment.</param>
+		/// <returns>The aligned rectangle.</returns>
+		public static Rectangle Align(this Size size, Rectangle anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
+		{
+			// Declare the location.
+			Point location;
+			// Compute the X coordinate.
+			switch (horizontalAlignment)
+			{
+				case HorizontalAlign.LeftOutside:
+					location.X = anchor.Left - size.Width;
+					break;
+				case HorizontalAlign.LeftInside:
+					location.X = anchor.Left;
+					break;
+				case HorizontalAlign.Center:
+					location.X = anchor.Left + (anchor.Width >> 1) - (size.Width >> 1);
+					break;
+				case HorizontalAlign.RightInside:
+					location.X = anchor.Right - size.Width;
+					break;
+				case HorizontalAlign.RightOutside:
+					location.X = anchor.Right;
+					break;
+			}
+			// Compute the Y coordinate.
+			switch (verticalAlignment)
+			{
+				case VerticalAlign.TopOutside:
+					location.Y = anchor.Top - size.Height;
+					break;
+				case VerticalAlign.TopInside:
+					location.Y = anchor.Top;
+					break;
+				case VerticalAlign.Center:
+					location.Y = anchor.Top + (anchor.Height >> 1) - (size.Height >> 1);
+					break;
+				case VerticalAlign.BottomInside:
+					location.Y = anchor.Bottom - size.Height;
+					break;
+				case VerticalAlign.BottomOutside:
+					location.Y = anchor.Bottom;
+					break;
+			}
+			// Return the aligned rectangle.
+			return new Rectangle(location, size);
+		}
+
+		/// <summary>
 		/// Returns the rectangle region encompassing the two rectangles.
 		/// </summary>
 		/// <param name="rectangle1">The first rectangle.</param>
 		/// <param name="rectangle2">The second rectangle.</param>
 		/// <returns>The merged rectangle region.</returns>
-		public static Rectangle Merge(Rectangle rectangle1, Rectangle rectangle2)
+		public static Rectangle Merge(this Rectangle rectangle1, Rectangle rectangle2)
 		{
 			int left = rectangle1.X < rectangle2.X ? rectangle1.X : rectangle2.X;
 			int top = rectangle1.Y < rectangle2.Y ? rectangle1.Y : rectangle2.Y;
