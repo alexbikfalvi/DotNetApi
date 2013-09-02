@@ -46,12 +46,17 @@ namespace DotNetApi.Drawing.Imaging
 			double invTwoSigmaSq = -1.0 / (2 * sigma * sigma);
 			double invSqrtTwoPiSigmaSq = Math.Sqrt(-invTwoSigmaSq / Math.PI);
 			// Create the kernel.
-			double sum = 0;
+			double sum = 0.0;
 			this.kernel = new double[size];
 			for (int i = 0, x = -this.offset; i < size; i++, x++)
 			{
 				this.kernel[i] = invSqrtTwoPiSigmaSq * Math.Exp(invTwoSigmaSq * (x * x));
 				sum += kernel[i];
+			}
+			// Normalize the kernel such that the sum of all elements is one.
+			for (int i = 0; i < size; i++)
+			{
+				this.kernel[i] /= sum;
 			}
 		}
 

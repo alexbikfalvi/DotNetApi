@@ -51,7 +51,6 @@
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
     <Compile Include="Drawing\Geometry.cs" />
-    <Compile Include="Drawing\IAnchor.cs" />
     <Compile Include="Drawing\Imaging\Kernel1D.cs" />
     <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
     <Compile Include="Drawing\Polygon.cs" />

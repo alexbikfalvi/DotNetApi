@@ -30,8 +30,6 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class MapMessage : Component
 	{
-		private MapControl parent;
-
 		private string text;
 
 		private Font font;
@@ -44,6 +42,7 @@ namespace DotNetApi.Windows.Controls
 		private Rectangle rectanglePaint;
 
 		private HorizontalAlign horizontalAlignment = HorizontalAlign.Center;
+		private VerticalAlign verticalAlignment = VerticalAlign.Center;
 		
 
 		/// <summary>
@@ -56,16 +55,15 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="font">The message font.</param>
 		/// <param name="padding">The message padding.</param>
 		/// <param name="shadow">The message shadow.</param>
-		public MapMessage(string text, IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment, Font font, Padding padding, Shadow shadow)
+		public MapMessage(string text, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment, Font font, Padding padding, Shadow shadow)
 		{
 			// Set the message properties.
 			this.text = text;
+			this.horizontalAlignment = horizontalAlignment;
+			this.verticalAlignment = verticalAlignment;
 			this.font = font;
-			this.shadow = shadow;
 			this.padding = padding;
-
-			// Update the message geometry.
-			//this.Update(anchor, horizontalAlignment, verticalAlignment);
+			this.shadow = shadow;
 		}
 
 		// Public properties.
@@ -77,14 +75,14 @@ namespace DotNetApi.Windows.Controls
 
 		// Public methods.
 
-		public void Update(IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
+		public void Update(Rectangle bounds, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
 		{
 			// Compute the text size.
 			Size sizeText = TextRenderer.MeasureText(this.text, this.font);
 			// Compute the border size.
 			this.sizeBorder = sizeText.Add(padding);
 			// Compute the border rectangle.
-			this.rectangleBorder = sizeBorder.Align(anchor.AnchorBounds, horizontalAlignment, verticalAlignment);
+			this.rectangleBorder = sizeBorder.Align(bounds, horizontalAlignment, verticalAlignment);
 			// Compute the text rectangle.
 			this.rectangleText = this.rectangleBorder.Add(padding.Left, padding.Top);
 			// Compute the shadow rectangle.

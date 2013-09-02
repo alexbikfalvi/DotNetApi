@@ -130,7 +130,7 @@ namespace DotNetApi.Drawing
 			if (disposed)
 			{
 				// Dispose current objects.
-				this.bitmap.Dispose();
+				if (null != this.bitmap) this.bitmap.Dispose();
 			}
 		}
 

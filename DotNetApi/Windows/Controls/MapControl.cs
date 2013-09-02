@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A control that displays a geographic map.
 	/// </summary>
-	public sealed class MapControl : ThreadSafeControl, IAnchor
+	public sealed class MapControl : ThreadSafeControl
 	{
 		private delegate void RefreshEventHandler();
 
@@ -171,14 +171,6 @@ namespace DotNetApi.Windows.Controls
 		{
 			get { return this.mapBounds; }
 			set { this.OnMapBoundsChanged(value); }
-		}
-
-		/// <summary>
-		/// Gets the anchor bounds.
-		/// </summary>
-		public Rectangle AnchorBounds
-		{
-			get { return this.ClientRectangle; }
 		}
 
 		// Protected methods.
