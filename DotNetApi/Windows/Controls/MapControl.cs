@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A control that displays a geographic map.
 	/// </summary>
-	public sealed class MapControl : ThreadSafeControl
+	public sealed class MapControl : ThreadSafeControl, IAnchor
 	{
 		private delegate void RefreshEventHandler();
 
@@ -78,17 +78,15 @@ namespace DotNetApi.Windows.Controls
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
 		private TextureBrush brushBackground;
 
-		private Shadow shadow = new Shadow(Color.Black, 0, 14);
+		// Annotations.
 
-		// Message.
+		private MapTextAnnotation annotationMessage = null;
+		private MapInfoAnnotation annotationRegion = null;
 
-		private MapMessage message = null;
-		private Font messageFont = Window.DefaultFont;
-		private Padding messagePadding = new Padding(4);
+		private MapAnnotation[] annotations = null;
 
 		// Switches.
 
-		private bool showMessage = true;
 		private bool showMarkers = true;
 		private bool showMajorGrid = true;
 		private bool showMinorGrid = true;
@@ -122,8 +120,14 @@ namespace DotNetApi.Windows.Controls
 				}
 			}
 
-			// Create the map message.
-			//this.message = new MapMessage(MapControl.
+			// Create the map annotations.
+			this.annotationMessage = new MapTextAnnotation(MapControl.messageNoMap, this);
+			this.annotationRegion = new MapInfoAnnotation(string.Empty, this);
+
+			this.annotations = new MapAnnotation[] {
+				this.annotationMessage,
+				this.annotationRegion
+			};
 
 			// Create the background brush.
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
@@ -140,7 +144,7 @@ namespace DotNetApi.Windows.Controls
 		[DefaultValue(MapControl.messageNoMap)]
 		public string Message
 		{
-			get { return this.message.Text; }
+			get { return this.annotationMessage.Text; }
 			set { this.OnMessageChanged(value); }
 		}
 
@@ -150,7 +154,7 @@ namespace DotNetApi.Windows.Controls
 		[DefaultValue(true)]
 		public bool MessageVisible
 		{
-			get { return this.showMessage; }
+			get { return this.annotationMessage.Visible; }
 			set { this.OnMessageVisibleChanged(value); }
 		}
 
@@ -173,6 +177,15 @@ namespace DotNetApi.Windows.Controls
 			set { this.OnMapBoundsChanged(value); }
 		}
 
+		/// <summary>
+		/// Gets the anchor bounds.
+		/// </summary>
+		public Rectangle AnchorBounds
+		{
+			get { return this.ClientRectangle; }
+		}
+
+
 		// Protected methods.
 
 		/// <summary>
@@ -188,9 +201,9 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Disposes the control.
+		/// An event handler called when the object is being disposed.
 		/// </summary>
-		/// <param name="disposing"><b>True</b> if the object is being disposed.</param>
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
 			// Call the base class dispose method.
@@ -208,8 +221,9 @@ namespace DotNetApi.Windows.Controls
 				}
 				this.bitmapBackground.Dispose();
 
-				// Dispose the shadow.
-				this.shadow.Dispose();
+				// Dispose the annotations.
+				this.annotationMessage.Dispose();
+				this.annotationRegion.Dispose();
 
 				// Dispose the asynchronous task.
 				this.task.Dispose();
@@ -281,12 +295,11 @@ namespace DotNetApi.Windows.Controls
 				e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 			}
 
-			// If the current message is not null or empty and the message is visible.
-			//if (!string.IsNullOrEmpty(this.message) && this.showMessage)
-			//{
-				// Draw the message.
-			//	this.OnDrawMessage(e.Graphics);
-			//}
+			// Draw the map annotations.
+			foreach (MapAnnotation annotation in this.annotations)
+			{
+				annotation.Draw(e.Graphics);
+			}
 
 			// Call the base class event handler.
 			base.OnPaint(e);
@@ -302,6 +315,8 @@ namespace DotNetApi.Windows.Controls
 			base.OnResize(e);
 			// Call the size changed event handler.
 			this.OnMapSizeChanged();
+			// Call the message bounds changed .
+			this.OnAnnotationBoundsChanged();
 			// Call the refresh map event handler.
 			this.OnRefreshMap();
 		}
@@ -342,13 +357,13 @@ namespace DotNetApi.Windows.Controls
 				{
 					// Invalidate the bounds of that region.
 					this.Invalidate(highlightRegion.Bounds);
-					// Show a message.
-					this.OnShowMessage(highlightRegion.Name);
+					// Show the annotation.
+					this.OnShowAnnotation(this.annotationRegion, highlightRegion.Name, highlightRegion, HorizontalAlign.Center, VerticalAlign.TopOutside);
 				}
 				else
 				{
-					// Hide the message.
-					this.OnHideMessage();
+					// Hide the annotation.
+					this.OnHideAnnotation(this.annotationRegion);
 				}
 				// Set the new highlighted region.
 				this.highlightRegion = highlightRegion;
@@ -374,67 +389,6 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		// Private methods.
-
-		/// <summary>
-		/// Shows the specified message.
-		/// </summary>
-		/// <param name="message">The message.</param>
-		private void OnShowMessage(string message)
-		{
-			//// If there exists a visible message.
-			//if (this.showMessage)
-			//{
-			//	// Invalidate the region for the old message.
-			//	this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-			//}
-			//// Set the message visibility to true.
-			//this.showMessage = true;
-			//// Set the message text.
-			//this.message = message;
-			//// Invalidated the region for the new message.
-			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-		}
-
-		/// <summary>
-		/// Hides the current message.
-		/// </summary>
-		private void OnHideMessage()
-		{
-			// If there exists a visible message.
-			if (this.showMessage)
-			{
-				// Invalidate the region for the old message.
-				//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-			}
-			// Set the message visibility to false.
-			this.showMessage = false;
-		}
-
-		/// <summary>
-		/// Sets the specified message on the control.
-		/// </summary>
-		/// <param name="message">The new message.</param>
-		private void OnMessageChanged(string message)
-		{
-			// Invalidate the region for the old message.
-			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-			// Set the new message.
-			//this.message = message;
-			// Invalidated the region for the new message.
-			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-		}
-
-		/// <summary>
-		/// Set the message visibility.
-		/// </summary>
-		/// <param name="visible"><b>True</b> if the message is visible or <b>false</b> otherwise.</param>
-		private void OnMessageVisibleChanged(bool visible)
-		{
-			// Set the new message visibility.
-			this.showMessage = visible;
-			// Invalidate the message region.
-			//this.Invalidate(this.shadow.GetShadowRectangle(this.MeasureMessage(this.message)));
-		}
 
 		/// <summary>
 		/// Sets the current map.
@@ -534,6 +488,126 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Shows the specified annotation.
+		/// </summary>
+		/// <param name="annotation">The text annotation</param>
+		/// <param name="text">The message text.</param>
+		/// <param name="anchor">The message anchor.</param>
+		/// <param name="horizontalAlignment">The horizontal alignment.</param>
+		/// <param name="verticalAlignment">The vertical alignment.</param>
+		private void OnShowAnnotation(MapTextAnnotation annotation, string text, IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
+		{
+			// Get the old message bounds.
+			Rectangle oldBounds = annotation.Bounds;
+			
+			// Suspend the message layout.
+			annotation.SuspendLayout();
+			// Set the new message properties.
+			annotation.Text = text;
+			annotation.Anchor = anchor;
+			annotation.HorizontalAlignment = horizontalAlignment;
+			annotation.VerticalAlignment = verticalAlignment;
+			// Result the message layout.
+			annotation.ResumeLayout();
+			
+			// Get the new message bounds.
+			Rectangle newBounds = annotation.Bounds;
+			// If the message is currently visible.
+			if (annotation.Visible)
+			{
+				// Invalidate the area corresponding to the old message bounds.
+				this.Invalidate(oldBounds);
+			}
+			else
+			{
+				// Set the message visibility to true.
+				annotation.Visible = true;
+			}
+			// Invalidated the area corresponding to the new message bounds.
+			this.Invalidate(newBounds);
+		}
+
+		/// <summary>
+		/// Hides the specified text annotation.
+		/// </summary>
+		/// <param name="annotation">The annotation.</param>
+		private void OnHideAnnotation(MapTextAnnotation annotation)
+		{
+			// If there exists a visible message.
+			if (annotation.Visible)
+			{
+				// Invalidate the area corresponding to the message bounds.
+				this.Invalidate(annotation.Bounds);
+			}
+			// Set the message visibility to false.
+			annotation.Visible = false;
+		}
+
+		/// <summary>
+		/// Sets the specified message on the control.
+		/// </summary>
+		/// <param name="text">The new message text.</param>
+		private void OnMessageChanged(string text)
+		{
+			// Get the old message bounds.
+			Rectangle oldBounds = this.annotationMessage.Bounds;
+			// Set the new message text.
+			this.annotationMessage.Text = text;
+			// Get the new message bounds.
+			Rectangle newBounds = this.annotationMessage.Bounds;
+			// If the bounds have changed.
+			if (oldBounds != newBounds)
+			{
+				// Invalidate the area corresponding to the old bounds.
+				this.Invalidate(oldBounds);
+				// Invalidate the area corresponding to the new bounds.
+				this.Invalidate(newBounds);
+			}
+			else
+			{
+				// Invalidate the area corresponding to the new bounds.
+				this.Invalidate(newBounds);
+			}
+		}
+
+		/// <summary>
+		/// Set the message visibility.
+		/// </summary>
+		/// <param name="visible"><b>True</b> if the message is visible or <b>false</b> otherwise.</param>
+		private void OnMessageVisibleChanged(bool visible)
+		{
+			// Set the new message visibility.
+			this.annotationMessage.Visible = visible;
+			// Invalidate the area corresponding to the message bounds.
+			this.Invalidate(this.annotationMessage.Bounds);
+		}
+
+		/// <summary>
+		/// An event handler called when the annotation bounds have changed.
+		/// </summary>
+		private void OnAnnotationBoundsChanged()
+		{
+			// For all map annotations.
+			foreach (MapAnnotation annotation in this.annotations)
+			{
+				// Get the old annotation bounds.
+				Rectangle oldBounds = annotation.Bounds;
+				// Refresh the annotation.
+				annotation.Refresh();
+				// Get the new annotation bounds.
+				Rectangle newBounds = annotation.Bounds;
+				// If the bounds have changed.
+				if (oldBounds != newBounds)
+				{
+					// Invalidate the area corresponding to the old bounds.
+					this.Invalidate(oldBounds);
+					// Invalidate the area corresponding to the new bounds.
+					this.Invalidate(newBounds);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Updates all the map items to the current map bounds and scale.
 		/// </summary>
 		private void OnUpdateItems()
@@ -571,7 +645,7 @@ namespace DotNetApi.Windows.Controls
 						// Return if the asynchronous operation has been canceled.
 						if (asyncState.IsCanceled) return;
 						// Hide the message.
-						this.showMessage = false;
+						this.annotationMessage.Visible = false;
 					}
 					finally
 					{
@@ -583,14 +657,14 @@ namespace DotNetApi.Windows.Controls
 				});
 
 				// Set a new message.
-				//this.message = MapControl.messageRefreshing;
-				this.showMessage = true;
+				this.annotationMessage.Text = MapControl.messageRefreshing;
+				this.annotationMessage.Visible = true;
 			}
 			else
 			{
 				// Set a new message.
-				//this.message = MapControl.messageNoMap;
-				this.showMessage = true;
+				this.annotationMessage.Text = MapControl.messageNoMap;
+				this.annotationMessage.Visible = true;
 			}
 
 			// Refresh the control.
@@ -650,24 +724,6 @@ namespace DotNetApi.Windows.Controls
 				// Return the bitmap.
 				return bitmap;
 			}
-		}
-
-		/// <summary>
-		/// Returns the drawing rectangle for the specified message.
-		/// </summary>
-		/// <param name="message">The message.</param>
-		/// <returns>The drawing rectangle.</returns>
-		private Rectangle MeasureMessage(string message)
-		{
-			// Measure the message text.
-			Size size = TextRenderer.MeasureText(message, this.messageFont);
-
-			// Return the message rectangle.
-			return new Rectangle(
-				this.ClientRectangle.X + (this.ClientRectangle.Width >> 1) - (size.Width >> 1) - this.messagePadding.Left,
-				this.ClientRectangle.Y + (this.ClientRectangle.Height >> 1) - (size.Height >> 1) - this.messagePadding.Top,
-				size.Width + this.messagePadding.Left + this.messagePadding.Right,
-				size.Height + this.messagePadding.Top + this.messagePadding.Bottom);
 		}
 	}
 }

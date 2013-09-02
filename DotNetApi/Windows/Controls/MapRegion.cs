@@ -27,7 +27,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a map region.
 	/// </summary>
-	public class MapRegion : MapItem
+	public class MapRegion : MapItem, IAnchor
 	{
 		private readonly MapShapePolygon shape;
 		private readonly PointF[][] points;
@@ -58,7 +58,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the map region to the specified bounds and scale.
 			this.Update(bounds, scale);
 			// Get the region metadata.
-			this.name = shape.Metadata["name"];
+			this.name = shape.Metadata["admin"];
 		}
 
 		// Public properties.
@@ -67,6 +67,10 @@ namespace DotNetApi.Windows.Controls
 		/// Returns a rectangle that bounds this region.
 		/// </summary>
 		public Rectangle Bounds { get { return this.bounds; } }
+		/// <summary>
+		/// Returns a rectangle that bounds this region.
+		/// </summary>
+		public Rectangle AnchorBounds { get { return this.bounds; } }
 		/// <summary>
 		/// Returns the region name.
 		/// </summary>
@@ -135,9 +139,9 @@ namespace DotNetApi.Windows.Controls
 		// Protected methods.
 
 		/// <summary>
-		/// Disposes the control.
+		/// An event handler called when the object is being disposed.
 		/// </summary>
-		/// <param name="disposing"><b>True</b> if the object is being disposed.</param>		
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
 			// Call the base class method.

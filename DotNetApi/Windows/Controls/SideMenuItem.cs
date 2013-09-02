@@ -440,9 +440,9 @@ namespace DotNetApi.Windows.Controls
 		// Protected methods.
 
 		/// <summary>
-		/// A method called when the object is being disposed.
+		/// An event handler called when the object is being disposed.
 		/// </summary>
-		/// <param name="disposing">If <b>true</b>, the control is being disposed.</param>
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
 			if (disposing)
