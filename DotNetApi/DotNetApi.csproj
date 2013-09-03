@@ -52,10 +52,17 @@
     <Compile Include="Drawing\Effects.cs" />
     <Compile Include="Drawing\Geometry.cs" />
     <Compile Include="Drawing\IAnchor.cs" />
+    <Compile Include="Drawing\ITranslation.cs" />
     <Compile Include="Drawing\Imaging\Kernel1D.cs" />
     <Compile Include="Drawing\Imaging\Kernel1DGauss.cs" />
     <Compile Include="Drawing\Polygon.cs" />
     <Compile Include="Drawing\Shadow.cs" />
+    <Compile Include="Drawing\Temporal\Motion.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Drawing\Temporal\MotionSpring.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Formatting.cs" />
     <Compile Include="IO\IoUtils.cs" />
     <Compile Include="Numeric\SpecialFunctions.cs" />
@@ -68,9 +75,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\MapBulletMarker.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapTextAnnotation.cs">
@@ -79,6 +89,7 @@
     <Compile Include="Windows\Controls\MapRegion.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Windows\Cursors.cs" />
     <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
     <Compile Include="Security\SecureStringExtensions.cs" />
@@ -116,9 +127,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapMarker.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\Controls\MapMarkerCircle.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ImageListBox.cs">
@@ -159,7 +167,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ThreadSafeControl.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\ToolStripDropDownCalendar.cs">
       <SubType>Component</SubType>
@@ -236,7 +244,9 @@
       <Name>MapApi</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\CursorHandGrab.cur" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

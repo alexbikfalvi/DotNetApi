@@ -82,16 +82,24 @@ namespace MapApi
 		// Public properties.
 
 		/// <summary>
+		/// Gets the rectangle location.
+		/// </summary>
+		[XmlIgnore]
+		public MapPoint Location { get { return new MapPoint(this.Left, this.Top); } }
+		/// <summary>
 		/// Gets the rectangle width.
 		/// </summary>
+		[XmlIgnore]
 		public double Width { get { return Math.Abs(this.Left - this.Right); } }
 		/// <summary>
 		/// Gets the rectangle height.
 		/// </summary>
+		[XmlIgnore]
 		public double Height { get { return Math.Abs(this.Top - this.Bottom); } }
 		/// <summary>
 		/// Gets the rectangle size.
 		/// </summary>
+		[XmlIgnore]
 		public MapSize Size { get { return new MapSize(this.Width, this.Height); } }
 	}
 }

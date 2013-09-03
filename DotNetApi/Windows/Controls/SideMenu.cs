@@ -335,7 +335,7 @@ namespace DotNetApi.Windows.Controls
 				this.dockButtonSelected = false;
 				this.OnRefresh();
 			}
-			this.Cursor = Cursors.Arrow;
+			this.Cursor = System.Windows.Forms.Cursors.Arrow;
 		}
 
 		/// <summary>
@@ -413,13 +413,13 @@ namespace DotNetApi.Windows.Controls
 
 			// Cursor
 			if ((e.X >= rectGrip.Left) && (e.X <= rectGrip.Right) && (e.Y >= rectGrip.Top) && (e.Y <= rectGrip.Bottom))
-				this.Cursor = Cursors.SizeNS;
+				this.Cursor = System.Windows.Forms.Cursors.SizeNS;
 			else if (-1 != visibleIndex)
-				this.Cursor = Cursors.Hand;
+				this.Cursor = System.Windows.Forms.Cursors.Hand;
 			else if (-1 != minimizedIndex)
-				this.Cursor = Cursors.Hand;
+				this.Cursor = System.Windows.Forms.Cursors.Hand;
 			else
-				this.Cursor = Cursors.Arrow;
+				this.Cursor = System.Windows.Forms.Cursors.Arrow;
 		}
 
 		/// <summary>

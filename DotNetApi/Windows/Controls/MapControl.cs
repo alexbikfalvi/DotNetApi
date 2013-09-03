@@ -25,6 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 using DotNetApi.Async;
 using DotNetApi.Drawing;
+using DotNetApi.Drawing.Temporal;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -32,7 +33,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A control that displays a geographic map.
 	/// </summary>
-	public sealed class MapControl : ThreadSafeControl, IAnchor
+	public sealed class MapControl : ThreadSafeControl, IAnchor, ITranslation
 	{
 		private delegate void RefreshEventHandler();
 
@@ -52,9 +53,14 @@ namespace DotNetApi.Windows.Controls
 		private MapRectangle mapBounds = MapControl.mapBoundsDefault;
 		private MapSize mapSize = MapControl.mapBoundsDefault.Size;
 		private MapScale mapScale = new MapScale(1.0, 1.0);
+		private MapPoint mapLocation = new MapPoint(-180, 90);
 
 		private Bitmap bitmapMap = null;
+		private Point bitmapLocation;
 		private Size bitmapSize;
+
+		//private MapSize majorGridSize;
+		//private Size minorGridSize;
 
 		private MapRegion highlightRegion = null;
 
@@ -78,6 +84,18 @@ namespace DotNetApi.Windows.Controls
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
 		private TextureBrush brushBackground;
 
+		private Shadow shadow = new Shadow(Color.Black, 0, 20);
+
+		// Animation.
+
+		private MotionSpring spring = new MotionSpring();
+
+		// Interaction.
+
+		private bool mouseGripFlag = false;
+		private Point mouseGripPoint;
+		private Point mouseGripLocation;
+
 		// Annotations.
 
 		private MapTextAnnotation annotationMessage = null;
@@ -85,12 +103,16 @@ namespace DotNetApi.Windows.Controls
 
 		private MapAnnotation[] annotations = null;
 
+		// Markers.
+
+		private MapMarker.Collection markers = new MapMarker.Collection();
+
 		// Switches.
 
+		private bool showStreched = true;
 		private bool showMarkers = true;
 		private bool showMajorGrid = true;
 		private bool showMinorGrid = true;
-		private bool showStreched = true;
 
 		// Asynchronous.
 		private AsyncTask task = new AsyncTask();
@@ -121,8 +143,8 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// Create the map annotations.
-			this.annotationMessage = new MapTextAnnotation(MapControl.messageNoMap, this);
-			this.annotationRegion = new MapInfoAnnotation(string.Empty, this);
+			this.annotationMessage = new MapTextAnnotation(MapControl.messageNoMap, this, null);
+			this.annotationRegion = new MapInfoAnnotation(string.Empty, this, this);
 
 			this.annotations = new MapAnnotation[] {
 				this.annotationMessage,
@@ -134,6 +156,9 @@ namespace DotNetApi.Windows.Controls
 
 			// Create the refresh delegate.
 			this.delegateRefresh = new RefreshEventHandler(this.Refresh);
+
+			// Create a spring event handler.
+			this.spring.Tick += OnSpringTick;
 		}
 
 		// Public properties.
@@ -178,6 +203,15 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Gets or sets the show markers flag.
+		/// </summary>
+		public bool ShowMarkers
+		{
+			get { return showMarkers; }
+			set { this.OnShowMarkersChanged(value); }
+		}
+
+		/// <summary>
 		/// Gets the anchor bounds.
 		/// </summary>
 		public Rectangle AnchorBounds
@@ -185,6 +219,21 @@ namespace DotNetApi.Windows.Controls
 			get { return this.ClientRectangle; }
 		}
 
+		/// <summary>
+		/// Gets the translation delta.
+		/// </summary>
+		public Point TranslationDelta
+		{
+			get { return this.bitmapLocation; }
+		}
+
+		/// <summary>
+		/// Gets the map markers.
+		/// </summary>
+		public MapMarker.Collection Markers
+		{
+			get { return this.markers; }
+		}
 
 		// Protected methods.
 
@@ -225,6 +274,12 @@ namespace DotNetApi.Windows.Controls
 				this.annotationMessage.Dispose();
 				this.annotationRegion.Dispose();
 
+				// Dispose the shadow.
+				this.shadow.Dispose();
+
+				// Dispose the motion spring.
+				this.spring.Dispose();
+
 				// Dispose the asynchronous task.
 				this.task.Dispose();
 
@@ -256,9 +311,15 @@ namespace DotNetApi.Windows.Controls
 			{
 				try
 				{
+					// Draw the checkerboard background.
+					e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 					// If the current map bitmap is null.
 					if (null != this.bitmapMap)
 					{
+						// Translate the graphics for the map location.
+						e.Graphics.TranslateTransform(this.bitmapLocation.X, this.bitmapLocation.Y);
+						// Draw the map shadow.
+						e.Graphics.DrawShadow(this.shadow, new Rectangle(new Point(0, 0), this.bitmapSize));
 						// Draw the map bitmap.
 						e.Graphics.DrawImage(this.bitmapMap, new Point(0, 0));
 						// Draw any highlighted region.
@@ -270,17 +331,23 @@ namespace DotNetApi.Windows.Controls
 								// Create a new brush.
 								using (SolidBrush brush = new SolidBrush(this.colorMapRegionHighlight))
 								{
-
 									// Draw the highlighted region.
 									this.highlightRegion.Draw(e.Graphics, brush, pen);
 								}
 							}
 						}
-					}
-					else
-					{
-						// Draw the checkerboard background.
-						e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
+
+						using (Pen pen = new Pen(this.colorGridMinor))
+						{
+							// Draw the minor horizontal grid.
+							//for (double x = 0; )
+							//{
+							//	e.Graphics.DrawLine(pen, this.Convert(new MapPoint(x, this.mapBounds.Top)), this.Convert(new MapPoint(x, this.mapBounds.Bottom)));
+							//}
+						}
+						// Draw the major grid.
+						// Translate the graphics for the map location.
+						e.Graphics.TranslateTransform(-this.bitmapLocation.X, -this.bitmapLocation.Y);
 					}
 				}
 				finally
@@ -329,18 +396,39 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class event handler.
 			base.OnMouseMove(e);
+
 			// The current highlighted region.
 			MapRegion highlightRegion = null;
-			// Compute the new highlight region.
-			foreach (MapRegion region in this.regions)
+
+			// If the mouse grip is set.
+			if (this.mouseGripFlag)
 			{
-				// If the region contains the mouse location.
-				if (region.IsVisible(e.Location))
+				// Compute the bitmap location based on the difference between the current mouse location and the grip location.
+				Point location = this.mouseGripLocation.Add(e.Location.Subtract(this.mouseGripPoint));
+				// If the location is different from the current location.
+				if (location != this.bitmapLocation)
 				{
-					// Set the current highlighted region.
-					highlightRegion = region;
-					// Stop the iteration.
-					break;
+					// Invalidate the map rectangle for the old location.
+					this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+					// Set the bitmap location at the new location.
+					this.bitmapLocation = location;
+					// Invalidate the map rectangle for the new location.
+					this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+				}
+			}
+			else
+			{
+				// Compute the new highlight region.
+				foreach (MapRegion region in this.regions)
+				{
+					// If the region contains the mouse location.
+					if (region.IsVisible(e.Location.Subtract(this.bitmapLocation)))
+					{
+						// Set the current highlighted region.
+						highlightRegion = region;
+						// Stop the iteration.
+						break;
+					}
 				}
 			}
 			// If the highlighted region has changed.
@@ -350,13 +438,13 @@ namespace DotNetApi.Windows.Controls
 				if (null != this.highlightRegion)
 				{
 					// Invalidate the bounds of that region.
-					this.Invalidate(this.highlightRegion.Bounds);
+					this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
 				}
 				// If there exists a curernt highlighted region.
 				if (null != highlightRegion)
 				{
 					// Invalidate the bounds of that region.
-					this.Invalidate(highlightRegion.Bounds);
+					this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
 					// Show the annotation.
 					this.OnShowAnnotation(this.annotationRegion, highlightRegion.Name, highlightRegion, HorizontalAlign.Center, VerticalAlign.TopOutside);
 				}
@@ -382,10 +470,92 @@ namespace DotNetApi.Windows.Controls
 			if (null != this.highlightRegion)
 			{
 				// Invalidate the bounds of that region.
-				this.Invalidate(this.highlightRegion.Bounds);
+				this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
 				// Set the highlighted region to null.
 				this.highlightRegion = null;
+				// Hide the region annotation.
+				this.OnHideAnnotation(this.annotationRegion);
 			}
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse button is pressed.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+			// Call the base class method.
+			base.OnMouseDown(e);
+			// Cancel the spring motion.
+			this.spring.Cancel();
+			// Set the mouse cursor to grip.
+			this.Cursor = Cursors.HandGrab;
+			// Set the mouse grip to true.
+			this.mouseGripFlag = true;
+			// Set the mouse grip point and location.
+			this.mouseGripPoint = e.Location;
+			this.mouseGripLocation = this.bitmapLocation;
+			// Call the mouse move event handler.
+			this.OnMouseMove(e);
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse button is released.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			// Call the base class method.
+			base.OnMouseUp(e);
+			// Set the mouse cursor to default.
+			this.Cursor = System.Windows.Forms.Cursors.Default;
+			// Set the mouse grip to false.
+			this.mouseGripFlag = false;
+			// Compute the map rectangle.
+			Rectangle mapRectangle = new Rectangle(this.bitmapLocation, this.bitmapSize);
+			// If the map rectangle does not fill the client rectangle.
+			if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Top > this.ClientRectangle.Top))
+			{
+				// Align the top-left corner.
+				this.spring.Start(this.bitmapLocation, this.ClientRectangle.Location);
+			}
+			else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Top > this.ClientRectangle.Top))
+			{
+				// Align the top-right corner.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Top - mapRectangle.Top));
+			}
+			else if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
+			{
+				// Align the bottom-left corner.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+			}
+			else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
+			{
+				// Align the bottom-right corner.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+			}
+			else if (mapRectangle.Left > this.ClientRectangle.Left)
+			{
+				// Align the left edge.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, 0));
+			}
+			else if (mapRectangle.Top > this.ClientRectangle.Top)
+			{
+				// Align the top edge.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Top - mapRectangle.Top));
+			}
+			else if (mapRectangle.Right < this.ClientRectangle.Right)
+			{
+				// Align the right edge.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, 0));
+			}
+			else if (mapRectangle.Bottom < this.ClientRectangle.Bottom)
+			{
+				// Align the bottom edge.
+				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+			}
+			// Call the mouse move event handler.
+			this.OnMouseMove(e);
 		}
 
 		// Private methods.
@@ -452,6 +622,8 @@ namespace DotNetApi.Windows.Controls
 				);
 			// Recompute the map scale and bitmap size.
 			this.OnMapSizeChanged();
+			// Refresh the current map.
+			this.OnRefreshMap();
 		}
 
 		/// <summary>
@@ -483,6 +655,11 @@ namespace DotNetApi.Windows.Controls
 					this.bitmapSize.Width = (int)Math.Round(this.mapBounds.Width * this.mapScale.Width);
 				}
 			}
+			// Update the bitmap location.
+			this.bitmapLocation = this.Convert(this.mapBounds.Location);
+			// Compute the grid size.
+			//this.majorGridSize = new MapSize(30, 30);
+			//this.minorGridSize = new Size(3, 3);
 			// Update the map items.
 			this.OnUpdateItems();
 		}
@@ -608,6 +785,15 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// An event handler called when the show markers flag has changed.
+		/// </summary>
+		/// <param name="showMarkers">The value of the show markers flag.</param>
+		private void OnShowMarkersChanged(bool showMarkers)
+		{
+			//
+		}
+
+		/// <summary>
 		/// Updates all the map items to the current map bounds and scale.
 		/// </summary>
 		private void OnUpdateItems()
@@ -641,7 +827,7 @@ namespace DotNetApi.Windows.Controls
 							this.bitmapMap = null;
 						}
 						// Create a new bitmap corresponding to the current map.
-						this.bitmapMap = this.OnDrawMap(this.ClientSize, asyncState);
+						this.bitmapMap = this.OnDrawMap(asyncState);
 						// Return if the asynchronous operation has been canceled.
 						if (asyncState.IsCanceled) return;
 						// Hide the message.
@@ -674,10 +860,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Creates a new bitmap for the current map, scaled at the specified size. The scaled version of the map fits the largest dimension between width and height.
 		/// </summary>
-		/// <param name="size">The bitmap minimum size.</param>
 		/// <param name="asyncState">The asynchrnous state.</param>
 		/// <returns>The map bitmap.</returns>
-		private Bitmap OnDrawMap(Size size, AsyncState asyncState)
+		private Bitmap OnDrawMap(AsyncState asyncState)
 		{
 			// Save the map object in a local variable.
 			Map map = this.map;
@@ -691,8 +876,8 @@ namespace DotNetApi.Windows.Controls
 				// Draw the bitmap.
 				using (Graphics graphics = Graphics.FromImage(bitmap))
 				{
-					// Set the smooting mode.
-					graphics.SmoothingMode = SmoothingMode.HighQuality;
+					// Set the smooting mode to default.
+					graphics.SmoothingMode = SmoothingMode.Default;
 					using (SolidBrush brush = new SolidBrush(this.colorMapSea))
 					{
 						using (Pen pen = new Pen(this.colorMapRegionBorder))
@@ -700,6 +885,8 @@ namespace DotNetApi.Windows.Controls
 							// Fill the background.
 							graphics.FillRectangle(brush, 0, 0, bitmapSize.Width, bitmapSize.Height);
 
+							// Set the smooting mode to high quality.
+							graphics.SmoothingMode = SmoothingMode.HighQuality;
 							// Change the brush color.
 							brush.Color = this.colorMapRegion;
 							// Draw the map regions.
@@ -724,6 +911,38 @@ namespace DotNetApi.Windows.Controls
 				// Return the bitmap.
 				return bitmap;
 			}
+		}
+
+		/// <summary>
+		/// An event handler called when the spring timer expires.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnSpringTick(object sender, EventArgs e)
+		{
+			// If the spring location is different from the current location.
+			if (this.spring.CurrentLocation != this.bitmapLocation)
+			{
+				// Invalidate the map rectangle for the old location.
+				this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+				// Set the bitmap location at the new location.
+				this.bitmapLocation = this.spring.CurrentLocation;
+				// Invalidate the map rectangle for the new location.
+				this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+			}
+		}
+
+		/// <summary>
+		/// Converts the specified map point to the screen coordinates, depending on the current map location and scale.
+		/// </summary>
+		/// <param name="point">The map point.</param>
+		/// <returns>The screen coordinates point.</returns>
+		private Point Convert(MapPoint point)
+		{
+			return new Point(
+				(int)Math.Round((point.X - this.mapLocation.X) * this.mapScale.Width),
+				(int)Math.Round((this.mapLocation.Y - point.Y) * this.mapScale.Height)
+				);
 		}
 	}
 }

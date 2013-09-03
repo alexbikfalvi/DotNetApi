@@ -45,6 +45,9 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="scale">The map scale.</param>
 		public MapRegion(MapShapePolygon shape, MapRectangle bounds, MapScale scale)
 		{
+			// Validate the parameters.
+			shape.ValidateNotNull("shape");
+
 			// Save the map shape.
 			this.shape = shape;
 			// Create the map points.
@@ -79,11 +82,26 @@ namespace DotNetApi.Windows.Controls
 		// Public methods.
 
 		/// <summary>
+		/// Indicates whether the specified point is contained within this region.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <returns><b>True</b> if the point is contained within the region, <b>false</b> otherwise.</returns>
+		public bool IsVisible(Point point)
+		{
+			lock (this.path)
+			{
+				return this.path.IsVisible(point);
+			}
+		}
+
+		// Internal methods.
+
+		/// <summary>
 		/// Updates the map item geometric characteristics to the specified map bounds and scale.
 		/// </summary>
 		/// <param name="bounds">The map bounds.</param>
 		/// <param name="scale">The map scale.</param>
-		public override void Update(MapRectangle bounds, MapScale scale)
+		internal override void Update(MapRectangle bounds, MapScale scale)
 		{
 			lock (this.path)
 			{
@@ -112,7 +130,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="graphics">The graphics object.</param>
 		/// <param name="brush">The brush.</param>
 		/// <param name="pen">The pen.</param>
-		public override void Draw(Graphics graphics, Brush brush, Pen pen)
+		internal override void Draw(Graphics graphics, Brush brush, Pen pen)
 		{
 			lock (this.path)
 			{
@@ -120,19 +138,6 @@ namespace DotNetApi.Windows.Controls
 				graphics.FillPath(brush, this.path);
 				// Draw the path.
 				graphics.DrawPath(pen, this.path);
-			}
-		}
-
-		/// <summary>
-		/// Indicates whether the specified point is contained within this region.
-		/// </summary>
-		/// <param name="point">The point.</param>
-		/// <returns><b>True</b> if the point is contained within the region, <b>false</b> otherwise.</returns>
-		public bool IsVisible(Point point)
-		{
-			lock (this.path)
-			{
-				return this.path.IsVisible(point);
 			}
 		}
 

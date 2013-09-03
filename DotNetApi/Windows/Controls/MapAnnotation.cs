@@ -32,6 +32,7 @@ namespace DotNetApi.Windows.Controls
 		private bool layoutSuspeded = false;
 
 		private IAnchor anchor;
+		private ITranslation translation;
 		private Rectangle rectangleBounds;
 
 		private HorizontalAlign horizontalAlignment = HorizontalAlign.Center;
@@ -40,9 +41,12 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Creates a new map annotation instance.
 		/// </summary>
-		public MapAnnotation(IAnchor anchor)
+		/// <param name="anchor">The annotation anchor.</param>
+		/// <param name="translation">The annotation translation.</param>
+		public MapAnnotation(IAnchor anchor, ITranslation translation)
 		{
 			this.anchor = anchor;
+			this.translation = translation;
 		}
 
 		/// <summary>
@@ -60,6 +64,14 @@ namespace DotNetApi.Windows.Controls
 		{
 			get { return this.anchor; }
 			set { this.OnAnchorChanged(value); }
+		}
+		/// <summary>
+		/// Gets or sets the annotation translation.
+		/// </summary>
+		public ITranslation Translation
+		{
+			get { return this.translation; }
+			set { this.OnTranslationChanged(value); }
 		}
 		/// <summary>
 		/// Gets or sets the message horizontal alignment.
@@ -158,7 +170,7 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Changes the anchor of the map message.
+		/// Changes the anchor of the map annotation.
 		/// </summary>
 		/// <param name="anchor">The new anchor.</param>
 		protected virtual void OnAnchorChanged(IAnchor anchor)
@@ -167,6 +179,20 @@ namespace DotNetApi.Windows.Controls
 			anchor.ValidateNotNull("anchor");
 			// Set the anchor.
 			this.anchor = anchor;
+			// Update the bounds measurements.
+			this.OnMeasureBounds();
+		}
+
+		/// <summary>
+		/// Changesthe translation of the map annotation.
+		/// </summary>
+		/// <param name="translation">The new translation.</param>
+		protected virtual void OnTranslationChanged(ITranslation translation)
+		{
+			// Check the anchor is not null.
+			translation.ValidateNotNull("translation");
+			// Set the translation.
+			this.translation = translation;
 			// Update the bounds measurements.
 			this.OnMeasureBounds();
 		}

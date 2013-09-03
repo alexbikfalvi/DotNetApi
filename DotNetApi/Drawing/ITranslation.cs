@@ -17,39 +17,18 @@
  */
 
 using System;
-using System.ComponentModel;
 using System.Drawing;
-using MapApi;
 
-namespace DotNetApi.Windows.Controls
+namespace DotNetApi.Drawing
 {
 	/// <summary>
-	/// A class representing a map item.
+	/// An interface for a geometric translation.
 	/// </summary>
-	public abstract class MapItem : Component
+	public interface ITranslation
 	{
 		/// <summary>
-		/// Creates a new map item instance.
+		/// Gets the translation delta.
 		/// </summary>
-		public MapItem()
-		{
-		}
-
-		// Abstract methods.
-
-		/// <summary>
-		/// Updates the map item geometric characteristics to the specified map bounds and scale.
-		/// </summary>
-		/// <param name="bounds">The map bounds.</param>
-		/// <param name="scale">The map scale.</param>
-		internal abstract void Update(MapRectangle bounds, MapScale scale);
-
-		/// <summary>
-		/// Draws the item on the specified graphics object.
-		/// </summary>
-		/// <param name="graphics">The graphics object.</param>
-		/// <param name="brush">The brush.</param>
-		/// <param name="pen">The pen.</param>
-		internal abstract void Draw(Graphics graphics, Brush brush, Pen pen);
+		Point TranslationDelta { get; }
 	}
 }

@@ -108,6 +108,17 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Adds to the current rectangle location the specified offset value.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="point">The offset point.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle Add(this Rectangle rectangle, Point point)
+		{
+			return new Rectangle(rectangle.Location.Add(point), rectangle.Size);
+		}
+
+		/// <summary>
 		/// Adds to the current rectangle location the specified X and Y offset values.
 		/// </summary>
 		/// <param name="rectangle">The rectangle.</param>
@@ -117,6 +128,28 @@ namespace DotNetApi.Drawing
 		public static Rectangle Add(this Rectangle rectangle, int x, int y)
 		{
 			return new Rectangle(rectangle.Location.Add(x, y), rectangle.Size);
+		}
+
+		/// <summary>
+		/// Adds to the current size the specfied width.
+		/// </summary>
+		/// <param name="size">The size.</param>
+		/// <param name="width">The width.</param>
+		/// <returns>The new size.</returns>
+		public static Size AddWidth(this Size size, int width)
+		{
+			return new Size(size.Width + width, size.Height);
+		}
+
+		/// <summary>
+		/// Adds to the current size the specified height.
+		/// </summary>
+		/// <param name="size">The size.</param>
+		/// <param name="height">The height.</param>
+		/// <returns>The new size.</returns>
+		public static Size AddHeight(this Size size, int height)
+		{
+			return new Size(size.Width, size.Height + height);
 		}
 
 		/// <summary>
@@ -290,6 +323,16 @@ namespace DotNetApi.Drawing
 				y,
 				(int)Math.Ceiling(rectangle.Right) - x,
 				(int)Math.Ceiling(rectangle.Bottom) - y);
+		}
+
+		/// <summary>
+		/// Returns the middle point for the specified rectangle.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <returns>The middle point.</returns>
+		public static Point Middle(this Rectangle rectangle)
+		{
+			return new Point(rectangle.X + (rectangle.Width >> 1), rectangle.Y + (rectangle.Height >> 1));
 		}
 
 		/// <summary>

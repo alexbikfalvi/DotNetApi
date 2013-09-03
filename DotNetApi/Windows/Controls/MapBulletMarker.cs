@@ -20,20 +20,28 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using MapApi;
 
 namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
-	/// A class representing a circular geo marker.
+	/// A class representing a circular map marker.
 	/// </summary>
-	public class MapMarkerCircle : MapMarker
+	public class MapBulletMarker : MapMarker
 	{
 		/// <summary>
-		/// Creates a new circular geo marker instance.
+		/// Creates a new circular map marker instance at the default location.
 		/// </summary>
-		/// <param name="coordinates">The marker coordinates as longitude and latitude in degrees.</param>
-		public MapMarkerCircle(PointF coordinates)
-			: base(coordinates)
+		public MapBulletMarker()
+		{
+		}
+
+		/// <summary>
+		/// Creates a new circular map marker instance.
+		/// </summary>
+		/// <param name="location">The marker location as longitude and latitude in degrees.</param>
+		public MapBulletMarker(MapPoint location)
+			: base(location)
 		{
 		}
 

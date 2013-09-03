@@ -50,5 +50,48 @@ namespace MapApi
 		/// </summary>
 		[XmlAttribute("Y")]
 		public double Y;
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares two map point for equality.
+		/// </summary>
+		/// <param name="point1">The left map point.</param>
+		/// <param name="point2">The right map point.</param>
+		/// <returns><b>True</b> if the two map points are equal, <b>false</b> otherwise.</returns>
+		public static bool operator ==(MapPoint point1, MapPoint point2)
+		{
+			return (point1.X == point2.X) && (point1.Y == point2.Y);
+		}
+
+		/// <summary>
+		/// Compares two map point for equality.
+		/// </summary>
+		/// <param name="point1">The left map point.</param>
+		/// <param name="point2">The right map point.</param>
+		/// <returns><b>True</b> if the two map points are different, <b>true</b> otherwise.</returns>
+		public static bool operator !=(MapPoint point1, MapPoint point2)
+		{
+			return (point1.X != point2.X) || (point1.Y != point2.Y);
+		}
+
+		/// <summary>
+		/// Compares the current and specified map points for equality.s
+		/// </summary>
+		/// <param name="obj">The map point to compare.</param>
+		/// <returns><b>True</b> if the two map points are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			return obj is MapPoint ? this == ((MapPoint)obj) : false;
+		}
+
+		/// <summary>
+		/// Returns the hash code of the current map point.
+		/// </summary>
+		/// <returns></returns>
+		public override int GetHashCode()
+		{
+			return this.X.GetHashCode() ^ this.Y.GetHashCode();
+		}
 	}
 }

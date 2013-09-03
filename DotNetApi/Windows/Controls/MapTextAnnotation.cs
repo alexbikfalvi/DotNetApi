@@ -46,8 +46,9 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="text">The message.</param>
 		/// <param name="anchor">The anchor object.</param>
-		public MapTextAnnotation(string text, IAnchor anchor)
-			: base(anchor)
+		/// <param name="translation">The map translation.</param>
+		public MapTextAnnotation(string text, IAnchor anchor, ITranslation translation)
+			: base(anchor, translation)
 		{
 			// Set the message properties.
 			this.text = text;
@@ -105,6 +106,13 @@ namespace DotNetApi.Windows.Controls
 		public Shadow Shadow
 		{
 			get { return this.shadow; }
+		}
+		/// <summary>
+		/// Gets the annotation font.
+		/// </summary>
+		public Font Font
+		{
+			get { return this.font; }
 		}
 
 		// Protected properties.
@@ -186,8 +194,10 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the layout is suspended, do nothing.
 			if (this.LayoutSuspeded) return;
+			// Compute the anchor bounds.
+			Rectangle anchorBounds = null != this.Anchor ? null != this.Translation ? this.Anchor.AnchorBounds.Add(this.Translation.TranslationDelta) : this.Anchor.AnchorBounds : default(Rectangle);
 			// Compute the border rectangle.
-			this.BorderRectangle = this.BorderSize.Align(null != this.Anchor ? this.Anchor.AnchorBounds : default(Rectangle), this.HorizontalAlignment, this.VerticalAlignment);
+			this.BorderRectangle = this.BorderSize.Align(anchorBounds, this.HorizontalAlignment, this.VerticalAlignment);
 			// Compute the shadow rectangle.
 			Rectangle shadowRectangle = this.shadow.GetShadowRectangle(this.BorderRectangle);
 			// Compute the paint rectangle.

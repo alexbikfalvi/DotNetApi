@@ -20,16 +20,17 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using MapApi;
 
 namespace DotNetApi.Windows.Controls
 {
 	public delegate void MarkerChangedEventHandler(MapMarker marker);
-	public delegate void MarkerCoordinatesChangedEventHandler(MapMarker marker, PointF oldCoordinates, PointF newCoordinates);
+	public delegate void MarkerLocationChangedEventHandler(MapMarker marker, MapPoint oldLocation, MapPoint newLocation);
 	public delegate void MarkerSizeChangedEventHandler(MapMarker marker, Size oldSize, Size newSize);
 	public delegate void MarkerEmphasisChangedEventHandler(MapMarker marker, bool oldEmphasis, bool newEmphasis);
 
 	/// <summary>
-	/// A class representing a geo marker.
+	/// A class representing a round map marker.
 	/// </summary>
 	public abstract class MapMarker : Component
 	{
@@ -170,7 +171,7 @@ namespace DotNetApi.Windows.Controls
 			protected override void OnValidate(Object value)
 			{
 				if (value.GetType().BaseType != typeof(MapMarker))
-					throw new ArgumentException("Value must be a geo marker.", "value");
+					throw new ArgumentException("Value must be a map marker.", "value");
 			}
 
 
@@ -277,19 +278,29 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
-		private PointF coordinates;
+		private MapPoint location;
+		private string name;
+		private object tag;
 		private Size size = new Size(8, 8);
 		private Color colorLine = Color.FromArgb(255, 153, 0);
 		private Color colorFill = Color.FromArgb(248, 224, 124);
 		private bool emphasis = false;
 
 		/// <summary>
-		/// Creates a new geo marker instance.
+		/// Creates a new map marker instance at the default location.
 		/// </summary>
-		/// <param name="coordinates">The marker coordinates as longitude and latitude in degrees.</param>
-		public MapMarker(PointF coordinates)
+		public MapMarker()
 		{
-			this.coordinates = coordinates;
+			this.location = default(MapPoint);
+		}
+
+		/// <summary>
+		/// Creates a new map marker instance.
+		/// </summary>
+		/// <param name="location">The marker location as longitude and latitude in degrees.</param>
+		public MapMarker(MapPoint location)
+		{
+			this.location = location;
 		}
 
 		// Public events.
@@ -305,7 +316,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event raised when the marker coordinates have changed.
 		/// </summary>
-		public event MarkerCoordinatesChangedEventHandler CoordinatesChanged;
+		public event MarkerLocationChangedEventHandler LocationChanged;
 		/// <summary>
 		/// An event raised when the marker size has changed.
 		/// </summary>
@@ -314,19 +325,19 @@ namespace DotNetApi.Windows.Controls
 		// Public properties.
 
 		/// <summary>
-		/// Gets or sets the marker coordinates.
+		/// Gets or sets the marker location.
 		/// </summary>
-		public PointF Coordinates
+		public MapPoint Location
 		{
-			get { return this.coordinates; }
+			get { return this.location; }
 			set
 			{
 				// Save the old coordinates.
-				PointF old = this.coordinates;
+				MapPoint old = this.location;
 				// Set the new coordinates.
-				this.coordinates = value;
+				this.location = value;
 				// Call the event handler.
-				this.OnCoordinatesChanged(old, value);
+				this.OnLocationChanged(old, value);
 			}
 		}
 
@@ -417,14 +428,14 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the marker coordinates have changed.
 		/// </summary>
-		/// <param name="oldCoordinates">The old coordinates.</param>
-		/// <param name="newCoordinates">The new coordinates.</param>
-		protected virtual void OnCoordinatesChanged(PointF oldCoordinates, PointF newCoordinates)
+		/// <param name="oldLocation">The old coordinates.</param>
+		/// <param name="newLocation">The new coordinates.</param>
+		protected virtual void OnLocationChanged(MapPoint oldLocation, MapPoint newLocation)
 		{
 			// If the coordinates have not changed, do nothing.
-			if (oldCoordinates == newCoordinates) return;
+			if (oldLocation == newLocation) return;
 			// Raise the event.
-			if (this.CoordinatesChanged != null) this.CoordinatesChanged(this, oldCoordinates, newCoordinates);
+			if (this.LocationChanged != null) this.LocationChanged(this, oldLocation, newLocation);
 		}
 
 		/// <summary>
