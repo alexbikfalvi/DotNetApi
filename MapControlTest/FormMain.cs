@@ -13,7 +13,7 @@ namespace MapControlTest
 		public FormMain()
 		{
 			InitializeComponent();
-			this.mapControl.Load("Ne110mAdmin0Countries");
+			this.mapControl.LoadMap("Ne110mAdmin0Countries");
 		}
 
 		private void OnTest(object sender, EventArgs e)
