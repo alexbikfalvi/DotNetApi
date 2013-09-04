@@ -153,6 +153,50 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Adds the specified width to the rectangle left side.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="width">The width to add.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle AddToLeft(this Rectangle rectangle, int width)
+		{
+			return new Rectangle(rectangle.X - width, rectangle.Y, rectangle.Width + width, rectangle.Height);
+		}
+
+		/// <summary>
+		/// Adds the specified width to the rectangle right side.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="width">The width to add.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle AddToRight(this Rectangle rectangle, int width)
+		{
+			return new Rectangle(rectangle.X, rectangle.Y, rectangle.Width + width, rectangle.Height);
+		}
+
+		/// <summary>
+		/// Adds the specified height to the rectangle top side.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="height">The height to add.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle AddToTop(this Rectangle rectangle, int height)
+		{
+			return new Rectangle(rectangle.X, rectangle.Y - height, rectangle.Width, rectangle.Height + height);
+		}
+
+		/// <summary>
+		/// Adds the specified height to the rectangle bottom side.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="height">The height to add.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle AddToBottom(this Rectangle rectangle, int height)
+		{
+			return new Rectangle(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height + height);
+		}
+
+		/// <summary>
 		/// Subtracts from the current point the specified offset.
 		/// </summary>
 		/// <param name="point">The point.</param>
@@ -321,8 +365,8 @@ namespace DotNetApi.Drawing
 			return new Rectangle(
 				x,
 				y,
-				(int)Math.Ceiling(rectangle.Right) - x,
-				(int)Math.Ceiling(rectangle.Bottom) - y);
+				(int)Math.Ceiling(rectangle.Right) - x + 1,
+				(int)Math.Ceiling(rectangle.Bottom) - y + 1);
 		}
 
 		/// <summary>

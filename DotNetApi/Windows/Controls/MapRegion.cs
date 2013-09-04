@@ -27,7 +27,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a map region.
 	/// </summary>
-	public class MapRegion : MapItem, IAnchor
+	public class MapRegion : MapItem
 	{
 		private readonly MapShapePolygon shape;
 		private readonly PointF[][] points;
@@ -35,7 +35,10 @@ namespace DotNetApi.Windows.Controls
 
 		private Rectangle bounds;
 
-		private string name;
+		private Color colorBackground = Color.Green;
+		private Color colorBorder = Color.White;
+
+		private bool disposed = false;
 
 		/// <summary>
 		/// Creates a new map region from the specified map shape, given the geographic map bounds and map scale.
@@ -61,7 +64,7 @@ namespace DotNetApi.Windows.Controls
 			// Update the map region to the specified bounds and scale.
 			this.Update(bounds, scale);
 			// Get the region metadata.
-			this.name = shape.Metadata["admin"];
+			this.Name = shape.Metadata["admin"];
 		}
 
 		// Public properties.
@@ -69,32 +72,32 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Returns a rectangle that bounds this region.
 		/// </summary>
-		public Rectangle Bounds { get { return this.bounds; } }
+		public override Rectangle Bounds { get { return this.bounds; } }
 		/// <summary>
 		/// Returns a rectangle that bounds this region.
 		/// </summary>
-		public Rectangle AnchorBounds { get { return this.bounds; } }
+		public override Rectangle AnchorBounds { get { return this.bounds; } }
 		/// <summary>
 		/// Returns the region name.
 		/// </summary>
-		public string Name { get { return this.name; } }
+		public override string Name { get; set; }
 
-		// Public methods.
+		// Internal methods.
 
 		/// <summary>
 		/// Indicates whether the specified point is contained within this region.
 		/// </summary>
 		/// <param name="point">The point.</param>
 		/// <returns><b>True</b> if the point is contained within the region, <b>false</b> otherwise.</returns>
-		public bool IsVisible(Point point)
+		internal override bool IsVisible(Point point)
 		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("region");
 			lock (this.path)
 			{
 				return this.path.IsVisible(point);
 			}
 		}
-
-		// Internal methods.
 
 		/// <summary>
 		/// Updates the map item geometric characteristics to the specified map bounds and scale.
@@ -103,6 +106,8 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="scale">The map scale.</param>
 		internal override void Update(MapRectangle bounds, MapScale scale)
 		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("region");
 			lock (this.path)
 			{
 				// Reset the graphics path.
@@ -125,6 +130,29 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Draws the item on the specified graphics 
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		internal override void Draw(Graphics graphics)
+		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("region");
+			lock (this.path)
+			{
+				// Fill the path.
+				using (SolidBrush brush = new SolidBrush(this.colorBackground))
+				{
+					graphics.FillPath(brush, this.path);
+				}
+				// Draw the path.
+				using (Pen pen = new Pen(this.colorBackground))
+				{
+					graphics.DrawPath(pen, this.path);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Draws the item on the specified graphics object.
 		/// </summary>
 		/// <param name="graphics">The graphics object.</param>
@@ -132,12 +160,14 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="pen">The pen.</param>
 		internal override void Draw(Graphics graphics, Brush brush, Pen pen)
 		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("region");
 			lock (this.path)
 			{
 				// Fill the path.
-				graphics.FillPath(brush, this.path);
+				if (null != brush) graphics.FillPath(brush, this.path);
 				// Draw the path.
-				graphics.DrawPath(pen, this.path);
+				if (null != pen) graphics.DrawPath(pen, this.path);
 			}
 		}
 
@@ -156,6 +186,8 @@ namespace DotNetApi.Windows.Controls
 			{
 				this.path.Dispose();
 			}
+			// Set the disposed flag to true.
+			this.disposed = true;
 		}
 	}
 }

@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using DotNetApi.Async;
 using DotNetApi.Drawing;
 using DotNetApi.Drawing.Temporal;
+using DotNetApi.Drawing.Transforms;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -36,6 +37,7 @@ namespace DotNetApi.Windows.Controls
 	public sealed class MapControl : ThreadSafeControl, IAnchor, ITranslation
 	{
 		private delegate void RefreshEventHandler();
+		private delegate void MessageEventHandler(string text);
 
 		private const int mapLevels = 4;
 
@@ -63,16 +65,27 @@ namespace DotNetApi.Windows.Controls
 		//private Size minorGridSize;
 
 		private MapRegion highlightRegion = null;
+		private MapMarker highlightMarker = null;
+		private MapMarker emphasizedMarker = null;
 
 		// Colors.
 
 		private Color colorMessageBorder = Color.DarkGray;
 		private Color colorMessageFill = Color.LightGray;
 
-		private Color colorMapSea = Color.SkyBlue;
-		private Color colorMapRegionBorder = Color.FromArgb(255, 255, 255);
-		private Color colorMapRegion = Color.Green;
-		private Color colorMapRegionHighlight = Color.YellowGreen;
+		private Color colorBackground = Color.SkyBlue;
+		
+		private Color colorRegionNormalBorder = Color.White;
+		private Color colorRegionNormalBackground = Color.Green;
+		private Color colorRegionHighlightBorder = Color.White;
+		private Color colorRegionHighlightBackground = Color.YellowGreen;
+
+		private Color colorMarkerNormalBorder = Color.DarkOrange;
+		private Color colorMarkerNormalBackground = Color.Yellow;
+		private Color colorMarkerEmphasisBorder = Color.DarkRed;
+		private Color colorMarkerEmphasisBackground = Color.Red;
+		private Color colorMarkerHighlightBorder = Color.DarkViolet;
+		private Color colorMarkerHighlightBackground = Color.Violet;
 
 		private Color colorGridMajor = Color.FromArgb(128, Color.Gray);
 		private Color colorGridMinor = Color.FromArgb(48, Color.Gray);
@@ -86,30 +99,30 @@ namespace DotNetApi.Windows.Controls
 
 		private Shadow shadow = new Shadow(Color.Black, 0, 20);
 
-		// Animation.
-
-		private MotionSpring spring = new MotionSpring();
-
 		// Interaction.
 
+		private MotionSpring scrollSpring = new MotionSpring();
+		private TransformAsymptotic scrollTransform = new TransformAsymptotic(100, 100);
+
 		private bool mouseGripFlag = false;
-		private Point mouseGripPoint;
 		private Point mouseGripLocation;
 
 		// Annotations.
 
 		private MapTextAnnotation annotationMessage = null;
-		private MapInfoAnnotation annotationRegion = null;
+		private MapInfoAnnotation annotationInfo = null;
 
-		private MapAnnotation[] annotations = null;
+		private MapAnnotation[] annotations;
 
 		// Markers.
 
-		private MapMarker.Collection markers = new MapMarker.Collection();
+		private MapMarkerCollection markers = new MapMarkerCollection();
+		private bool markerAutoDispose = true;
 
 		// Switches.
 
 		private bool showStreched = true;
+		private bool showBorders = true;
 		private bool showMarkers = true;
 		private bool showMajorGrid = true;
 		private bool showMinorGrid = true;
@@ -118,6 +131,7 @@ namespace DotNetApi.Windows.Controls
 		private AsyncTask task = new AsyncTask();
 
 		private RefreshEventHandler delegateRefresh;
+		private MessageEventHandler delegateMessage;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -144,22 +158,34 @@ namespace DotNetApi.Windows.Controls
 
 			// Create the map annotations.
 			this.annotationMessage = new MapTextAnnotation(MapControl.messageNoMap, this, null);
-			this.annotationRegion = new MapInfoAnnotation(string.Empty, this, this);
+			this.annotationInfo = new MapInfoAnnotation(null, this, this);
 
 			this.annotations = new MapAnnotation[] {
 				this.annotationMessage,
-				this.annotationRegion
+				this.annotationInfo
 			};
 
 			// Create the background brush.
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
 
-			// Create the refresh delegate.
+			// Create the delegates.
 			this.delegateRefresh = new RefreshEventHandler(this.Refresh);
+			this.delegateMessage = new MessageEventHandler(this.OnMessageChanged);
 
-			// Create a spring event handler.
-			this.spring.Tick += OnSpringTick;
+			// Create the spring motion event handler.
+			this.scrollSpring.Tick += this.OnSpringTick;
+
+			// Create the marker collection event handlers.
+			this.markers.BeforeCleared += this.OnBeforeMarkersCleared;
+			this.markers.AfterItemInserted += this.OnAfterMarkerInserted;
+			this.markers.AfterItemRemoved += this.OnAfterMarkerRemoved;
+			this.markers.AfterItemSet += this.OnAfterMarkerSet;
 		}
+
+		// Public events.
+
+		public event EventHandler MarkerClick;
+		public event EventHandler MarkerDoubleClick;
 
 		// Public properties.
 
@@ -203,8 +229,19 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// Gets or sets the show borders flag.
+		/// </summary>
+		[DefaultValue(true)]
+		public bool ShowBorders
+		{
+			get { return this.showBorders; }
+			set { this.OnShowBordersChanged(value); }
+		}
+
+		/// <summary>
 		/// Gets or sets the show markers flag.
 		/// </summary>
+		[DefaultValue(true)]
 		public bool ShowMarkers
 		{
 			get { return showMarkers; }
@@ -230,12 +267,28 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets the map markers.
 		/// </summary>
-		public MapMarker.Collection Markers
+		public MapMarkerCollection Markers
 		{
 			get { return this.markers; }
 		}
 
-		// Protected methods.
+		/// <summary>
+		/// Gets or sets whether the markers are automatically disposed when removed from the map.
+		/// </summary>
+		[DefaultValue(true)]
+		public bool MarkersAutoDispose
+		{
+			get { return this.markerAutoDispose; }
+			set { this.markerAutoDispose = value; }
+		}
+
+		[Browsable(false)]
+		public MapMarker HighlightedMarker
+		{
+			get { return this.highlightMarker; }
+		}
+
+		// Public methods.
 
 		/// <summary>
 		/// Invalidates the client area of the current control.
@@ -248,6 +301,32 @@ namespace DotNetApi.Windows.Controls
 				base.Refresh();
 			}
 		}
+
+		/// <summary>
+		/// Loads the map with the specified name from the current resource file.
+		/// </summary>
+		/// <param name="data">The map name.</param>
+		public void LoadMap(string name)
+		{
+			// Display a loading message.
+			this.OnMessageChanged("Loading...");
+			// Load the map data on the thread pool.
+			ThreadPool.QueueUserWorkItem((object state) =>
+				{
+					try
+					{
+						// Get the map.
+						this.Map = Maps.Get(name);
+					}
+					catch (Exception)
+					{
+						// Display a message.
+						this.OnMessageChanged("Loading map failed.");
+					}
+				});
+		}
+
+		// Protected methods.
 
 		/// <summary>
 		/// An event handler called when the object is being disposed.
@@ -271,14 +350,16 @@ namespace DotNetApi.Windows.Controls
 				this.bitmapBackground.Dispose();
 
 				// Dispose the annotations.
-				this.annotationMessage.Dispose();
-				this.annotationRegion.Dispose();
+				foreach (MapAnnotation annotation in this.annotations)
+				{
+					annotation.Dispose();
+				}
 
 				// Dispose the shadow.
 				this.shadow.Dispose();
 
 				// Dispose the motion spring.
-				this.spring.Dispose();
+				this.scrollSpring.Dispose();
 
 				// Dispose the asynchronous task.
 				this.task.Dispose();
@@ -290,6 +371,15 @@ namespace DotNetApi.Windows.Controls
 				foreach (MapRegion region in this.regions)
 				{
 					region.Dispose();
+				}
+
+				// Dispose tha map markers.
+				if (this.markerAutoDispose)
+				{
+					foreach (MapMarker marker in this.markers)
+					{
+						marker.Dispose();
+					}
 				}
 			}
 		}
@@ -305,7 +395,7 @@ namespace DotNetApi.Windows.Controls
 
 			// Set the graphics smoothing mode to high quality.
 			e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-
+			
 			// Try and lock the drawing mutex.
 			if (this.mutex.WaitOne(0))
 			{
@@ -318,34 +408,73 @@ namespace DotNetApi.Windows.Controls
 					{
 						// Translate the graphics for the map location.
 						e.Graphics.TranslateTransform(this.bitmapLocation.X, this.bitmapLocation.Y);
-						// Draw the map shadow.
-						e.Graphics.DrawShadow(this.shadow, new Rectangle(new Point(0, 0), this.bitmapSize));
-						// Draw the map bitmap.
-						e.Graphics.DrawImage(this.bitmapMap, new Point(0, 0));
-						// Draw any highlighted region.
-						if (null != this.highlightRegion)
+
+						// Create a new pen.
+						using (Pen pen = new Pen(this.colorRegionHighlightBorder))
 						{
-							// Create a new pen.
-							using (Pen pen = new Pen(this.colorMapRegionBorder))
+							// Create a new brush.
+							using (SolidBrush brush = new SolidBrush(this.colorRegionHighlightBackground))
 							{
-								// Create a new brush.
-								using (SolidBrush brush = new SolidBrush(this.colorMapRegionHighlight))
+								// Draw the map shadow.
+								e.Graphics.DrawShadow(this.shadow, new Rectangle(new Point(0, 0), this.bitmapSize));
+								// Draw the map bitmap.
+								e.Graphics.DrawImage(this.bitmapMap, new Point(0, 0));
+								// Draw any highlighted region.
+								if (null != this.highlightRegion)
 								{
 									// Draw the highlighted region.
 									this.highlightRegion.Draw(e.Graphics, brush, pen);
 								}
+
+								// Draw the major grid.
+
+								// If the show markers flag is set.
+								if (this.showMarkers)
+								{
+									// Change the pen and brush colors.
+									pen.Color = this.colorMarkerNormalBorder;
+									brush.Color = this.colorMarkerNormalBackground;
+
+									// Draw the normal markers.
+									foreach (MapMarker marker in this.markers)
+									{
+										if (!marker.Emphasized)
+										{
+											marker.Draw(e.Graphics, brush, pen);
+										}
+									}
+
+									// Change the pen and brush colors.
+									pen.Color = this.colorMarkerEmphasisBorder;
+									brush.Color = this.colorMarkerEmphasisBackground;
+									
+									// Draw the emphasized markers.
+									foreach (MapMarker marker in this.markers)
+									{
+										if (marker.Emphasized)
+										{
+											marker.Draw(e.Graphics, brush, pen);
+										}
+									}
+
+									// Draw the highlighed marker.
+									if ((null != this.highlightMarker) && (this.emphasizedMarker != this.highlightMarker))
+									{
+										pen.Color = this.colorMarkerHighlightBorder;
+										brush.Color = this.colorMarkerHighlightBackground;
+
+										this.highlightMarker.Draw(e.Graphics, brush, pen);
+									}
+								}								
+
+								// Draw the minor horizontal grid.
+								//for (double x = 0; )
+								//{
+								//	e.Graphics.DrawLine(pen, this.Convert(new MapPoint(x, this.mapBounds.Top)), this.Convert(new MapPoint(x, this.mapBounds.Bottom)));
+								//}
 							}
 						}
 
-						using (Pen pen = new Pen(this.colorGridMinor))
-						{
-							// Draw the minor horizontal grid.
-							//for (double x = 0; )
-							//{
-							//	e.Graphics.DrawLine(pen, this.Convert(new MapPoint(x, this.mapBounds.Top)), this.Convert(new MapPoint(x, this.mapBounds.Bottom)));
-							//}
-						}
-						// Draw the major grid.
 						// Translate the graphics for the map location.
 						e.Graphics.TranslateTransform(-this.bitmapLocation.X, -this.bitmapLocation.Y);
 					}
@@ -397,6 +526,8 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class event handler.
 			base.OnMouseMove(e);
 
+			// The current highlighted marker.
+			MapMarker highlightMarker = null;
 			// The current highlighted region.
 			MapRegion highlightRegion = null;
 
@@ -404,33 +535,90 @@ namespace DotNetApi.Windows.Controls
 			if (this.mouseGripFlag)
 			{
 				// Compute the bitmap location based on the difference between the current mouse location and the grip location.
-				Point location = this.mouseGripLocation.Add(e.Location.Subtract(this.mouseGripPoint));
+				Point bitmapLocation = this.mouseGripLocation.Add(this.scrollTransform.GetRelative(e.Location));
 				// If the location is different from the current location.
-				if (location != this.bitmapLocation)
+				if (bitmapLocation != this.bitmapLocation)
 				{
 					// Invalidate the map rectangle for the old location.
 					this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
 					// Set the bitmap location at the new location.
-					this.bitmapLocation = location;
+					this.bitmapLocation = bitmapLocation;
 					// Invalidate the map rectangle for the new location.
 					this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+					// Refresh the text annotation.
+					this.OnRefreshAnnotation(this.annotationInfo);
 				}
 			}
-			else
+
+			// Compute the mouse location.
+			Point location = e.Location.Subtract(this.bitmapLocation);
+			// Compute the new highlight marker.
+			foreach (MapMarker marker in this.markers)
 			{
-				// Compute the new highlight region.
-				foreach (MapRegion region in this.regions)
+				// If the marker contains the mouse location.
+				if (marker.IsVisible(location))
 				{
-					// If the region contains the mouse location.
-					if (region.IsVisible(e.Location.Subtract(this.bitmapLocation)))
+					// Set the current highlighted marker.
+					highlightMarker = marker;
+					// Stop the iteration.
+					break;
+				}
+			}
+			// Compute the new highlight region.
+			foreach (MapRegion region in this.regions)
+			{
+				// If the region contains the mouse location.
+				if (region.IsVisible(location))
+				{
+					// Set the current highlighted region.
+					highlightRegion = region;
+					// Stop the iteration.
+					break;
+				}
+			}
+
+			// If the highlighted marker has changed.
+			if (this.highlightMarker != highlightMarker)
+			{
+				// If there exists a previous highlighted marker.
+				if (null != this.highlightMarker)
+				{
+					// Invalidate the bounds of that marker.
+					this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
+				}
+				// If there exists a current highlighted marker.
+				if ((null != highlightMarker) && this.showMarkers)
+				{
+					// Invalidate the bounds of that marker.
+					this.Invalidate(highlightMarker.Bounds.Add(this.bitmapLocation));
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, highlightMarker.Name, highlightMarker);
+				}
+				else
+				{
+					// If there is an emphasized marker.
+					if ((null != this.emphasizedMarker) && this.showMarkers)
 					{
-						// Set the current highlighted region.
-						highlightRegion = region;
-						// Stop the iteration.
-						break;
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+					}
+					// Else, if there is a highlighted region.
+					else if (null != highlightRegion)
+					{
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+					}
+					// Else.
+					else
+					{
+						// Hide the info annotation.
+						this.OnHideAnnotation(this.annotationInfo);
 					}
 				}
+				// Set the new highlighted marker.
+				this.highlightMarker = highlightMarker;
 			}
+
 			// If the highlighted region has changed.
 			if (this.highlightRegion != highlightRegion)
 			{
@@ -440,18 +628,26 @@ namespace DotNetApi.Windows.Controls
 					// Invalidate the bounds of that region.
 					this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
 				}
-				// If there exists a curernt highlighted region.
+				// If there exists a current highlighted region.
 				if (null != highlightRegion)
 				{
 					// Invalidate the bounds of that region.
 					this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
-					// Show the annotation.
-					this.OnShowAnnotation(this.annotationRegion, highlightRegion.Name, highlightRegion, HorizontalAlign.Center, VerticalAlign.TopOutside);
+					// If there is no highlighted marker and no emphasized marker or if the markers are hidden.
+					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+					{
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+					}
 				}
 				else
 				{
-					// Hide the annotation.
-					this.OnHideAnnotation(this.annotationRegion);
+					// If there is no highlighted marker and no emphasized marker.
+					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+					{
+						// Hide the info annotation.
+						this.OnHideAnnotation(this.annotationInfo);
+					}
 				}
 				// Set the new highlighted region.
 				this.highlightRegion = highlightRegion;
@@ -466,6 +662,14 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class methods.
 			base.OnMouseLeave(e);
+			// If there exists a highlighted marker.
+			if (null != this.highlightMarker)
+			{
+				// Invalidate the bounds of that region.
+				this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
+				// Set the highlighted marker to null.
+				this.highlightMarker = null;
+			}
 			// If there exists a highlighted region.
 			if (null != this.highlightRegion)
 			{
@@ -473,8 +677,17 @@ namespace DotNetApi.Windows.Controls
 				this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
 				// Set the highlighted region to null.
 				this.highlightRegion = null;
-				// Hide the region annotation.
-				this.OnHideAnnotation(this.annotationRegion);
+			}
+			// If there exists an emphasized marker.
+			if ((null != this.emphasizedMarker) && this.showMarkers)
+			{
+				// Show the info annotation.
+				this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+			}
+			else
+			{
+				// Hide the info annotation.
+				this.OnHideAnnotation(this.annotationInfo);
 			}
 		}
 
@@ -487,16 +700,20 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnMouseDown(e);
 			// Cancel the spring motion.
-			this.spring.Cancel();
-			// Set the mouse cursor to grip.
-			this.Cursor = Cursors.HandGrab;
-			// Set the mouse grip to true.
-			this.mouseGripFlag = true;
-			// Set the mouse grip point and location.
-			this.mouseGripPoint = e.Location;
-			this.mouseGripLocation = this.bitmapLocation;
-			// Call the mouse move event handler.
-			this.OnMouseMove(e);
+			this.scrollSpring.Cancel();
+
+			// If there is no highlighted marker.
+			if (null == this.highlightMarker)
+			{
+				// Set the mouse cursor to grip.
+				this.Cursor = Cursors.HandGrab;
+				// Set the mouse grip variables.
+				this.mouseGripFlag = true;
+				this.mouseGripLocation = this.bitmapLocation;
+				this.scrollTransform.Anchor = e.Location;
+				// Call the mouse move event handler.
+				this.OnMouseMove(e);
+			}
 		}
 
 		/// <summary>
@@ -507,55 +724,92 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class method.
 			base.OnMouseUp(e);
-			// Set the mouse cursor to default.
-			this.Cursor = System.Windows.Forms.Cursors.Default;
-			// Set the mouse grip to false.
-			this.mouseGripFlag = false;
-			// Compute the map rectangle.
-			Rectangle mapRectangle = new Rectangle(this.bitmapLocation, this.bitmapSize);
-			// If the map rectangle does not fill the client rectangle.
-			if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Top > this.ClientRectangle.Top))
+
+			// If the grip mouse flag was set.
+			if (this.mouseGripFlag)
 			{
-				// Align the top-left corner.
-				this.spring.Start(this.bitmapLocation, this.ClientRectangle.Location);
+				// Set the mouse cursor to default.
+				this.Cursor = System.Windows.Forms.Cursors.Default;
+				// Compute the map rectangle.
+				Rectangle mapRectangle = new Rectangle(this.bitmapLocation, this.bitmapSize);
+				// If the map rectangle does not fill the client rectangle.
+				if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Top > this.ClientRectangle.Top))
+				{
+					// Align the top-left corner.
+					this.scrollSpring.Start(this.bitmapLocation, this.ClientRectangle.Location);
+				}
+				else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Top > this.ClientRectangle.Top))
+				{
+					// Align the top-right corner.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Top - mapRectangle.Top));
+				}
+				else if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
+				{
+					// Align the bottom-left corner.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+				}
+				else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
+				{
+					// Align the bottom-right corner.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+				}
+				else if (mapRectangle.Left > this.ClientRectangle.Left)
+				{
+					// Align the left edge.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, 0));
+				}
+				else if (mapRectangle.Top > this.ClientRectangle.Top)
+				{
+					// Align the top edge.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Top - mapRectangle.Top));
+				}
+				else if (mapRectangle.Right < this.ClientRectangle.Right)
+				{
+					// Align the right edge.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, 0));
+				}
+				else if (mapRectangle.Bottom < this.ClientRectangle.Bottom)
+				{
+					// Align the bottom edge.
+					this.scrollSpring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+				}
+				// Set the grip mouse flag to false.
+				this.mouseGripFlag = false;
+				// Call the mouse move event handler.
+				this.OnMouseMove(e);
 			}
-			else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Top > this.ClientRectangle.Top))
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse is clicked.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			// If there exists a highlighted marker.
+			if (null != this.highlightMarker)
 			{
-				// Align the top-right corner.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Top - mapRectangle.Top));
+				// Raise the event.
+				if (null != this.MarkerClick) this.MarkerClick(this, e);
 			}
-			else if ((mapRectangle.Left > this.ClientRectangle.Left) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
+			// Call the base class event handler.
+			base.OnMouseClick(e);
+		}
+
+		/// <summary>
+		/// An event handler called when the mouse is double-clicked.
+		/// </summary>
+		/// <param name="e"></param>
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			// If there exists a highlighted marker.
+			if (null != this.highlightMarker)
 			{
-				// Align the bottom-left corner.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, this.ClientRectangle.Bottom - mapRectangle.Bottom));
+				// Raise the event.
+				if (null != this.MarkerDoubleClick) this.MarkerDoubleClick(this, e);
 			}
-			else if ((mapRectangle.Right < this.ClientRectangle.Right) && (mapRectangle.Bottom < this.ClientRectangle.Bottom))
-			{
-				// Align the bottom-right corner.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, this.ClientRectangle.Bottom - mapRectangle.Bottom));
-			}
-			else if (mapRectangle.Left > this.ClientRectangle.Left)
-			{
-				// Align the left edge.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Left - mapRectangle.Left, 0));
-			}
-			else if (mapRectangle.Top > this.ClientRectangle.Top)
-			{
-				// Align the top edge.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Top - mapRectangle.Top));
-			}
-			else if (mapRectangle.Right < this.ClientRectangle.Right)
-			{
-				// Align the right edge.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(this.ClientRectangle.Right - mapRectangle.Right, 0));
-			}
-			else if (mapRectangle.Bottom < this.ClientRectangle.Bottom)
-			{
-				// Align the bottom edge.
-				this.spring.Start(this.bitmapLocation, this.bitmapLocation.Add(0, this.ClientRectangle.Bottom - mapRectangle.Bottom));
-			}
-			// Call the mouse move event handler.
-			this.OnMouseMove(e);
+			// Call the base class event handler.
+			base.OnMouseDoubleClick(e);
 		}
 
 		// Private methods.
@@ -569,37 +823,49 @@ namespace DotNetApi.Windows.Controls
 			// If the map has not changed, do nothing.
 			if (this.map == map) return;
 
-			// Set the current map.
-			this.map = map;
-			
-			// Clear the existing map regions.
-			foreach (MapRegion region in this.regions)
-			{
-				region.Dispose();
-			}
-			this.regions.Clear();
+			// Lock the map mutex.
+			this.mutex.WaitOne();
 
-			// If the current map is not null.
-			if (null != this.map)
+			try
 			{
-				// Create the map shapes.
-				foreach (MapShape shape in map.Shapes)
+				// Set the current map.
+				this.map = map;
+
+				// Clear the existing map regions.
+				foreach (MapRegion region in this.regions)
 				{
-					// Switch according to the shape type.
-					switch (shape.Type)
+					region.Dispose();
+				}
+				this.regions.Clear();
+
+				// If the current map is not null.
+				if (null != this.map)
+				{
+					// Create the map shapes.
+					foreach (MapShape shape in map.Shapes)
 					{
-						case MapShapeType.Polygon:
-							// Get the polygon shape.
-							MapShapePolygon shapePolygon = shape as MapShapePolygon;
-							// Create a map region for this shape.
-							MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
-							// Add the map region to the region items.
-							this.regions.Add(region);
-							break;
-						default: continue;
+						// Switch according to the shape type.
+						switch (shape.Type)
+						{
+							case MapShapeType.Polygon:
+								// Get the polygon shape.
+								MapShapePolygon shapePolygon = shape as MapShapePolygon;
+								// Create a map region for this shape.
+								MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
+								// Add the map region to the region items.
+								this.regions.Add(region);
+								break;
+							default: continue;
+						}
 					}
 				}
 			}
+			finally
+			{
+				// Unlock the mutex.
+				this.mutex.ReleaseMutex();
+			}
+
 			// Refresh the current map.
 			this.OnRefreshMap();
 		}
@@ -670,9 +936,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="annotation">The text annotation</param>
 		/// <param name="text">The message text.</param>
 		/// <param name="anchor">The message anchor.</param>
-		/// <param name="horizontalAlignment">The horizontal alignment.</param>
-		/// <param name="verticalAlignment">The vertical alignment.</param>
-		private void OnShowAnnotation(MapTextAnnotation annotation, string text, IAnchor anchor, HorizontalAlign horizontalAlignment, VerticalAlign verticalAlignment)
+		private void OnShowAnnotation(MapTextAnnotation annotation, string text, IAnchor anchor)
 		{
 			// Get the old message bounds.
 			Rectangle oldBounds = annotation.Bounds;
@@ -682,8 +946,6 @@ namespace DotNetApi.Windows.Controls
 			// Set the new message properties.
 			annotation.Text = text;
 			annotation.Anchor = anchor;
-			annotation.HorizontalAlignment = horizontalAlignment;
-			annotation.VerticalAlignment = verticalAlignment;
 			// Result the message layout.
 			annotation.ResumeLayout();
 			
@@ -692,15 +954,15 @@ namespace DotNetApi.Windows.Controls
 			// If the message is currently visible.
 			if (annotation.Visible)
 			{
-				// Invalidate the area corresponding to the old message bounds.
+				// Invalidate the area corresponding to the old annotation bounds.
 				this.Invalidate(oldBounds);
 			}
 			else
 			{
-				// Set the message visibility to true.
+				// Set the annotation visibility to true.
 				annotation.Visible = true;
 			}
-			// Invalidated the area corresponding to the new message bounds.
+			// Invalidated the area corresponding to the new annotation bounds.
 			this.Invalidate(newBounds);
 		}
 
@@ -710,14 +972,32 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="annotation">The annotation.</param>
 		private void OnHideAnnotation(MapTextAnnotation annotation)
 		{
-			// If there exists a visible message.
+			// If the annotation is visible.
 			if (annotation.Visible)
 			{
-				// Invalidate the area corresponding to the message bounds.
+				// Invalidate the area corresponding to the annotation bounds.
 				this.Invalidate(annotation.Bounds);
 			}
-			// Set the message visibility to false.
+			// Set the annotation visibility to false.
 			annotation.Visible = false;
+		}
+
+		/// <summary>
+		/// Refreshes the specified text annotation.
+		/// </summary>
+		/// <param name="annotation">The annotation.</param>
+		private void OnRefreshAnnotation(MapTextAnnotation annotation)
+		{
+			// If the annotation is visible.
+			if (annotation.Visible)
+			{
+				// Invalidate the area corresponding to the old annotation bounds.
+				this.Invalidate(annotation.Bounds);
+				// Refresh the annotation.
+				annotation.Refresh();
+				// Invalidate the area corresponding to the new annotation bounds.
+				this.Invalidate(annotation.Bounds);
+			}
 		}
 
 		/// <summary>
@@ -726,6 +1006,12 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="text">The new message text.</param>
 		private void OnMessageChanged(string text)
 		{
+			// Execute the method on the UI thread.
+			if (this.InvokeRequired)
+			{
+				this.Invoke(this.delegateMessage, new object[] { text });
+				return;
+			}
 			// Get the old message bounds.
 			Rectangle oldBounds = this.annotationMessage.Bounds;
 			// Set the new message text.
@@ -785,12 +1071,61 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// An event handler called when the show borders flag has changed.
+		/// </summary>
+		/// <param name="showBorders">The value of the show borders flag.</param>
+		private void OnShowBordersChanged(bool showBorders)
+		{
+			// Set the flag value.
+			this.showBorders = showBorders;
+			// Refresh the map.
+			this.OnRefreshMap();
+		}
+
+		/// <summary>
 		/// An event handler called when the show markers flag has changed.
 		/// </summary>
 		/// <param name="showMarkers">The value of the show markers flag.</param>
 		private void OnShowMarkersChanged(bool showMarkers)
 		{
-			//
+			// Set the flag value.
+			this.showMarkers = showMarkers;
+			// If the show markers flag is set.
+			if (this.showMarkers)
+			{
+				// If there exists a highlighted marker.
+				if (null != this.highlightMarker)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.highlightMarker.Name, this.highlightMarker);
+				}
+				// If there exists an emphasized marker.
+				else if (null != this.emphasizedMarker)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+				}
+			}
+			else
+			{
+				// If there exists a highlighted region.
+				if (null != this.highlightRegion)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.highlightRegion.Name, this.highlightRegion);
+				}
+				else
+				{
+					// Hide the info annotation.
+					this.OnHideAnnotation(this.annotationInfo);
+				}
+			}
+			// Invalidate the area corresponding to all markers.
+			foreach (MapMarker marker in this.markers)
+			{
+				// Refresh the marker.
+				this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			}
 		}
 
 		/// <summary>
@@ -802,6 +1137,11 @@ namespace DotNetApi.Windows.Controls
 			foreach (MapRegion region in this.regions)
 			{
 				region.Update(this.mapBounds, this.mapScale);
+			}
+			// Update all map markers.
+			foreach (MapMarker marker in this.markers)
+			{
+				marker.Update(this.mapBounds, this.mapScale);
 			}
 		}
 
@@ -878,9 +1218,9 @@ namespace DotNetApi.Windows.Controls
 				{
 					// Set the smooting mode to default.
 					graphics.SmoothingMode = SmoothingMode.Default;
-					using (SolidBrush brush = new SolidBrush(this.colorMapSea))
+					using (SolidBrush brush = new SolidBrush(this.colorBackground))
 					{
-						using (Pen pen = new Pen(this.colorMapRegionBorder))
+						using (Pen pen = new Pen(this.colorRegionNormalBorder))
 						{
 							// Fill the background.
 							graphics.FillRectangle(brush, 0, 0, bitmapSize.Width, bitmapSize.Height);
@@ -888,7 +1228,7 @@ namespace DotNetApi.Windows.Controls
 							// Set the smooting mode to high quality.
 							graphics.SmoothingMode = SmoothingMode.HighQuality;
 							// Change the brush color.
-							brush.Color = this.colorMapRegion;
+							brush.Color = this.colorRegionNormalBackground;
 							// Draw the map regions.
 							foreach (MapRegion region in this.regions)
 							{
@@ -902,7 +1242,7 @@ namespace DotNetApi.Windows.Controls
 								}
 
 								// Draw the region.
-								region.Draw(graphics, brush, pen);
+								region.Draw(graphics, brush, this.showBorders ? pen : null);
 							}
 						}
 					}
@@ -921,15 +1261,216 @@ namespace DotNetApi.Windows.Controls
 		private void OnSpringTick(object sender, EventArgs e)
 		{
 			// If the spring location is different from the current location.
-			if (this.spring.CurrentLocation != this.bitmapLocation)
+			if (this.scrollSpring.CurrentLocation != this.bitmapLocation)
 			{
 				// Invalidate the map rectangle for the old location.
 				this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
 				// Set the bitmap location at the new location.
-				this.bitmapLocation = this.spring.CurrentLocation;
+				this.bitmapLocation = this.scrollSpring.CurrentLocation;
 				// Invalidate the map rectangle for the new location.
 				this.Invalidate(this.shadow.GetShadowRectangle(new Rectangle(this.bitmapLocation, this.bitmapSize)));
+				// Refresh the text annotation.
+				this.OnRefreshAnnotation(this.annotationInfo);
 			}
+		}
+
+		/// <summary>
+		/// An event handler called before the markers are cleared.
+		/// </summary>
+		private void OnBeforeMarkersCleared()
+		{
+			// Remove the event handlers all markers in the markers collection.
+			foreach (MapMarker marker in this.markers)
+			{
+				this.OnRemoveMarkerEventHandlers(marker);
+				// Dispose the marker.
+				if (this.markerAutoDispose)
+				{
+					marker.Dispose();
+				}
+			}
+		}
+
+		/// <summary>
+		/// An event handler called after a marker is inserted.
+		/// </summary>
+		/// <param name="index">The marker index in the collection.</param>
+		/// <param name="marker">The marker.</param>
+		private void OnAfterMarkerInserted(int index, MapMarker marker)
+		{
+			// If the marker is null, do nothing.
+			if (null == marker) return;
+			// Add the marker event handlers.
+			this.OnAddMarkerEventHandlers(marker);
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+		}
+
+		/// <summary>
+		/// An event handler called after a marker is removed.
+		/// </summary>
+		/// <param name="index">The marker index in the collection.</param>
+		/// <param name="marker">The marker.</param>
+		private void OnAfterMarkerRemoved(int index, MapMarker marker)
+		{
+			// If the marker is null, do nothing.
+			if (null == marker) return;
+			// Remove the marker event handlers.
+			this.OnRemoveMarkerEventHandlers(marker);
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			// Dispose the marker.
+			if (this.markerAutoDispose)
+			{
+				marker.Dispose();
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when a marker is set.
+		/// </summary>
+		/// <param name="index">The marker index in the collection.</param>
+		/// <param name="oldMarker">The old marker.</param>
+		/// <param name="newMarker">The new marker.</param>
+		private void OnAfterMarkerSet(int index, MapMarker oldMarker, MapMarker newMarker)
+		{
+			// If the old marker is different from the new marker.
+			if (oldMarker != newMarker)
+			{
+				// If the old marker is not null.
+				if (null != oldMarker)
+				{
+					// Remove the old marker event handlers.
+					this.OnRemoveMarkerEventHandlers(oldMarker);
+					// Refresh the old marker.
+					this.Invalidate(oldMarker.Bounds.Add(this.bitmapLocation));
+					// Dispose the marker.
+					if (this.markerAutoDispose)
+					{
+						oldMarker.Dispose();
+					}
+				}
+				// If the new marker is not null.
+				if (null != newMarker)
+				{
+					// Add the new marker event handlers.
+					this.OnAddMarkerEventHandlers(newMarker);
+					// Refresh the new marker.
+					this.Invalidate(newMarker.Bounds.Add(this.bitmapLocation));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Adds the event handlers for the specified marker.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		private void OnAddMarkerEventHandlers(MapMarker marker)
+		{
+			marker.ColorChanged += this.OnMarkerColorChanged;
+			marker.EmphasisChanged += this.OnMarkerEmphasisChanged;
+			marker.LocationChanged += this.OnMarkerLocationChanged;
+			marker.SizeChanged += this.OnMarkerSizeChanged;
+		}
+
+		/// <summary>
+		/// Removes the event handlers for the specified marker.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		private void OnRemoveMarkerEventHandlers(MapMarker marker)
+		{
+			marker.ColorChanged -= this.OnMarkerColorChanged;
+			marker.EmphasisChanged -= this.OnMarkerEmphasisChanged;
+			marker.LocationChanged -= this.OnMarkerLocationChanged;
+			marker.SizeChanged -= this.OnMarkerSizeChanged;
+		}
+
+		/// <summary>
+		/// An event handler called when a marker color has changed.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		private void OnMarkerColorChanged(MapMarker marker)
+		{
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+		}
+
+		/// <summary>
+		/// An event handler called when a marker emphasis has changed.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		/// <param name="oldEmphasis">The old emphasis state.</param>
+		/// <param name="newEmphasis">The new emphasis state.</param>
+		private void OnMarkerEmphasisChanged(MapMarker marker, bool oldEmphasis, bool newEmphasis)
+		{
+			// If the marker is emphasized.
+			if (newEmphasis)
+			{
+				// If the markers are shown.
+				if (this.showMarkers)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, marker.Name, marker);
+				}
+				// Set the emphasized marker.
+				this.emphasizedMarker = marker;
+			}
+			else
+			{
+				// If there is a highlighted marker.
+				if ((null != this.highlightMarker) && this.showMarkers)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.highlightMarker.Name, this.highlightMarker);
+				}
+				// If there is a highlighted region.
+				else if (null != this.highlightRegion)
+				{
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.highlightRegion.Name, this.highlightRegion);
+				}
+				else
+				{
+					// Hide the info annotation.
+					this.OnHideAnnotation(this.annotationInfo);
+				}
+				// Set the emphasized marker.
+				this.emphasizedMarker = null;
+			}
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+		}
+
+		/// <summary>
+		/// An event handler called when a marker location has changed.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		/// <param name="oldLocation">The old location.</param>
+		/// <param name="newLocation">The new location.</param>
+		private void OnMarkerLocationChanged(MapMarker marker, MapPoint oldLocation, MapPoint newLocation)
+		{
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			// Update the marker.
+			marker.Update(this.mapBounds, this.mapScale);
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+		}
+
+		/// <summary>
+		/// An event handler called when a marker size has changed.
+		/// </summary>
+		/// <param name="marker">The marker.</param>
+		/// <param name="oldSize">The old size.</param>
+		/// <param name="newSize">The new size.</param>
+		private void OnMarkerSizeChanged(MapMarker marker, Size oldSize, Size newSize)
+		{
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			// Update the marker.
+			marker.Update(this.mapBounds, this.mapScale);
+			// Refresh the marker.
+			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>

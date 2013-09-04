@@ -13,25 +13,26 @@ namespace MapControlTest
 		public FormMain()
 		{
 			InitializeComponent();
+			this.mapControl.Load("Ne110mAdmin0Countries");
 		}
 
 		private void OnTest(object sender, EventArgs e)
 		{
-			try
-			{
-				this.textBox.AppendText("Creating map...{0}".FormatWith(Environment.NewLine));
+			//try
+			//{
+				//this.textBox.AppendText("Creating map...{0}".FormatWith(Environment.NewLine));
 
-				Map map = Map.Read(Maps.Ne110mAdmin0Countries);
+				//Map map = Map.Read(Maps.Ne110mAdmin0Countries);
 
-				this.textBox.AppendText("Map created.{0}".FormatWith(Environment.NewLine));
+				//this.textBox.AppendText("Map created.{0}".FormatWith(Environment.NewLine));
 
 				// Set the map.
-				this.mapControl.Map = map;
-			}
-			catch (Exception exception)
-			{
-				this.textBox.AppendText("Exception. {0}{1}".FormatWith(exception.Message, Environment.NewLine));
-			}
+				//this.mapControl.Map = map;
+			//}
+			//catch (Exception exception)
+			//{
+			//	this.textBox.AppendText("Exception. {0}{1}".FormatWith(exception.Message, Environment.NewLine));
+			//}
 		}
 
 		private void OnProcess(object sender, EventArgs e)

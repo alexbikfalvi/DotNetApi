@@ -46,10 +46,11 @@
     <Compile Include="MapPointCollection.cs" />
     <Compile Include="MapRectangle.cs" />
     <Compile Include="MapPoint.cs" />
-    <Compile Include="Maps.Designer.cs">
+    <Compile Include="Maps.cs" />
+    <Compile Include="MapsBinary.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Maps.resx</DependentUpon>
+      <DependentUpon>MapsBinary.resx</DependentUpon>
     </Compile>
     <Compile Include="MapScale.cs" />
     <Compile Include="MapShape.cs" />
@@ -60,9 +61,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Maps.resx">
+    <EmbeddedResource Include="MapsBinary.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Maps.Designer.cs</LastGenOutput>
+      <LastGenOutput>MapsBinary.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using DotNetApi.Drawing;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -26,7 +27,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a map item.
 	/// </summary>
-	public abstract class MapItem : Component
+	public abstract class MapItem : Component, IAnchor
 	{
 		/// <summary>
 		/// Creates a new map item instance.
@@ -35,7 +36,30 @@ namespace DotNetApi.Windows.Controls
 		{
 		}
 
+		// Public properties.
+
+		/// <summary>
+		/// Returns a rectangle that bounds this region.
+		/// </summary>
+		public abstract Rectangle Bounds { get; }
+		/// <summary>
+		/// Returns a rectangle that bounds this region.
+		/// </summary>
+		public abstract Rectangle AnchorBounds { get; }
+		/// <summary>
+		/// Returns the region name.
+		/// </summary>
+		public abstract string Name { get; set; }
+
+
 		// Abstract methods.
+
+		/// <summary>
+		/// Indicates whether the specified point is contained within this map item.
+		/// </summary>
+		/// <param name="point">The point.</param>
+		/// <returns><b>True</b> if the point is contained within the map item, <b>false</b> otherwise.</returns>
+		internal abstract bool IsVisible(Point point);
 
 		/// <summary>
 		/// Updates the map item geometric characteristics to the specified map bounds and scale.
@@ -43,6 +67,12 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="bounds">The map bounds.</param>
 		/// <param name="scale">The map scale.</param>
 		internal abstract void Update(MapRectangle bounds, MapScale scale);
+
+		/// <summary>
+		/// Draws the item on the specified graphics 
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		internal abstract void Draw(Graphics graphics);
 
 		/// <summary>
 		/// Draws the item on the specified graphics object.

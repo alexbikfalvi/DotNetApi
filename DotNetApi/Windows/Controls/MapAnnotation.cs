@@ -50,7 +50,7 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Gets or sets whether the message is visible.
+		/// Gets or sets whether the annotation is visible.
 		/// </summary>
 		public bool Visible
 		{

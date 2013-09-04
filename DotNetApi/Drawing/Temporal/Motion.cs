@@ -29,6 +29,8 @@ namespace DotNetApi.Drawing.Temporal
 	public abstract class Motion : Timer
 	{
 		private Stopwatch stopwatch = new Stopwatch();
+		private int counter = 0;
+		private int stop = -1;
 
 		/// <summary>
 		/// Creates a new motion instance.
@@ -74,6 +76,9 @@ namespace DotNetApi.Drawing.Temporal
 			this.BeginLocation = begin;
 			this.EndLocation = end;
 			this.CurrentLocation = begin;
+			// Reset the counters.
+			this.counter = 0;
+			this.stop = -1;
 			// Restart the stopwatch.
 			this.stopwatch.Restart();
 			// Enable the timer.
@@ -89,6 +94,9 @@ namespace DotNetApi.Drawing.Temporal
 			this.Enabled = false;
 			// Reset the stopwatch.
 			this.stopwatch.Reset();
+			// Reset the counters.
+			this.counter = 0;
+			this.stop = -1;
 		}
 
 		// Protected methods.
@@ -100,11 +108,22 @@ namespace DotNetApi.Drawing.Temporal
 		protected override void OnTick(EventArgs e)
 		{
 			// If the current location equals to the finish location.
-			if (this.CurrentLocation == this.EndLocation)
+			if ((this.CurrentLocation == this.EndLocation) && (this.counter > 0))
 			{
-				// Cancel the timer.
-				this.Cancel();
+				// If the previous tick was on the same position.
+				if (this.stop == this.counter - 1)
+				{
+					// Cancel the timer.
+					this.Cancel();
+				}
+				else
+				{
+					// Save the stop counter.
+					this.stop = this.counter;
+				}
 			}
+			// Increment the counter.
+			this.counter++;
 			// Call the base class method.
 			base.OnTick(e);
 		}

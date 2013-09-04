@@ -20,6 +20,8 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using DotNetApi.Drawing;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -29,6 +31,10 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class MapBulletMarker : MapMarker
 	{
+		private GraphicsPath path = new GraphicsPath();
+		private Rectangle bounds;
+		private bool disposed = false;
+
 		/// <summary>
 		/// Creates a new circular map marker instance at the default location.
 		/// </summary>
@@ -45,23 +51,117 @@ namespace DotNetApi.Windows.Controls
 		{
 		}
 
+		/// <summary>
+		/// Returns a rectangle that bounds this marker.
+		/// </summary>
+		public override Rectangle Bounds { get { return this.bounds; } }
+		/// <summary>
+		/// Returns a rectangle that bounds this marker.
+		/// </summary>
+		public override Rectangle AnchorBounds { get { return this.bounds; } }
+
 		// Internal methods.
 
 		/// <summary>
-		/// Paints the current marker.
+		/// Indicates whether the specified point is contained within this region.
 		/// </summary>
-		/// <param name="g">The graphics object.</param>
-		/// <param name="rectangle">The rectangle.</param>
-		internal override void Paint(Graphics g, Rectangle rectangle)
+		/// <param name="point">The point.</param>
+		/// <returns><b>True</b> if the point is contained within the region, <b>false</b> otherwise.</returns>
+		internal override bool IsVisible(Point point)
 		{
-			using (SolidBrush brush = new SolidBrush(this.ColorFill))
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("marker");
+			lock (this.path)
 			{
-				g.FillEllipse(brush, rectangle);
+				return this.path.IsVisible(point);
 			}
-			using (Pen pen = new Pen(this.ColorLine))
+		}
+
+		/// <summary>
+		/// Updates the map item geometric characteristics to the specified map bounds and scale.
+		/// </summary>
+		/// <param name="bounds">The map bounds.</param>
+		/// <param name="scale">The map scale.</param>
+		internal override void Update(MapRectangle bounds, MapScale scale)
+		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("marker");
+			// Compute the marker center.
+			PointF center = new PointF(
+				(float)((this.Location.X - bounds.Left) * scale.Width),
+				(float)((bounds.Top - this.Location.Y) * scale.Height)
+				);
+			// Lock the current path.
+			lock (this.path)
 			{
-				g.DrawEllipse(pen, rectangle);
+				// Reset the graphics path.
+				this.path.Reset();
+				// Add a circle to the path.
+				this.path.AddEllipse((float)(center.X - this.Size.Width / 2.0), (float)(center.Y - this.Size.Height / 2.0), this.Size.Width, this.Size.Height);
+				// Set the region bounds.
+				this.bounds = this.path.GetBounds().Ceiling();
 			}
+		}
+
+		/// <summary>
+		/// Draws the item on the specified graphics 
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		internal override void Draw(Graphics graphics)
+		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("marker");
+			lock (this.path)
+			{
+				// Fill the path.
+				using (SolidBrush brush = new SolidBrush(this.BackgroundColor))
+				{
+					graphics.FillPath(brush, this.path);
+				}
+				// Draw the path.
+				using (Pen pen = new Pen(this.BorderColor))
+				{
+					graphics.DrawPath(pen, this.path);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draws the item on the specified graphics object.
+		/// </summary>
+		/// <param name="graphics">The graphics object.</param>
+		/// <param name="brush">The brush.</param>
+		/// <param name="pen">The pen.</param>
+		internal override void Draw(Graphics graphics, Brush brush, Pen pen)
+		{
+			// If the object has been disposed throw an exception.
+			if (this.disposed) throw new ObjectDisposedException("marker");
+			lock (this.path)
+			{
+				// Fill the path.
+				if (null != brush) graphics.FillPath(brush, this.path);
+				// Draw the path.
+				if (null != pen) graphics.DrawPath(pen, this.path);
+			}
+		}
+
+		// Protected methods.
+
+		/// <summary>
+		/// An event handler called when the object is being disposed.
+		/// </summary>
+		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
+		protected override void Dispose(bool disposing)
+		{
+			// Call the base class method.
+			base.Dispose(disposing);
+			// Dispose the managed resources.
+			if (disposing)
+			{
+				this.path.Dispose();
+			}
+			// Set the disposed flag to true.
+			this.disposed = true;
 		}
 	}
 }

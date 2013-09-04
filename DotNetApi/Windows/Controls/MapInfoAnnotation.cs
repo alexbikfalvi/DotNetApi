@@ -112,10 +112,9 @@ namespace DotNetApi.Windows.Controls
 				// Compute the anchor bounds.
 				Rectangle anchorBounds = null != this.Translation ? this.Anchor.AnchorBounds.Add(this.Translation.TranslationDelta) : this.Anchor.AnchorBounds;
 				
-				if (this.boundary.AnchorBounds.Top + this.BorderSize.Height + this.tailSize.Height <= anchorBounds.Top)
+				// Compute the alignment to the top.
+				if (this.boundary.AnchorBounds.Contains(this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.TopOutside)))
 				{
-					// Compute the alignment to the top.
-					this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.TopOutside);
 					// Compute the polygon.
 					int bottom = this.BorderRectangle.Bottom - this.tailSize.Height;
 					int middle = this.BorderRectangle.Middle().X;
@@ -130,10 +129,9 @@ namespace DotNetApi.Windows.Controls
 					// Compute the text rectangle.
 					this.textRectangle = new Rectangle(this.BorderRectangle.Location, this.BorderSize);
 				}
-				else if (this.boundary.AnchorBounds.Bottom - this.BorderSize.Height - this.tailSize.Height >= anchorBounds.Bottom)
+				// Compute the alignment to the bottom.
+				else if (this.boundary.AnchorBounds.Contains(this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.BottomOutside)))
 				{
-					// Compute the alignment to the bottom.
-					this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.BottomOutside);
 					// Compute the polygon.
 					int top = this.BorderRectangle.Top + this.tailSize.Height;
 					int middle = this.BorderRectangle.Middle().X;
@@ -148,10 +146,9 @@ namespace DotNetApi.Windows.Controls
 					// Compute the text rectangle.
 					this.textRectangle = new Rectangle(this.BorderRectangle.Left, top, this.BorderSize.Width, this.BorderSize.Height);
 				}
-				else if (this.boundary.AnchorBounds.Left + this.BorderSize.Width + this.tailSize.Width <= anchorBounds.Left)
+				// Compute the alignment to the left.
+				else if (this.boundary.AnchorBounds.Contains(this.BorderRectangle = this.BorderSize.AddWidth(this.tailSize.Width).Align(anchorBounds, HorizontalAlign.LeftOutside, VerticalAlign.Center)))
 				{
-					// Compute the alignment to the left.
-					this.BorderRectangle = this.BorderSize.AddWidth(this.tailSize.Width).Align(anchorBounds, HorizontalAlign.LeftOutside, VerticalAlign.Center);
 					// Compute the polygon.
 					int right = this.BorderRectangle.Right - this.tailSize.Width;
 					int middle = this.BorderRectangle.Middle().Y;
@@ -166,10 +163,9 @@ namespace DotNetApi.Windows.Controls
 					// Compute the text rectangle.
 					this.textRectangle = new Rectangle(this.BorderRectangle.Location, this.BorderSize);
 				}
-				else if (this.boundary.AnchorBounds.Right - this.BorderSize.Width - this.tailSize.Width >= anchorBounds.Right)
+				// Compute the alignment to the right.
+				else if (this.boundary.AnchorBounds.Contains(this.BorderRectangle = this.BorderSize.AddWidth(this.tailSize.Width).Align(anchorBounds, HorizontalAlign.RightOutside, VerticalAlign.Center)))
 				{
-					// Compute the alignment to the right.
-					this.BorderRectangle = this.BorderSize.AddWidth(this.tailSize.Width).Align(anchorBounds, HorizontalAlign.RightOutside, VerticalAlign.Center);
 					// Compute the polygon.
 					int left = this.BorderRectangle.Left + this.tailSize.Width;
 					int middle = this.BorderRectangle.Middle().Y;
