@@ -35,5 +35,57 @@ namespace DotNetApi
 		{
 			return string.Format(CultureInfo.InvariantCulture, format, args);
 		}
+
+		/// <summary>
+		/// Converts the specified longitude to a string.
+		/// </summary>
+		/// <param name="longitude">The longitude.</param>
+		/// <returns>The display string.</returns>
+		public static string LongitudeToString(this double longitude)
+		{
+			double absoluteLongitude = Math.Abs(longitude);
+
+			double degrees = Math.Floor(absoluteLongitude);
+			double minutes = (absoluteLongitude - degrees) * 60.0;
+			double seconds = (minutes - Math.Floor(minutes)) * 60.0;
+			double tenths = (seconds - Math.Floor(seconds)) * 10.0;
+
+			minutes = Math.Floor(minutes);
+			seconds = Math.Floor(seconds);
+			tenths = Math.Floor(tenths);
+
+			char hemisphere = Math.Sign(longitude) > 0 ? 'E' : Math.Sign(longitude) < 0 ? 'W' : ' ';
+
+			if (tenths != 0.0) return string.Format("{0}° {1}ʹ {2}.{3}ʺ {4}", degrees, minutes, seconds, tenths, hemisphere);
+			else if (seconds != 0.0) return string.Format("{0}° {1}ʹ {2}ʺ {3}", degrees, minutes, seconds, hemisphere);
+			else if (minutes != 0.0) return string.Format("{0}° {1}ʹ {2}", degrees, minutes, hemisphere);
+			else return string.Format("{0}° {1}", degrees, hemisphere);
+		}
+
+		/// <summary>
+		/// Converts the specified latitude to a string.
+		/// </summary>
+		/// <param name="latitude">The latitude.</param>
+		/// <returns>The display string.</returns>
+		public static string LatitudeToString(this double latitude)
+		{
+			double absoluteLatitude = Math.Abs(latitude);
+
+			double degrees = Math.Floor(absoluteLatitude);
+			double minutes = (absoluteLatitude - degrees) * 60.0;
+			double seconds = (minutes - Math.Floor(minutes)) * 60.0;
+			double tenths = (seconds - Math.Floor(seconds)) * 10.0;
+
+			minutes = Math.Floor(minutes);
+			seconds = Math.Floor(seconds);
+			tenths = Math.Floor(tenths);
+
+			char hemisphere = Math.Sign(latitude) > 0 ? 'N' : Math.Sign(latitude) < 0 ? 'S' : ' ';
+
+			if (tenths != 0.0) return string.Format("{0}° {1}ʹ {2}.{3}ʺ {4}", degrees, minutes, seconds, tenths, hemisphere);
+			else if (seconds != 0.0) return string.Format("{0}° {1}ʹ {2}ʺ {3}", degrees, minutes, seconds, hemisphere);
+			else if (minutes != 0.0) return string.Format("{0}° {1}ʹ {2}", degrees, minutes, hemisphere);
+			else return string.Format("{0}° {1}", degrees, hemisphere);
+		}
 	}
 }

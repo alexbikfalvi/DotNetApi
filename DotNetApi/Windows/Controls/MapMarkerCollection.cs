@@ -40,8 +40,8 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The item.</returns>
 		public MapMarker this[int index]
 		{
-			get { return this.List[index] as MapMarker; }
-			set { this.List[index] = value; }
+			get { lock (this) { return this.List[index] as MapMarker; } }
+			set { lock (this) { this.List[index] = value; } }
 		}
 
 		// Public events.
@@ -89,10 +89,13 @@ namespace DotNetApi.Windows.Controls
 		/// or -1 to indicate that the item was not inserted into the collection.</returns>
 		public int Add(MapMarker item)
 		{
-			// Add the item.
-			int result = this.List.Add(item);
-			// Return the result.
-			return result;
+			lock (this)
+			{
+				// Add the item.
+				int result = this.List.Add(item);
+				// Return the result.
+				return result;
+			}
 		}
 
 		/// <summary>
@@ -101,10 +104,13 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="items">The range of items.</param>
 		public void AddRange(MapMarker[] items)
 		{
-			// Add the items.
-			foreach (MapMarker item in items)
+			lock (this)
 			{
-				this.Add(item);
+				// Add the items.
+				foreach (MapMarker item in items)
+				{
+					this.Add(item);
+				}
 			}
 		}
 
@@ -115,7 +121,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The index of value if found in the list; otherwise, -1.</returns>
 		public int IndexOf(MapMarker item)
 		{
-			return this.List.IndexOf(item);
+			lock (this) { return this.List.IndexOf(item); }
 		}
 
 		/// <summary>
@@ -126,7 +132,7 @@ namespace DotNetApi.Windows.Controls
 		public void Insert(int index, MapMarker item)
 		{
 			// Insert the item.
-			this.List.Insert(index, item);
+			lock (this) { this.List.Insert(index, item); }
 		}
 
 		/// <summary>
@@ -136,7 +142,7 @@ namespace DotNetApi.Windows.Controls
 		public void Remove(MapMarker item)
 		{
 			// Remove the item.
-			this.List.Remove(item);
+			lock (this) { this.List.Remove(item); }
 		}
 
 		/// <summary>
@@ -146,7 +152,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns><b>True</b> if the element is found in the collection, or <b>false</b> otherwise.</returns>
 		public bool Contains(MapMarker item)
 		{
-			return this.List.Contains(item);
+			lock (this) { return this.List.Contains(item); }
 		}
 
 		// Protected methods.

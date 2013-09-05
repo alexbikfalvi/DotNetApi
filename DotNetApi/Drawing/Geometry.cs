@@ -242,6 +242,30 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Subtracts from the current rectangle location the specified offset value.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="point">The offset point.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle Subtract(this Rectangle rectangle, Point point)
+		{
+			return new Rectangle(rectangle.Location.Subtract(point), rectangle.Size);
+		}
+
+		/// <summary>
+		/// Subtracts to the current rectangle location the specified X and Y offset values.
+		/// </summary>
+		/// <param name="rectangle">The rectangle.</param>
+		/// <param name="x">The X offset.</param>
+		/// <param name="y">The Y offset.</param>
+		/// <returns>The new rectangle.</returns>
+		public static Rectangle Subtract(this Rectangle rectangle, int x, int y)
+		{
+			return new Rectangle(rectangle.Location.Subtract(x, y), rectangle.Size);
+		}
+
+
+		/// <summary>
 		/// Returns the point with the minimum X and Y coodinates between the given number of points.
 		/// </summary>
 		/// <param name="points">The points.</param>

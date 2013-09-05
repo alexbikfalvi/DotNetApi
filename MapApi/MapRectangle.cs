@@ -53,7 +53,7 @@ namespace MapApi
 			this.Left = location.X;
 			this.Top = location.Y;
 			this.Right = location.X + size.Width;
-			this.Bottom = location.Y + size.Height;
+			this.Bottom = location.Y - size.Height;
 		}
 
 		// Public fields.

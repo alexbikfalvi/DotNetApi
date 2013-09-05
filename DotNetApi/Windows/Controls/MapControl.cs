@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Windows.Forms;
+using DotNetApi;
 using DotNetApi.Async;
 using DotNetApi.Drawing;
 using DotNetApi.Drawing.Temporal;
@@ -55,14 +56,21 @@ namespace DotNetApi.Windows.Controls
 		private MapRectangle mapBounds = MapControl.mapBoundsDefault;
 		private MapSize mapSize = MapControl.mapBoundsDefault.Size;
 		private MapScale mapScale = new MapScale(1.0, 1.0);
-		private MapPoint mapLocation = new MapPoint(-180, 90);
 
 		private Bitmap bitmapMap = null;
 		private Point bitmapLocation;
 		private Size bitmapSize;
 
-		//private MapSize majorGridSize;
-		//private Size minorGridSize;
+		private double[] majorGridHorizontalCoordinate = null;
+		private double[] majorGridVerticalCoordinate = null;
+		private float[] majorGridHorizontalPoint = null;
+		private float[] majorGridVerticalPoint = null;
+		private static readonly Size majorGridMinimumSize = new Size(50, 50);
+		private static readonly double[] majorGridValues = new double[] { 30.0, 45.0, 90.0 };
+		private static readonly double[] minorGridValues = new double[] { 10.0, 15.0, 30.0 };
+		private static readonly double[] majorGridFactor = new double[] { 0.1, 0.2, 0.5, 1.0 };
+		private static readonly double[] minorGridFactor = new double[] { 0.25, 0.25, 0.25, 0.25 };
+		private static readonly Padding gridPadding = new Padding(2);
 
 		private MapRegion highlightRegion = null;
 		private MapMarker highlightMarker = null;
@@ -87,8 +95,8 @@ namespace DotNetApi.Windows.Controls
 		private Color colorMarkerHighlightBorder = Color.DarkViolet;
 		private Color colorMarkerHighlightBackground = Color.Violet;
 
-		private Color colorGridMajor = Color.FromArgb(128, Color.Gray);
-		private Color colorGridMinor = Color.FromArgb(48, Color.Gray);
+		private Color colorMajorGrid = Color.FromArgb(128, Color.Gray);
+		private Color colorMinorGrid = Color.FromArgb(48, Color.Gray);
 
 		// Drawing.
 
@@ -98,6 +106,8 @@ namespace DotNetApi.Windows.Controls
 		private TextureBrush brushBackground;
 
 		private Shadow shadow = new Shadow(Color.Black, 0, 20);
+
+		private Font fontGrid;
 
 		// Interaction.
 
@@ -180,6 +190,9 @@ namespace DotNetApi.Windows.Controls
 			this.markers.AfterItemInserted += this.OnAfterMarkerInserted;
 			this.markers.AfterItemRemoved += this.OnAfterMarkerRemoved;
 			this.markers.AfterItemSet += this.OnAfterMarkerSet;
+
+			// Create the grid font.
+			this.fontGrid = new Font(Window.DefaultFont.FontFamily, 7.0f);
 		}
 
 		// Public events.
@@ -358,6 +371,9 @@ namespace DotNetApi.Windows.Controls
 				// Dispose the shadow.
 				this.shadow.Dispose();
 
+				// Dispose the fonts.
+				this.fontGrid.Dispose();
+
 				// Dispose the motion spring.
 				this.scrollSpring.Dispose();
 
@@ -367,18 +383,27 @@ namespace DotNetApi.Windows.Controls
 				// Dispose the drawing mutex.
 				this.mutex.Dispose();
 
-				// Dispose the map regions.
-				foreach (MapRegion region in this.regions)
+				// Get an exclusive lock to the regions list.
+				lock (this.regions)
 				{
-					region.Dispose();
+					// Dispose the map regions.
+					foreach (MapRegion region in this.regions)
+					{
+						region.Dispose();
+					}
 				}
 
 				// Dispose tha map markers.
 				if (this.markerAutoDispose)
 				{
-					foreach (MapMarker marker in this.markers)
+					// Get an exclusive lock to the markers collection.
+					lock (this.markers)
 					{
-						marker.Dispose();
+						// Dispose the markers.
+						foreach (MapMarker marker in this.markers)
+						{
+							marker.Dispose();
+						}
 					}
 				}
 			}
@@ -395,14 +420,15 @@ namespace DotNetApi.Windows.Controls
 
 			// Set the graphics smoothing mode to high quality.
 			e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+
+			// Draw the checkerboard background.
+			e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 			
 			// Try and lock the drawing mutex.
 			if (this.mutex.WaitOne(0))
 			{
 				try
 				{
-					// Draw the checkerboard background.
-					e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 					// If the current map bitmap is null.
 					if (null != this.bitmapMap)
 					{
@@ -435,25 +461,30 @@ namespace DotNetApi.Windows.Controls
 									pen.Color = this.colorMarkerNormalBorder;
 									brush.Color = this.colorMarkerNormalBackground;
 
-									// Draw the normal markers.
-									foreach (MapMarker marker in this.markers)
+									// Lock the markers collection.
+									lock (this.markers)
 									{
-										if (!marker.Emphasized)
-										{
-											marker.Draw(e.Graphics, brush, pen);
-										}
-									}
 
-									// Change the pen and brush colors.
-									pen.Color = this.colorMarkerEmphasisBorder;
-									brush.Color = this.colorMarkerEmphasisBackground;
-									
-									// Draw the emphasized markers.
-									foreach (MapMarker marker in this.markers)
-									{
-										if (marker.Emphasized)
+										// Draw the normal markers.
+										foreach (MapMarker marker in this.markers)
 										{
-											marker.Draw(e.Graphics, brush, pen);
+											if (!marker.Emphasized)
+											{
+												marker.Draw(e.Graphics, brush, pen);
+											}
+										}
+
+										// Change the pen and brush colors.
+										pen.Color = this.colorMarkerEmphasisBorder;
+										brush.Color = this.colorMarkerEmphasisBackground;
+
+										// Draw the emphasized markers.
+										foreach (MapMarker marker in this.markers)
+										{
+											if (marker.Emphasized)
+											{
+												marker.Draw(e.Graphics, brush, pen);
+											}
 										}
 									}
 
@@ -465,13 +496,46 @@ namespace DotNetApi.Windows.Controls
 
 										this.highlightMarker.Draw(e.Graphics, brush, pen);
 									}
-								}								
-
-								// Draw the minor horizontal grid.
-								//for (double x = 0; )
-								//{
-								//	e.Graphics.DrawLine(pen, this.Convert(new MapPoint(x, this.mapBounds.Top)), this.Convert(new MapPoint(x, this.mapBounds.Bottom)));
-								//}
+								}
+					
+								// Draw the major grid.
+								if (this.showMajorGrid)
+								{
+									// Set the pen color.
+									pen.Color = this.colorMajorGrid;
+									// Draw the horizontal grid.
+									if (null != this.majorGridHorizontalPoint)
+									{
+										for (int index = 0; index < this.majorGridHorizontalPoint.Length; index++)
+										{
+											// Draw the grid line.
+											e.Graphics.DrawLine(pen, this.majorGridHorizontalPoint[index], 0, this.majorGridHorizontalPoint[index], this.bitmapSize.Height - 1);
+											// Draw the coordinates.
+											TextRenderer.DrawText(
+												e.Graphics,
+												this.majorGridHorizontalCoordinate[index].LongitudeToString(),
+												this.fontGrid,
+												(new Point((int)this.majorGridHorizontalPoint[index], 0)).Add(this.bitmapLocation),
+												Color.Black);
+										}
+									}
+									// Draw the vertical grid.
+									if (null != this.majorGridVerticalPoint)
+									{
+										for (int index = 0; index < this.majorGridVerticalPoint.Length; index++)
+										{
+											// Draw the grid line.
+											e.Graphics.DrawLine(pen, 0, this.majorGridVerticalPoint[index], this.bitmapSize.Width - 1, this.majorGridVerticalPoint[index]);
+											// Draw the coordinates.
+											TextRenderer.DrawText(
+												e.Graphics,
+												this.majorGridVerticalCoordinate[index].LatitudeToString(),
+												this.fontGrid,
+												(new Point(0, (int)this.majorGridVerticalPoint[index])).Add(this.bitmapLocation),
+												Color.Black);
+										}
+									}
+								}
 							}
 						}
 
@@ -552,28 +616,36 @@ namespace DotNetApi.Windows.Controls
 
 			// Compute the mouse location.
 			Point location = e.Location.Subtract(this.bitmapLocation);
-			// Compute the new highlight marker.
-			foreach (MapMarker marker in this.markers)
+			// Get an exclusive lock to the markers collection.
+			lock (this.markers)
 			{
-				// If the marker contains the mouse location.
-				if (marker.IsVisible(location))
+				// Compute the new highlight marker.
+				foreach (MapMarker marker in this.markers)
 				{
-					// Set the current highlighted marker.
-					highlightMarker = marker;
-					// Stop the iteration.
-					break;
+					// If the marker contains the mouse location.
+					if (marker.IsVisible(location))
+					{
+						// Set the current highlighted marker.
+						highlightMarker = marker;
+						// Stop the iteration.
+						break;
+					}
 				}
 			}
-			// Compute the new highlight region.
-			foreach (MapRegion region in this.regions)
+			// Get an exclusive lock to the regions list.
+			lock (this.regions)
 			{
-				// If the region contains the mouse location.
-				if (region.IsVisible(location))
+				// Compute the new highlight region.
+				foreach (MapRegion region in this.regions)
 				{
-					// Set the current highlighted region.
-					highlightRegion = region;
-					// Stop the iteration.
-					break;
+					// If the region contains the mouse location.
+					if (region.IsVisible(location))
+					{
+						// Set the current highlighted region.
+						highlightRegion = region;
+						// Stop the iteration.
+						break;
+					}
 				}
 			}
 
@@ -831,31 +903,36 @@ namespace DotNetApi.Windows.Controls
 				// Set the current map.
 				this.map = map;
 
-				// Clear the existing map regions.
-				foreach (MapRegion region in this.regions)
-				{
-					region.Dispose();
-				}
-				this.regions.Clear();
+				// Get an exclusive lock to the regions list.
 
-				// If the current map is not null.
-				if (null != this.map)
+				lock (this.regions)
 				{
-					// Create the map shapes.
-					foreach (MapShape shape in map.Shapes)
+					// Clear the existing map regions.
+					foreach (MapRegion region in this.regions)
 					{
-						// Switch according to the shape type.
-						switch (shape.Type)
+						region.Dispose();
+					}
+					this.regions.Clear();
+
+					// If the current map is not null.
+					if (null != this.map)
+					{
+						// Create the map shapes.
+						foreach (MapShape shape in map.Shapes)
 						{
-							case MapShapeType.Polygon:
-								// Get the polygon shape.
-								MapShapePolygon shapePolygon = shape as MapShapePolygon;
-								// Create a map region for this shape.
-								MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
-								// Add the map region to the region items.
-								this.regions.Add(region);
-								break;
-							default: continue;
+							// Switch according to the shape type.
+							switch (shape.Type)
+							{
+								case MapShapeType.Polygon:
+									// Get the polygon shape.
+									MapShapePolygon shapePolygon = shape as MapShapePolygon;
+									// Create a map region for this shape.
+									MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
+									// Add the map region to the region items.
+									this.regions.Add(region);
+									break;
+								default: continue;
+							}
 						}
 					}
 				}
@@ -923,11 +1000,130 @@ namespace DotNetApi.Windows.Controls
 			}
 			// Update the bitmap location.
 			this.bitmapLocation = this.Convert(this.mapBounds.Location);
-			// Compute the grid size.
-			//this.majorGridSize = new MapSize(30, 30);
-			//this.minorGridSize = new Size(3, 3);
+			// Update the map grid.
+			this.OnUpdateGrid();
 			// Update the map items.
 			this.OnUpdateItems();
+		}
+
+		/// <summary>
+		/// Updates the map grid.
+		/// </summary>
+		private void OnUpdateGrid()
+		{
+			MapSize majorGridSize = new MapSize(1.0, 1.0);
+			MapSize minorGridSize = new MapSize(1.0, 1.0);
+			Point majorGridBegin;
+			Point majorGridEnd;
+			Point minorGridBegin;
+			Point minorGridEnd;
+
+			// Compute the grid size.
+			majorGridSize = new MapSize(
+				Math.Pow(10.0, Math.Floor(Math.Log10(this.mapSize.Width))),
+				Math.Pow(10.0, Math.Floor(Math.Log10(this.mapSize.Height)))
+				);
+			// Adjust the horizontal grid.
+			if (majorGridSize.Width > 10.0)
+			{
+				// Select the first value than results in a displayed width greater than the minimum width.
+				for (int index = 0; index < MapControl.majorGridValues.Length; index++)
+				{
+					if (majorGridValues[index] * this.mapScale.Width >=  MapControl.majorGridMinimumSize.Width)
+					{
+						majorGridSize.Width =  MapControl.majorGridValues[index];
+						minorGridSize.Width =  MapControl.minorGridValues[index];
+						break;
+					}
+				}
+				// Limit the grid size to the highest value.
+				if (majorGridSize.Width > MapControl.majorGridValues[MapControl.majorGridValues.Length - 1])
+				{
+					majorGridSize.Width = MapControl.majorGridValues[MapControl.majorGridValues.Length - 1];
+					minorGridSize.Width = MapControl.minorGridValues[MapControl.majorGridValues.Length - 1];
+				}
+			}
+			else
+			{
+				// Select the first factor that results in a displayed width greater than the minimum width.
+				for (int index = 0; index <  MapControl.majorGridFactor.Length; index++)
+				{
+					if (majorGridSize.Width *  MapControl.majorGridFactor[index] >=  MapControl.majorGridMinimumSize.Width)
+					{
+						majorGridSize.Width *=  MapControl.majorGridFactor[index];
+						minorGridSize.Width = majorGridSize.Width * minorGridFactor[index];
+						break;
+					}
+				}
+			}
+			// Adjust the vertical grid.
+			if (majorGridSize.Height > 10.0)
+			{
+				// Select the first value than results in a displayed height greater than the minimum height.
+				for (int index = 0; index <  MapControl.majorGridValues.Length; index++)
+				{
+					if ( MapControl.majorGridValues[index] * this.mapScale.Height >=  MapControl.majorGridMinimumSize.Height)
+					{
+						majorGridSize.Height =  MapControl.majorGridValues[index];
+						minorGridSize.Height =  MapControl.minorGridValues[index];
+						break;
+					}
+				}
+				// Limit the grid size to the highest value.
+				if (majorGridSize.Height > MapControl.majorGridValues[MapControl.majorGridValues.Length - 1])
+				{
+					majorGridSize.Height = MapControl.majorGridValues[MapControl.majorGridValues.Length - 1];
+					minorGridSize.Height = MapControl.minorGridValues[MapControl.majorGridValues.Length - 1];
+				}
+			}
+			else
+			{
+				// Select the first factor that results in a displayed height greater than the minimum height.
+				for (int index = 0; index <  MapControl.majorGridFactor.Length; index++)
+				{
+					if (majorGridSize.Height *  MapControl.majorGridFactor[index] >=  MapControl.majorGridMinimumSize.Height)
+					{
+						majorGridSize.Height *=  MapControl.majorGridFactor[index];
+						minorGridSize.Height = majorGridSize.Height *  MapControl.minorGridFactor[index];
+						break;
+					}
+				}
+			}
+			// Compute the major grid begin and end.
+			majorGridBegin = new Point(
+				this.mapBounds.Left % majorGridSize.Width == 0 ? (int)Math.Ceiling(this.mapBounds.Left / majorGridSize.Width) + 1 : (int)Math.Ceiling(this.mapBounds.Left / majorGridSize.Width),
+				this.mapBounds.Top % majorGridSize.Height == 0 ? (int)Math.Floor(this.mapBounds.Top / majorGridSize.Height) - 1 : (int)Math.Floor(this.mapBounds.Top / majorGridSize.Height)
+				);
+			majorGridEnd = new Point(
+				this.mapBounds.Right % majorGridSize.Width == 0 ? (int)Math.Floor(this.mapBounds.Right / majorGridSize.Width) - 1 : (int)Math.Floor(this.mapBounds.Right / majorGridSize.Width),
+				this.mapBounds.Bottom % majorGridSize.Height == 0 ? (int)Math.Ceiling(this.mapBounds.Bottom / majorGridSize.Height) + 1 : (int)Math.Ceiling(this.mapBounds.Bottom / majorGridSize.Height)
+				);
+			// Compute the minor grid begin and end.
+			minorGridBegin = new Point(
+				this.mapBounds.Left % minorGridSize.Width == 0 ? (int)Math.Ceiling(this.mapBounds.Left / minorGridSize.Width) + 1 : (int)Math.Ceiling(this.mapBounds.Left / minorGridSize.Width),
+				this.mapBounds.Top % minorGridSize.Height == 0 ? (int)Math.Floor(this.mapBounds.Top / minorGridSize.Height) - 1 : (int)Math.Floor(this.mapBounds.Top / minorGridSize.Height)
+				);
+			minorGridEnd = new Point(
+				this.mapBounds.Right % minorGridSize.Width == 0 ? (int)Math.Floor(this.mapBounds.Right / minorGridSize.Width) - 1 : (int)Math.Floor(this.mapBounds.Right / minorGridSize.Width),
+				this.mapBounds.Bottom % minorGridSize.Height == 0 ? (int)Math.Ceiling(this.mapBounds.Bottom / minorGridSize.Height) + 1 : (int)Math.Ceiling(this.mapBounds.Bottom / minorGridSize.Height)
+				);
+
+			// Compute the horizontal major grid.
+			this.majorGridHorizontalCoordinate = new double[majorGridEnd.X - majorGridBegin.X + 1];
+			this.majorGridHorizontalPoint = new float[this.majorGridHorizontalCoordinate.Length];
+			for (int index = 0; index < this.majorGridHorizontalPoint.Length; index++)
+			{
+				this.majorGridHorizontalCoordinate[index] = (majorGridBegin.X + index) * majorGridSize.Width;
+				this.majorGridHorizontalPoint[index] = this.ConvertLongitudeF(this.majorGridHorizontalCoordinate[index]);
+			}
+			// Compute the vertical major grid.
+			this.majorGridVerticalCoordinate = new double[majorGridBegin.Y - majorGridEnd.Y + 1];
+			this.majorGridVerticalPoint = new float[this.majorGridVerticalCoordinate.Length];
+			for (int index = 0; index < this.majorGridVerticalPoint.Length; index++)
+			{
+				this.majorGridVerticalCoordinate[index] = (majorGridEnd.Y + index) * majorGridSize.Height;
+				this.majorGridVerticalPoint[index] = this.ConvertLatitudeF(this.majorGridVerticalCoordinate[index]);
+			}
 		}
 
 		/// <summary>
@@ -1120,11 +1316,15 @@ namespace DotNetApi.Windows.Controls
 					this.OnHideAnnotation(this.annotationInfo);
 				}
 			}
-			// Invalidate the area corresponding to all markers.
-			foreach (MapMarker marker in this.markers)
+			// Lock the markers collection.
+			lock (this.markers)
 			{
-				// Refresh the marker.
-				this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+				// Invalidate the area corresponding to all markers.
+				foreach (MapMarker marker in this.markers)
+				{
+					// Refresh the marker.
+					this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+				}
 			}
 		}
 
@@ -1133,15 +1333,23 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateItems()
 		{
-			// Update all map regions.
-			foreach (MapRegion region in this.regions)
+			// Get an exclusive lock to the regions list.
+			lock (this.regions)
 			{
-				region.Update(this.mapBounds, this.mapScale);
+				// Update all map regions.
+				foreach (MapRegion region in this.regions)
+				{
+					region.Update(this.mapBounds, this.mapScale);
+				}
 			}
-			// Update all map markers.
-			foreach (MapMarker marker in this.markers)
+			// Get an exclusive lock to the markers collection.
+			lock (this.markers)
 			{
-				marker.Update(this.mapBounds, this.mapScale);
+				// Update all map markers.
+				foreach (MapMarker marker in this.markers)
+				{
+					marker.Update(this.mapBounds, this.mapScale);
+				}
 			}
 		}
 
@@ -1229,20 +1437,24 @@ namespace DotNetApi.Windows.Controls
 							graphics.SmoothingMode = SmoothingMode.HighQuality;
 							// Change the brush color.
 							brush.Color = this.colorRegionNormalBackground;
-							// Draw the map regions.
-							foreach (MapRegion region in this.regions)
+							// Get an exclusive lock to the regions list.
+							lock (this.regions)
 							{
-								// If the asynchronous operation has been canceled.
-								if (asyncState.IsCanceled)
+								// Draw the map regions.
+								foreach (MapRegion region in this.regions)
 								{
-									// Dispose the bitmap.
-									bitmap.Dispose();
-									// Return null.
-									return null;
-								}
+									// If the asynchronous operation has been canceled.
+									if (asyncState.IsCanceled)
+									{
+										// Dispose the bitmap.
+										bitmap.Dispose();
+										// Return null.
+										return null;
+									}
 
-								// Draw the region.
-								region.Draw(graphics, brush, this.showBorders ? pen : null);
+									// Draw the region.
+									region.Draw(graphics, brush, this.showBorders ? pen : null);
+								}
 							}
 						}
 					}
@@ -1279,14 +1491,40 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnBeforeMarkersCleared()
 		{
-			// Remove the event handlers all markers in the markers collection.
-			foreach (MapMarker marker in this.markers)
+			// Lock the markers collection.
+			lock (this.markers)
 			{
-				this.OnRemoveMarkerEventHandlers(marker);
-				// Dispose the marker.
-				if (this.markerAutoDispose)
+				// For all the markers.
+				foreach (MapMarker marker in this.markers)
 				{
-					marker.Dispose();
+					// Refresh the marker.
+					this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+					// Remove the event handlers all markers in the markers collection.
+					this.OnRemoveMarkerEventHandlers(marker);
+					// Dispose the marker.
+					if (this.markerAutoDispose)
+					{
+						marker.Dispose();
+					}
+				}
+			}
+			// If any of the highlighted or emphasized markers are not null.
+			if ((null != this.highlightRegion) || (null != this.emphasizedMarker))
+			{
+				// Set the highlighted marker to null.
+				this.highlightMarker = null;
+				// Set the emphasized marker to null.
+				this.emphasizedMarker = null;
+				// If there exists a highlighted region.
+				if (null != this.highlightRegion)
+				{
+					// Update the annotation.
+					this.OnShowAnnotation(this.annotationInfo, this.highlightRegion.Name, this.highlightRegion);
+				}
+				else
+				{
+					// Hide the annotation.
+					this.OnHideAnnotation(this.annotationInfo);
 				}
 			}
 		}
@@ -1302,6 +1540,8 @@ namespace DotNetApi.Windows.Controls
 			if (null == marker) return;
 			// Add the marker event handlers.
 			this.OnAddMarkerEventHandlers(marker);
+			// Update the marker.
+			marker.Update(this.mapBounds, this.mapScale);
 			// Refresh the marker.
 			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
 		}
@@ -1319,6 +1559,33 @@ namespace DotNetApi.Windows.Controls
 			this.OnRemoveMarkerEventHandlers(marker);
 			// Refresh the marker.
 			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			// If this marker equals the highlighted marker.
+			if (marker == this.highlightMarker)
+			{
+				if (null != this.emphasizedMarker)
+				{
+					this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+				}
+				else if (null != this.highlightRegion)
+				{
+					this.OnShowAnnotation(this.annotationInfo, this.highlightRegion.Name, this.highlightRegion);
+				}
+				else
+				{
+					this.OnHideAnnotation(this.annotationInfo);
+				}
+			}
+			else if (marker == this.emphasizedMarker)
+			{
+				if (null != this.highlightRegion)
+				{
+					this.OnShowAnnotation(this.annotationInfo, this.highlightRegion.Name, this.highlightRegion);
+				}
+				else
+				{
+					this.OnHideAnnotation(this.annotationInfo);
+				}
+			}
 			// Dispose the marker.
 			if (this.markerAutoDispose)
 			{
@@ -1337,27 +1604,8 @@ namespace DotNetApi.Windows.Controls
 			// If the old marker is different from the new marker.
 			if (oldMarker != newMarker)
 			{
-				// If the old marker is not null.
-				if (null != oldMarker)
-				{
-					// Remove the old marker event handlers.
-					this.OnRemoveMarkerEventHandlers(oldMarker);
-					// Refresh the old marker.
-					this.Invalidate(oldMarker.Bounds.Add(this.bitmapLocation));
-					// Dispose the marker.
-					if (this.markerAutoDispose)
-					{
-						oldMarker.Dispose();
-					}
-				}
-				// If the new marker is not null.
-				if (null != newMarker)
-				{
-					// Add the new marker event handlers.
-					this.OnAddMarkerEventHandlers(newMarker);
-					// Refresh the new marker.
-					this.Invalidate(newMarker.Bounds.Add(this.bitmapLocation));
-				}
+				this.OnAfterMarkerRemoved(index, oldMarker);
+				this.OnAfterMarkerInserted(index, newMarker);
 			}
 		}
 
@@ -1474,16 +1722,69 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
-		/// Converts the specified map point to the screen coordinates, depending on the current map location and scale.
+		/// Converts the specified map point to the integer screen coordinates, depending on the current map bounds and scale.
 		/// </summary>
 		/// <param name="point">The map point.</param>
 		/// <returns>The screen coordinates point.</returns>
 		private Point Convert(MapPoint point)
 		{
 			return new Point(
-				(int)Math.Round((point.X - this.mapLocation.X) * this.mapScale.Width),
-				(int)Math.Round((this.mapLocation.Y - point.Y) * this.mapScale.Height)
+				(int)Math.Round((point.X - this.mapBounds.Left) * this.mapScale.Width),
+				(int)Math.Round((this.mapBounds.Top - point.Y) * this.mapScale.Height)
 				);
+		}
+
+		/// <summary>
+		/// Converts the specified map point to the float screen coordinates, depending on the current map bounds and scale.
+		/// </summary>
+		/// <param name="point">The map point.</param>
+		/// <returns>The screen coordinates point.</returns>
+		private PointF ConvertF(MapPoint point)
+		{
+			return new PointF(
+				(float)((point.X - this.mapBounds.Left) * this.mapScale.Width),
+				(float)((this.mapBounds.Top - point.Y) * this.mapScale.Height)
+				);
+		}
+
+		/// <summary>
+		/// Converts the specified longitude to the integer screen coordinates, depending on the current map bounds and scale.
+		/// </summary>
+		/// <param name="x">The longitude.</param>
+		/// <returns>The screen X coordinate.</returns>
+		private int ConvertLongitude(double x)
+		{
+			return (int)Math.Round((x - this.mapBounds.Left) * this.mapScale.Width);
+		}
+
+		/// <summary>
+		/// Converts the specified latitude to the integer screen coordinates, depending on the current map bounds and scale.
+		/// </summary>
+		/// <param name="y">The latitude.</param>
+		/// <returns>The screen Y coordinate.</returns>
+		private int ConvertLatitude(double y)
+		{
+			return (int)Math.Round((this.mapBounds.Top - y) * this.mapScale.Height);
+		}
+
+		/// <summary>
+		/// Converts the specified longitude to the float screen coordinates, depending on the current map bounds and scale.
+		/// </summary>
+		/// <param name="x">The longitude.</param>
+		/// <returns>The screen X coordinate.</returns>
+		private float ConvertLongitudeF(double x)
+		{
+			return (float)((x - this.mapBounds.Left) * this.mapScale.Width);
+		}
+
+		/// <summary>
+		/// Converts the specified latitude to the float screen coordinates, depending on the current map bounds and scale.
+		/// </summary>
+		/// <param name="y">The latitude.</param>
+		/// <returns>The screen Y coordinate.</returns>
+		private float ConvertLatitudeF(double y)
+		{
+			return (float)((this.mapBounds.Top - y) * this.mapScale.Height);
 		}
 	}
 }

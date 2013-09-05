@@ -182,8 +182,8 @@ namespace DotNetApi.Windows.Controls
 				}
 				else
 				{
-					// Compute the alignment to the center
-					this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.Center);
+					// Compute the alignment to the center.
+					this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, HorizontalAlign.Center, VerticalAlign.Center).Subtract(0, this.tailSize.Height + (this.BorderSize.Height >> 1) + 1);
 					// Compute the polygon.
 					int bottom = this.BorderRectangle.Bottom - this.tailSize.Height;
 					int middle = this.BorderRectangle.Middle().X;
@@ -203,7 +203,7 @@ namespace DotNetApi.Windows.Controls
 			{
 				// Compute the anchor bounds.
 				Rectangle anchorBounds = null != this.Anchor ? null != this.Translation ? this.Anchor.AnchorBounds.Add(this.Translation.TranslationDelta) : this.Anchor.AnchorBounds : default(Rectangle);
-				// Compute the alignment to the center
+				// Compute the alignment.
 				this.BorderRectangle = this.BorderSize.AddHeight(this.tailSize.Height).Align(anchorBounds, this.HorizontalAlignment, this.VerticalAlignment);
 				// Compute the polygon.
 				int bottom = this.BorderRectangle.Bottom - this.tailSize.Height;
