@@ -21,10 +21,6 @@ using System.ComponentModel;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void ProgressEventHandler(ProgressInfo progress);
-	public delegate void ProgressLegendChangedEventHandler(ProgressInfo progress, ProgressLegend legend);
-	public delegate void ProgressLegendSetEventHandler(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend); 
-
 	/// <summary>
 	/// A class representing multi-level progress information.
 	/// </summary>
@@ -62,15 +58,15 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event raised when the progress level has changed.
 		/// </summary>
-		public event ProgressEventHandler LevelChanged;
+		public event ProgressInfoEventHandler LevelChanged;
 		/// <summary>
 		/// An event raised when the progress default value has changed.
 		/// </summary>
-		public event ProgressEventHandler DefaultChanged;
+		public event ProgressInfoEventHandler DefaultChanged;
 		/// <summary>
 		/// An event raised when the progress count has changed.
 		/// </summary>
-		public event ProgressEventHandler CountChanged;
+		public event ProgressInfoEventHandler CountChanged;
 		/// <summary>
 		/// An event raised when the progress legend has changed.
 		/// </summary>
@@ -189,7 +185,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnLevelChanged()
 		{
 			// Raise the event.
-			if (null != this.LevelChanged) this.LevelChanged(this);
+			if (null != this.LevelChanged) this.LevelChanged(this, new ProgressInfoEventArgs(this));
 		}
 
 		/// <summary>
@@ -198,7 +194,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnDefaultChanged()
 		{
 			// Raise the event.
-			if (null != this.DefaultChanged) this.DefaultChanged(this);
+			if (null != this.DefaultChanged) this.DefaultChanged(this, new ProgressInfoEventArgs(this));
 		}
 
 		/// <summary>
@@ -207,7 +203,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnCountChanged()
 		{
 			// Raise the event.
-			if (null != this.CountChanged) this.CountChanged(this);
+			if (null != this.CountChanged) this.CountChanged(this, new ProgressInfoEventArgs(this));
 		}
 
 		/// <summary>
@@ -231,34 +227,35 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// Raise the event.
-			if (null != this.LegendSet) this.LegendSet(this, oldLegend, newLegend);
+			if (null != this.LegendSet) this.LegendSet(this, new ProgressLegendSetEventArgs(this, oldLegend, newLegend));
 		}
 
 		/// <summary>
 		/// An event handler called when the legend items have changed.
 		/// </summary>
-		/// <param name="legend">The legend.</param>
-		private void OnLegendItemsChanged(ProgressLegend legend)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnLegendItemsChanged(object sender, ProgressLegendEventArgs e)
 		{
 			// If the legend is not the current legend, do nothing.
-			if (legend != this.legend) return;
+			if (e.Legend != this.legend) return;
 			// Initialize the progress values.
 			this.OnInitialize();
 			// Raise the legend changed event.
-			if (null != this.LegendChanged) this.LegendChanged(this, legend);
+			if (null != this.LegendChanged) this.LegendChanged(this, new ProgressLegendChangedEventArgs(this, e.Legend));
 		}
 
 		/// <summary>
 		/// An event handler called whn a leged item has changed.
 		/// </summary>
-		/// <param name="legend">The progress legend.</param>
-		/// <param name="item">The legend item.</param>
-		private void OnLegendItemChanged(ProgressLegend legend, ProgressLegendItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnLegendItemChanged(object sender, ProgressLegendItemChangedEventArgs e)
 		{
 			// If the legend is not the current legend, do nothing.
-			if (legend != this.legend) return;
+			if (e.Legend != this.legend) return;
 			// Raise the legend changed event.
-			if (null != this.LegendChanged) this.LegendChanged(this, legend);
+			if (null != this.LegendChanged) this.LegendChanged(this, new ProgressLegendChangedEventArgs(this, e.Legend));
 		}
 
 		/// <summary>

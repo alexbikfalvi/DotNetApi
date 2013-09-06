@@ -25,8 +25,6 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void ImageListBoxItemActivateEventHandler(object sender, ImageListBoxItem item);
-
 	/// <summary>
 	/// An image list box control.
 	/// </summary>
@@ -143,7 +141,9 @@ namespace DotNetApi.Windows.Controls
 			base.OnDoubleClick(e);
 			// Activate the selected item.
 			if ((this.SelectedItem != null) && (this.ItemActivate != null))
-				this.ItemActivate(this, this.SelectedItem as ImageListBoxItem);
+			{
+				this.ItemActivate(this, new ImageListBoxItemActivateEventArgs(this.SelectedItem as ImageListBoxItem));
+			}
 		}
 	}
 }

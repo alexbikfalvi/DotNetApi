@@ -18,18 +18,91 @@
 
 using System;
 using System.Collections;
+using System.ComponentModel;
 
 namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
-	/// A collection of progress navigator item items.
+	/// A collection of progress items.
 	/// </summary>
-	public class MapMarkerCollection : CollectionBase
+	public sealed class ComponentCollection<T> : CollectionBase where T : Component
 	{
 		// Public delegates.
-		public delegate void ClearedEventHandler();
-		public delegate void ChangedEventHandler(int index, MapMarker item);
-		public delegate void SetEventHandler(int index, MapMarker oldItem, MapMarker newItem);
+
+		/// <summary>
+		/// A delegate representing a collection item changed event handler.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		public delegate void ItemChangedEventHandler(object sender, ItemChangedEventArgs e);
+		/// <summary>
+		/// A delegate representing a collection item set event handler.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		public delegate void ItemSetEventHandler(object sender, ItemSetEventArgs e);
+
+		/// <summary>
+		/// A class representing a collection item changed event arguments.
+		/// </summary>
+		public class ItemChangedEventArgs : EventArgs
+		{
+			/// <summary>
+			/// Creates a new event arguments instance.
+			/// </summary>
+			/// <param name="index">The changed index.</param>
+			/// <param name="item">The changed item.</param>
+			public ItemChangedEventArgs(int index, T item)
+			{
+				this.Index = index;
+				this.Item = item;
+			}
+
+			// Public properties.
+
+			/// <summary>
+			/// Gets the changed index.
+			/// </summary>
+			public int Index { get; private set; }
+			/// <summary>
+			/// Gets the changed item.
+			/// </summary>
+			public T Item { get; private set; }
+		}
+
+		/// <summary>
+		/// A class representing a collection item set event arguments.
+		/// </summary>
+		public class ItemSetEventArgs : EventArgs
+		{
+			/// <summary>
+			/// Creates a new event arguments instance.
+			/// </summary>
+			/// <param name="index">The set index.</param>
+			/// <param name="oldItem">The old item.</param>
+			/// <param name="newItem">The new item.</param>
+			public ItemSetEventArgs(int index, T oldItem, T newItem)
+			{
+				this.Index = index;
+				this.OldItem = oldItem;
+				this.NewItem = newItem;
+			}
+
+			// Public properties.
+
+			/// <summary>
+			/// Gets the set index.
+			/// </summary>
+			public int Index { get; private set; }
+			/// <summary>
+			/// Gets the old item.
+			/// </summary>
+			public T OldItem { get; private set; }
+			/// <summary>
+			/// Gets the new item.
+			/// </summary>
+			public T NewItem { get; private set; }
+		}
 
 		// Public properties.
 
@@ -38,10 +111,10 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns>The item.</returns>
-		public MapMarker this[int index]
+		public T this[int index]
 		{
-			get { lock (this) { return this.List[index] as MapMarker; } }
-			set { lock (this) { this.List[index] = value; } }
+			get { return this.List[index] as T; }
+			set { this.List[index] = value; }
 		}
 
 		// Public events.
@@ -49,35 +122,35 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event raised before the collection is cleared.
 		/// </summary>
-		public event ClearedEventHandler BeforeCleared;
+		public event EventHandler BeforeCleared;
 		/// <summary>
 		/// An event raised after the collection is cleared.
 		/// </summary>
-		public event ClearedEventHandler AfterCleared;
+		public event EventHandler AfterCleared;
 		/// <summary>
 		/// An event raised before an item is inserted into the collection.
 		/// </summary>
-		public event ChangedEventHandler BeforeItemInserted;
+		public event ItemChangedEventHandler BeforeItemInserted;
 		/// <summary>
 		/// An event raised after an item is inserted into the collection.
 		/// </summary>
-		public event ChangedEventHandler AfterItemInserted;
+		public event ItemChangedEventHandler AfterItemInserted;
 		/// <summary>
 		/// An event raised before an item is removed from the collection.
 		/// </summary>
-		public event ChangedEventHandler BeforeItemRemoved;
+		public event ItemChangedEventHandler BeforeItemRemoved;
 		/// <summary>
 		/// An event raised after an item is removed from the collection.
 		/// </summary>
-		public event ChangedEventHandler AfterItemRemoved;
+		public event ItemChangedEventHandler AfterItemRemoved;
 		/// <summary>
 		/// An event raised before an item is set in the collection.
 		/// </summary>
-		public event SetEventHandler BeforeItemSet;
+		public event ItemSetEventHandler BeforeItemSet;
 		/// <summary>
 		/// An event raised after an item is set in the collection.
 		/// </summary>
-		public event SetEventHandler AfterItemSet;
+		public event ItemSetEventHandler AfterItemSet;
 
 		// Public methods.
 
@@ -87,30 +160,24 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="item">The item.</param>
 		/// <returns>The position into which the new item was inserted,
 		/// or -1 to indicate that the item was not inserted into the collection.</returns>
-		public int Add(MapMarker item)
+		public int Add(T item)
 		{
-			lock (this)
-			{
-				// Add the item.
-				int result = this.List.Add(item);
-				// Return the result.
-				return result;
-			}
+			// Add the item.
+			int result = this.List.Add(item);
+			// Return the result.
+			return result;
 		}
 
 		/// <summary>
 		/// Adds a range of items to the collection.
 		/// </summary>
 		/// <param name="items">The range of items.</param>
-		public void AddRange(MapMarker[] items)
+		public void AddRange(T[] items)
 		{
-			lock (this)
+			// Add the items.
+			foreach (T item in items)
 			{
-				// Add the items.
-				foreach (MapMarker item in items)
-				{
-					this.Add(item);
-				}
+				this.Add(item);
 			}
 		}
 
@@ -119,9 +186,9 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns>The index of value if found in the list; otherwise, -1.</returns>
-		public int IndexOf(MapMarker item)
+		public int IndexOf(T item)
 		{
-			lock (this) { return this.List.IndexOf(item); }
+			return this.List.IndexOf(item);
 		}
 
 		/// <summary>
@@ -129,20 +196,20 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <param name="item">The item</param>
-		public void Insert(int index, MapMarker item)
+		public void Insert(int index, T item)
 		{
 			// Insert the item.
-			lock (this) { this.List.Insert(index, item); }
+			this.List.Insert(index, item);
 		}
 
 		/// <summary>
 		/// Removes the item from the collection.
 		/// </summary>
 		/// <param name="item">The item.</param>
-		public void Remove(MapMarker item)
+		public void Remove(T item)
 		{
 			// Remove the item.
-			lock (this) { this.List.Remove(item); }
+			this.List.Remove(item);
 		}
 
 		/// <summary>
@@ -150,9 +217,9 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns><b>True</b> if the element is found in the collection, or <b>false</b> otherwise.</returns>
-		public bool Contains(MapMarker item)
+		public bool Contains(T item)
 		{
-			lock (this) { return this.List.Contains(item); }
+			return this.List.Contains(item);
 		}
 
 		// Protected methods.
@@ -163,8 +230,7 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="value">The value to validate.</param>
 		protected override void OnValidate(Object value)
 		{
-			if (value.GetType().BaseType != typeof(MapMarker))
-				throw new ArgumentException("Value must be a map marker.", "value");
+			if (!(value is T)) throw new ArgumentException("The value object is not a valid item.", "value");
 		}
 
 
@@ -176,7 +242,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnClear();
 			// Raise the event.
-			if (this.BeforeCleared != null) this.BeforeCleared();
+			if (this.BeforeCleared != null) this.BeforeCleared(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -187,7 +253,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnClearComplete();
 			// Raise the event.
-			if (this.AfterCleared != null) this.AfterCleared();
+			if (this.AfterCleared != null) this.AfterCleared(this, EventArgs.Empty);
 		}
 
 		/// <summary>
@@ -200,7 +266,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnInsert(index, value);
 			// Raise the event.
-			if (this.BeforeItemInserted != null) this.BeforeItemInserted(index, value as MapMarker);
+			if (this.BeforeItemInserted != null) this.BeforeItemInserted(this, new ItemChangedEventArgs(index, value as T));
 		}
 
 		/// <summary>
@@ -213,7 +279,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnInsertComplete(index, value);
 			// Raise the event.
-			if (this.AfterItemInserted != null) this.AfterItemInserted(index, value as MapMarker);
+			if (this.AfterItemInserted != null) this.AfterItemInserted(this, new ItemChangedEventArgs(index, value as T));
 		}
 
 		/// <summary>
@@ -226,7 +292,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnRemove(index, value);
 			// Raise the event.
-			if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(index, value as MapMarker);
+			if (this.BeforeItemRemoved != null) this.BeforeItemRemoved(this, new ItemChangedEventArgs(index, value as T));
 		}
 
 		/// <summary>
@@ -239,7 +305,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnRemoveComplete(index, value);
 			// Raise the event.
-			if (this.AfterItemRemoved != null) this.AfterItemRemoved(index, value as MapMarker);
+			if (this.AfterItemRemoved != null) this.AfterItemRemoved(this, new ItemChangedEventArgs(index, value as T));
 		}
 
 		/// <summary>
@@ -253,7 +319,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnSet(index, oldValue, newValue);
 			// Raise the event.
-			if (this.BeforeItemSet != null) this.BeforeItemSet(index, oldValue as MapMarker, newValue as MapMarker);
+			if (this.BeforeItemSet != null) this.BeforeItemSet(this, new ItemSetEventArgs(index, oldValue as T, newValue as T));
 		}
 
 		/// <summary>
@@ -267,7 +333,7 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class method.
 			base.OnSetComplete(index, oldValue, newValue);
 			// Raise the event.
-			if (this.AfterItemSet != null) this.AfterItemSet(index, oldValue as MapMarker, newValue as MapMarker);
+			if (this.AfterItemSet != null) this.AfterItemSet(this, new ItemSetEventArgs(index, oldValue as T, newValue as T));
 		}
 	}
 }

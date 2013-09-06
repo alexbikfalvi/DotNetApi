@@ -36,7 +36,7 @@ namespace DotNetApi.Windows.Controls
 	public sealed class SideMenu : ContainerControl
 	{
 		// Private members
-		private SideMenuItem.Collection items = new SideMenuItem.Collection();
+		private ComponentCollection<SideMenuItem> items = new ComponentCollection<SideMenuItem>();
 
 		private int dockButtonWidth = 18;				// The width of the dock button.
 		private int gripHeight = 8;						// The grip height.
@@ -123,7 +123,7 @@ namespace DotNetApi.Windows.Controls
 		[DisplayName("Items"), Description("The collection of side menu items"), Category("Menu")]
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public SideMenuItem.Collection Items { get { return this.items; } }
+		public ComponentCollection<SideMenuItem> Items { get { return this.items; } }
 		/// <summary>
 		/// Gets the grip height.
 		/// </summary>
@@ -1119,8 +1119,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the side menu item text has changed.
 		/// </summary>
-		/// <param name="item">The side menu item.</param>
-		private void OnItemTextChanged(SideMenuItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemTextChanged(object sender, SideMenuItemEventArgs e)
 		{
 			// Refresh the item.
 			this.OnRefresh();
@@ -1129,8 +1130,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the side menu item small image has changed.
 		/// </summary>
-		/// <param name="item">The side menu item.</param>
-		private void OnItemSmallImageChanged(SideMenuItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemSmallImageChanged(object sender, SideMenuItemEventArgs e)
 		{
 			// Refresh the item.
 			this.OnRefresh();
@@ -1139,8 +1141,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the side menu item large image has changed.
 		/// </summary>
-		/// <param name="item">The side menu item.</param>
-		private void OnItemLargeImageChanged(SideMenuItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemLargeImageChanged(object sender, SideMenuItemEventArgs e)
 		{
 			// Refresh the item.
 			this.OnRefresh();
@@ -1149,28 +1152,27 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the side menu item control has  changed.
 		/// </summary>
-		/// <param name="item">The side menu item.</param>
-		/// <param name="oldControl">The old control.</param>
-		/// <param name="newControl">The new control.</param>
-		private void OnItemControlChanged(SideMenuItem item, ISideControl oldControl, ISideControl newControl)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemControlChanged(object sender, SideMenuItemControlChangedEventArgs e)
 		{
 			// Get the index of the side menu item.
-			int index = this.items.IndexOf(item);
+			int index = this.items.IndexOf(e.Item);
 			// Hide the old control.
-			if (null != oldControl)
+			if (null != e.OldControl)
 			{
-				oldControl.HideSideControl();
+				e.OldControl.HideSideControl();
 			}
 			// Show the new control.
-			if (null != newControl)
+			if (null != e.NewControl)
 			{
 				if (index == this.selectedIndex)
 				{
-					newControl.ShowSideControl();
+					e.NewControl.ShowSideControl();
 				}
 				else
 				{
-					newControl.HideSideControl();
+					e.NewControl.HideSideControl();
 				}
 			}
 		}
@@ -1179,10 +1181,10 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the user clicks on a hidden item.
 		/// </summary>
 		/// <param name="item">The side menu item.</param>
-		private void OnItemHiddenClick(SideMenuItem item)
+		private void OnItemHiddenClick(object sender, SideMenuItemEventArgs e)
 		{
 			// Get the index of the menu item.
-			int index = this.items.IndexOf(item);
+			int index = this.items.IndexOf(e.Item);
 
 			//  If the selected index changed.
 			if (this.selectedIndex != index)
@@ -1238,7 +1240,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called before the menu item collection has been cleared.
 		/// </summary>
-		private void OnBeforeItemsCleared()
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnBeforeItemsCleared(object sender, EventArgs e)
 		{
 			// Remove the event handlers and hidden menu for all items.
 			foreach (SideMenuItem item in this.items)
@@ -1258,7 +1262,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after the menu item collection has been cleared.
 		/// </summary>
-		private void OnAfterItemsCleared()
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemsCleared(object sender, EventArgs e)
 		{
 			// Update the number of visible items.
 			this.VisibleItems = this.items.Count;
@@ -1271,25 +1277,25 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after a new menu item has been inserted.
 		/// </summary>
-		/// <param name="index">The item index.</param>
-		/// <param name="item">The menu item</param>
-		private void OnAfterItemInserted(int index, SideMenuItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemInserted(object sender, ComponentCollection<SideMenuItem>.ItemChangedEventArgs e)
 		{
 			// Add the item event handlers.
-			item.TextChanged += this.OnItemTextChanged;
-			item.SmallImageChanged += this.OnItemSmallImageChanged;
-			item.LargeImageChanged += this.OnItemLargeImageChanged;
-			item.ControlChanged += this.OnItemControlChanged;
-			item.HiddenClick += this.OnItemHiddenClick;
+			e.Item.TextChanged += this.OnItemTextChanged;
+			e.Item.SmallImageChanged += this.OnItemSmallImageChanged;
+			e.Item.LargeImageChanged += this.OnItemLargeImageChanged;
+			e.Item.ControlChanged += this.OnItemControlChanged;
+			e.Item.HiddenClick += this.OnItemHiddenClick;
 			
 			// Add the hidden menu item.
-			this.controlMenu.Items.Add(item.HiddenMenuItem);
+			this.controlMenu.Items.Add(e.Item.HiddenMenuItem);
 
 			// If this is the first item.
 			if (this.items.Count == 1)
 			{
 				// Select the item.
-				item.Select();
+				e.Item.Select();
 				// Change the selected index.
 				this.selectedIndex = 0;
 			}
@@ -1300,22 +1306,22 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after an existing menu item has been removed.
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="item">The menu item.</param>
-		private void OnAfterItemRemoved(int index, SideMenuItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemRemoved(object sender, ComponentCollection<SideMenuItem>.ItemChangedEventArgs e)
 		{
 			// Remove the hidden event handler.
-			item.TextChanged -= this.OnItemTextChanged;
-			item.SmallImageChanged -= this.OnItemSmallImageChanged;
-			item.LargeImageChanged -= this.OnItemLargeImageChanged;
-			item.ControlChanged -= this.OnItemControlChanged;
-			item.HiddenClick -= this.OnItemHiddenClick;
+			e.Item.TextChanged -= this.OnItemTextChanged;
+			e.Item.SmallImageChanged -= this.OnItemSmallImageChanged;
+			e.Item.LargeImageChanged -= this.OnItemLargeImageChanged;
+			e.Item.ControlChanged -= this.OnItemControlChanged;
+			e.Item.HiddenClick -= this.OnItemHiddenClick;
 
 			// Remove the hidden menu item.
-			this.controlMenu.Items.Remove(item.HiddenMenuItem);
+			this.controlMenu.Items.Remove(e.Item.HiddenMenuItem);
 
 			// If this is the selected item.
-			if (this.selectedIndex == index)
+			if (this.selectedIndex == e.Index)
 			{
 				// If the item list is not empty.
 				if (this.items.Count > 0)
@@ -1337,36 +1343,35 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after a menu item has been set.
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="oldItem">The old menu item.</param>
-		/// <param name="newItem">The new menu item.</param>
-		private void OnAfterItemSet(int index, SideMenuItem oldItem, SideMenuItem newItem)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemSet(object sender, ComponentCollection<SideMenuItem>.ItemSetEventArgs e)
 		{
 			// Check that the arguments are not null.
-			if (null == oldItem) throw new ArgumentNullException("oldItem");
-			if (null == newItem) throw new ArgumentNullException("newItem");
+			if (null == e.OldItem) throw new ArgumentNullException("oldItem");
+			if (null == e.NewItem) throw new ArgumentNullException("newItem");
 
 			// If the new and the old item are the same, do nothing.
-			if (oldItem == newItem) return;
+			if (e.OldItem == e.NewItem) return;
 
 			// Remove the event handlers from the old item.
-			oldItem.TextChanged -= this.OnItemTextChanged;
-			oldItem.SmallImageChanged -= this.OnItemSmallImageChanged;
-			oldItem.LargeImageChanged -= this.OnItemLargeImageChanged;
-			oldItem.ControlChanged -= this.OnItemControlChanged;
-			oldItem.HiddenClick -= this.OnItemHiddenClick;
+			e.OldItem.TextChanged -= this.OnItemTextChanged;
+			e.OldItem.SmallImageChanged -= this.OnItemSmallImageChanged;
+			e.OldItem.LargeImageChanged -= this.OnItemLargeImageChanged;
+			e.OldItem.ControlChanged -= this.OnItemControlChanged;
+			e.OldItem.HiddenClick -= this.OnItemHiddenClick;
 			
 			// Add the event handlers to the new item.
-			newItem.TextChanged += this.OnItemTextChanged;
-			newItem.SmallImageChanged += this.OnItemSmallImageChanged;
-			newItem.LargeImageChanged += this.OnItemLargeImageChanged;
-			newItem.ControlChanged += this.OnItemControlChanged;
-			newItem.HiddenClick += this.OnItemHiddenClick;
+			e.NewItem.TextChanged += this.OnItemTextChanged;
+			e.NewItem.SmallImageChanged += this.OnItemSmallImageChanged;
+			e.NewItem.LargeImageChanged += this.OnItemLargeImageChanged;
+			e.NewItem.ControlChanged += this.OnItemControlChanged;
+			e.NewItem.HiddenClick += this.OnItemHiddenClick;
 
 			// Remove the old hidden menu item from the items list.
-			this.controlMenu.Items.Remove(oldItem.HiddenMenuItem);
+			this.controlMenu.Items.Remove(e.OldItem.HiddenMenuItem);
 			// Add the new hidden menu item to the items list.
-			this.controlMenu.Items.Add(newItem.HiddenMenuItem);
+			this.controlMenu.Items.Add(e.NewItem.HiddenMenuItem);
 
 			// Refresh the control.
 			this.OnRefresh();

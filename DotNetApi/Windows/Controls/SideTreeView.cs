@@ -21,8 +21,6 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void SideTreeViewControlChangedEventHandler(Control sender, Control control);
-
 	/// <summary>
 	/// A control representing a side tree view.
 	/// </summary>
@@ -50,7 +48,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event raised when the selected control has changed.
 		/// </summary>
-		public event SideTreeViewControlChangedEventHandler ControlChanged;
+		public event ControlChangedEventHandler ControlChanged;
 
 		// Public methods.
 
@@ -85,7 +83,7 @@ namespace DotNetApi.Windows.Controls
 				// Get the control tag for the selected tree node.
 				Control control = this.SelectedNode.Tag as Control;
 				// Raise a control changed event for this control.
-				if (null != this.ControlChanged) this.ControlChanged(this, control);
+				if (null != this.ControlChanged) this.ControlChanged(this, new ControlChangedEventArgs(control));
 			}
 		}
 
@@ -187,7 +185,7 @@ namespace DotNetApi.Windows.Controls
 			if (this.visible)
 			{
 				// Raise a control changed event for this control.
-				if (null != this.ControlChanged) this.ControlChanged(this, control);
+				if (null != this.ControlChanged) this.ControlChanged(this, new ControlChangedEventArgs(control));
 			}
 		}
 	}

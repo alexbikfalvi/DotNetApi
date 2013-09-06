@@ -34,19 +34,19 @@ namespace DotNetApi.Windows.Controls
 		private readonly GraphicsPath path;
 
 		private Rectangle bounds;
+		private string name;
 
 		private Color colorBackground = Color.Green;
 		private Color colorBorder = Color.White;
 
+		private object sync = new object();
 		private bool disposed = false;
 
 		/// <summary>
 		/// Creates a new map region from the specified map shape, given the geographic map bounds and map scale.
 		/// </summary>
 		/// <param name="shape">The map shape.</param>
-		/// <param name="bounds">The geographic map bounds.</param>
-		/// <param name="scale">The map scale.</param>
-		public MapRegion(MapShapePolygon shape, MapRectangle bounds, MapScale scale)
+		public MapRegion(MapShapePolygon shape)
 		{
 			// Validate the parameters.
 			shape.ValidateNotNull("shape");
@@ -61,10 +61,8 @@ namespace DotNetApi.Windows.Controls
 			}
 			// Create the graphics path.
 			this.path = new GraphicsPath();
-			// Update the map region to the specified bounds and scale.
-			this.Update(bounds, scale);
 			// Get the region metadata.
-			this.Name = shape.Metadata["admin"];
+			this.name = shape.Metadata["admin"];
 		}
 
 		// Public properties.
@@ -80,7 +78,11 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Returns the region name.
 		/// </summary>
-		public override string Name { get; set; }
+		public override string Name
+		{
+			get { return this.name; }
+			set { this.name = value; }
+		}
 
 		// Internal methods.
 
@@ -93,7 +95,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("region");
-			lock (this.path)
+			lock (this.sync)
 			{
 				return this.path.IsVisible(point);
 			}
@@ -108,7 +110,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("region");
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Reset the graphics path.
 				this.path.Reset();
@@ -137,7 +139,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("region");
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Fill the path.
 				using (SolidBrush brush = new SolidBrush(this.colorBackground))
@@ -162,7 +164,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("region");
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Fill the path.
 				if (null != brush) graphics.FillPath(brush, this.path);

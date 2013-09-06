@@ -21,7 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -70,6 +70,7 @@
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Validation.cs" />
+    <Compile Include="Windows\Controls\ImageListBoxItemActivateEventArgs.cs" />
     <Compile Include="Windows\Controls\MapInfoAnnotation.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -85,13 +86,27 @@
     <Compile Include="Windows\Controls\MapBulletMarker.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Windows\Controls\MapMarkerCollection.cs" />
+    <Compile Include="Windows\Controls\MapMarkerChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\MapTextAnnotation.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Controls\MapRegion.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Windows\Controls\ComponentCollection.cs" />
+    <Compile Include="Windows\Controls\ProgressInfoEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressItemEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressItemInfoSetEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressItemLegendChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressItemLegendSetEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressLegendChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressLegendEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressLegendItemChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressLegendItemEventArgs.cs" />
+    <Compile Include="Windows\Controls\ProgressLegendSetEventArgs.cs" />
+    <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
+    <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
     <Compile Include="Windows\Cursors.cs" />
     <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />

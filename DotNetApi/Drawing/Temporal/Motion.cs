@@ -38,8 +38,6 @@ namespace DotNetApi.Drawing.Temporal
 		/// <param name="fps">The number of frames per second.</param>
 		public Motion(uint fps = 25)
 		{
-			// Disable the timer.
-			this.Enabled = false;
 			// Set the timer interval.
 			this.Interval = (int)Math.Round(1000.0 / fps);
 		}

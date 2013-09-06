@@ -197,8 +197,8 @@ namespace DotNetApi.Windows.Controls
 				oldProgress.CountChanged -= this.OnProgressCountChanged;
 				oldProgress.DefaultChanged -= this.OnProgressDefaultChanged;
 				oldProgress.LevelChanged -= this.OnProgressLevelChanged;
-				oldProgress.LegendSet -= OnProgressLegendSet;
-				oldProgress.LegendChanged -= OnProgressLegendChanged;
+				oldProgress.LegendSet -= this.OnProgressLegendSet;
+				oldProgress.LegendChanged -= this.OnProgressLegendChanged;
 			}
 			// Add the event handler for the new progress info.
 			if (null != newProgress)
@@ -222,51 +222,55 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the progress count has changed.
 		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		private void OnProgressCountChanged(ProgressInfo progress)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProgressCountChanged(object sender, ProgressInfoEventArgs e)
 		{
 			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
+			if (e.Progress != this.progress) return;
 		}
 
 		/// <summary>
 		/// An event handler called when the progress default has changed.
 		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		private void OnProgressDefaultChanged(ProgressInfo progress)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProgressDefaultChanged(object sender, ProgressInfoEventArgs e)
 		{
 			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
+			if (e.Progress != this.progress) return;
 		}
 
 		/// <summary>
 		/// An event handler called when the progress level has changed.
 		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		private void OnProgressLevelChanged(ProgressInfo progress)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProgressLevelChanged(object sender, ProgressInfoEventArgs e)
 		{
 			// If the event is not for the current progress info, do nothing.
-			if (progress != this.progress) return;
+			if (e.Progress != this.progress) return;
 		}
 
 		/// <summary>
 		/// An event handler called when the progress legend is being set.
 		/// </summary>
-		/// <param name="progress">The progress info.</param>
-		/// <param name="oldLegend">The old legend.</param>
-		/// <param name="newLegend">The new legend.</param>
-		private void OnProgressLegendSet(ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProgressLegendSet(object sender, ProgressLegendSetEventArgs e)
 		{
+			// If the event is not for the current progress info, do nothing.
+			if (e.Progress != this.progress) return;
 			// If the old legend is the same as the new legend, do nothing.
-			if (oldLegend == newLegend) return;
+			if (e.OldLegend == e.NewLegend) return;
 		}
 
 		/// <summary>
 		/// An event handler called when the progress legend has changed.
 		/// </summary>
-		/// <param name="progress">The old legend.</param>
-		/// <param name="legend">The new legend.</param>
-		private void OnProgressLegendChanged(ProgressInfo progress, ProgressLegend legend)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnProgressLegendChanged(object sender, ProgressLegendChangedEventArgs e)
 		{
 		}
 

@@ -23,7 +23,6 @@ using MapApi;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void MarkerChangedEventHandler(MapMarker marker);
 	public delegate void MarkerLocationChangedEventHandler(MapMarker marker, MapPoint oldLocation, MapPoint newLocation);
 	public delegate void MarkerSizeChangedEventHandler(MapMarker marker, Size oldSize, Size newSize);
 	public delegate void MarkerEmphasisChangedEventHandler(MapMarker marker, bool oldEmphasis, bool newEmphasis);
@@ -61,19 +60,19 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event raised when the marker color has changed.
 		/// </summary>
-		public event MarkerChangedEventHandler ColorChanged;
+		public event MapMarkerChangedEventHandler ColorChanged;
 		/// <summary>
 		/// An event raised when the marker emphasis has changed.
 		/// </summary>
-		public event MarkerEmphasisChangedEventHandler EmphasisChanged;
+		public event MapMarkerChangedEventHandler EmphasisChanged;
 		/// <summary>
 		/// An event raised when the marker coordinates have changed.
 		/// </summary>
-		public event MarkerLocationChangedEventHandler LocationChanged;
+		public event MapMarkerChangedEventHandler LocationChanged;
 		/// <summary>
 		/// An event raised when the marker size has changed.
 		/// </summary>
-		public event MarkerSizeChangedEventHandler SizeChanged;
+		public event MapMarkerChangedEventHandler SizeChanged;
 
 		// Public properties.
 
@@ -184,7 +183,7 @@ namespace DotNetApi.Windows.Controls
 		protected virtual void OnColorChanged()
 		{
 			// Raise the event.
-			if (this.ColorChanged != null) this.ColorChanged(this);
+			if (this.ColorChanged != null) this.ColorChanged(this, new MapMarkerChangedEventArgs(this));
 		}
 
 		/// <summary>
@@ -197,7 +196,7 @@ namespace DotNetApi.Windows.Controls
 			// If the coordinates have not changed, do nothing.
 			if (oldLocation == newLocation) return;
 			// Raise the event.
-			if (this.LocationChanged != null) this.LocationChanged(this, oldLocation, newLocation);
+			if (this.LocationChanged != null) this.LocationChanged(this, new MapMarkerChangedEventArgs(this));
 		}
 
 		/// <summary>
@@ -210,7 +209,7 @@ namespace DotNetApi.Windows.Controls
 			// If the size has not changed, do nothing.
 			if (oldSize == newSize) return;
 			// Raise the event.
-			if (this.SizeChanged != null) this.SizeChanged(this, oldSize, newSize);
+			if (this.SizeChanged != null) this.SizeChanged(this, new MapMarkerChangedEventArgs(this));
 		}
 
 		/// <summary>
@@ -223,7 +222,7 @@ namespace DotNetApi.Windows.Controls
 			// If the emphasis has not changed, do nothing.
 			if (oldEmphasis == newEmphasis) return;
 			// Raise the event.
-			if (this.EmphasisChanged != null) this.EmphasisChanged(this, oldEmphasis, newEmphasis);
+			if (this.EmphasisChanged != null) this.EmphasisChanged(this, new MapMarkerChangedEventArgs(this));
 		}
 	}
 }

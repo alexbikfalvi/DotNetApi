@@ -34,6 +34,7 @@ namespace DotNetApi.Windows.Controls
 		private GraphicsPath path = new GraphicsPath();
 		private Rectangle bounds;
 		private bool disposed = false;
+		private object sync = new object();
 
 		/// <summary>
 		/// Creates a new circular map marker instance at the default location.
@@ -71,7 +72,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("marker");
-			lock (this.path)
+			lock (this.sync)
 			{
 				return this.path.IsVisible(point);
 			}
@@ -92,7 +93,7 @@ namespace DotNetApi.Windows.Controls
 				(float)((bounds.Top - this.Location.Y) * scale.Height)
 				);
 			// Lock the current path.
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Reset the graphics path.
 				this.path.Reset();
@@ -111,7 +112,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("marker");
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Fill the path.
 				using (SolidBrush brush = new SolidBrush(this.BackgroundColor))
@@ -136,7 +137,7 @@ namespace DotNetApi.Windows.Controls
 		{
 			// If the object has been disposed throw an exception.
 			if (this.disposed) throw new ObjectDisposedException("marker");
-			lock (this.path)
+			lock (this.sync)
 			{
 				// Fill the path.
 				if (null != brush) graphics.FillPath(brush, this.path);

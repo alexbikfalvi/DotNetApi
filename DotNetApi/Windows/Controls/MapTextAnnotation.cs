@@ -52,10 +52,6 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Set the message properties.
 			this.text = text;
-			// Update the text measurements.
-			this.OnMeasureText();
-			// Update the bounds measurements.
-			this.OnMeasureBounds();
 		}
 
 		// Public properties.

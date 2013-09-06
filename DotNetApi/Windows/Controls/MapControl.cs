@@ -126,7 +126,7 @@ namespace DotNetApi.Windows.Controls
 
 		// Markers.
 
-		private MapMarkerCollection markers = new MapMarkerCollection();
+		private ComponentCollection<MapMarker> markers = new ComponentCollection<MapMarker>();
 		private bool markerAutoDispose = true;
 
 		// Switches.
@@ -280,7 +280,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets the map markers.
 		/// </summary>
-		public MapMarkerCollection Markers
+		public ComponentCollection<MapMarker> Markers
 		{
 			get { return this.markers; }
 		}
@@ -927,7 +927,9 @@ namespace DotNetApi.Windows.Controls
 									// Get the polygon shape.
 									MapShapePolygon shapePolygon = shape as MapShapePolygon;
 									// Create a map region for this shape.
-									MapRegion region = new MapRegion(shapePolygon, this.mapBounds, this.mapScale);
+									MapRegion region = new MapRegion(shapePolygon);
+									// Update the region.
+									region.Update(this.mapBounds, this.mapScale);
 									// Add the map region to the region items.
 									this.regions.Add(region);
 									break;
@@ -1489,7 +1491,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called before the markers are cleared.
 		/// </summary>
-		private void OnBeforeMarkersCleared()
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnBeforeMarkersCleared(object sender, EventArgs e)
 		{
 			// Lock the markers collection.
 			lock (this.markers)
@@ -1532,35 +1536,35 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after a marker is inserted.
 		/// </summary>
-		/// <param name="index">The marker index in the collection.</param>
-		/// <param name="marker">The marker.</param>
-		private void OnAfterMarkerInserted(int index, MapMarker marker)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterMarkerInserted(object sender, ComponentCollection<MapMarker>.ItemChangedEventArgs e)
 		{
 			// If the marker is null, do nothing.
-			if (null == marker) return;
+			if (null == e.Item) return;
 			// Add the marker event handlers.
-			this.OnAddMarkerEventHandlers(marker);
+			this.OnAddMarkerEventHandlers(e.Item);
 			// Update the marker.
-			marker.Update(this.mapBounds, this.mapScale);
+			e.Item.Update(this.mapBounds, this.mapScale);
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Item.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>
 		/// An event handler called after a marker is removed.
 		/// </summary>
-		/// <param name="index">The marker index in the collection.</param>
-		/// <param name="marker">The marker.</param>
-		private void OnAfterMarkerRemoved(int index, MapMarker marker)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterMarkerRemoved(object sender, ComponentCollection<MapMarker>.ItemChangedEventArgs e)
 		{
 			// If the marker is null, do nothing.
-			if (null == marker) return;
+			if (null == e.Item) return;
 			// Remove the marker event handlers.
-			this.OnRemoveMarkerEventHandlers(marker);
+			this.OnRemoveMarkerEventHandlers(e.Item);
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Item.Bounds.Add(this.bitmapLocation));
 			// If this marker equals the highlighted marker.
-			if (marker == this.highlightMarker)
+			if (e.Item == this.highlightMarker)
 			{
 				if (null != this.emphasizedMarker)
 				{
@@ -1575,7 +1579,7 @@ namespace DotNetApi.Windows.Controls
 					this.OnHideAnnotation(this.annotationInfo);
 				}
 			}
-			else if (marker == this.emphasizedMarker)
+			else if (e.Item == this.emphasizedMarker)
 			{
 				if (null != this.highlightRegion)
 				{
@@ -1589,23 +1593,22 @@ namespace DotNetApi.Windows.Controls
 			// Dispose the marker.
 			if (this.markerAutoDispose)
 			{
-				marker.Dispose();
+				e.Item.Dispose();
 			}
 		}
 
 		/// <summary>
 		/// An event handler called when a marker is set.
 		/// </summary>
-		/// <param name="index">The marker index in the collection.</param>
-		/// <param name="oldMarker">The old marker.</param>
-		/// <param name="newMarker">The new marker.</param>
-		private void OnAfterMarkerSet(int index, MapMarker oldMarker, MapMarker newMarker)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterMarkerSet(object sender, ComponentCollection<MapMarker>.ItemSetEventArgs e)
 		{
 			// If the old marker is different from the new marker.
-			if (oldMarker != newMarker)
+			if (e.OldItem != e.NewItem)
 			{
-				this.OnAfterMarkerRemoved(index, oldMarker);
-				this.OnAfterMarkerInserted(index, newMarker);
+				this.OnAfterMarkerRemoved(sender, new ComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.OldItem));
+				this.OnAfterMarkerInserted(sender, new ComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.NewItem));
 			}
 		}
 
@@ -1636,32 +1639,32 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when a marker color has changed.
 		/// </summary>
-		/// <param name="marker">The marker.</param>
-		private void OnMarkerColorChanged(MapMarker marker)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnMarkerColorChanged(object sender, MapMarkerChangedEventArgs e)
 		{
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>
 		/// An event handler called when a marker emphasis has changed.
 		/// </summary>
-		/// <param name="marker">The marker.</param>
-		/// <param name="oldEmphasis">The old emphasis state.</param>
-		/// <param name="newEmphasis">The new emphasis state.</param>
-		private void OnMarkerEmphasisChanged(MapMarker marker, bool oldEmphasis, bool newEmphasis)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnMarkerEmphasisChanged(object sender, MapMarkerChangedEventArgs e)
 		{
 			// If the marker is emphasized.
-			if (newEmphasis)
+			if (e.Marker.Emphasized)
 			{
 				// If the markers are shown.
 				if (this.showMarkers)
 				{
 					// Show the info annotation.
-					this.OnShowAnnotation(this.annotationInfo, marker.Name, marker);
+					this.OnShowAnnotation(this.annotationInfo, e.Marker.Name, e.Marker);
 				}
 				// Set the emphasized marker.
-				this.emphasizedMarker = marker;
+				this.emphasizedMarker = e.Marker;
 			}
 			else
 			{
@@ -1686,39 +1689,37 @@ namespace DotNetApi.Windows.Controls
 				this.emphasizedMarker = null;
 			}
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>
 		/// An event handler called when a marker location has changed.
 		/// </summary>
-		/// <param name="marker">The marker.</param>
-		/// <param name="oldLocation">The old location.</param>
-		/// <param name="newLocation">The new location.</param>
-		private void OnMarkerLocationChanged(MapMarker marker, MapPoint oldLocation, MapPoint newLocation)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnMarkerLocationChanged(object sender, MapMarkerChangedEventArgs e)
 		{
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 			// Update the marker.
-			marker.Update(this.mapBounds, this.mapScale);
+			e.Marker.Update(this.mapBounds, this.mapScale);
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>
 		/// An event handler called when a marker size has changed.
 		/// </summary>
-		/// <param name="marker">The marker.</param>
-		/// <param name="oldSize">The old size.</param>
-		/// <param name="newSize">The new size.</param>
-		private void OnMarkerSizeChanged(MapMarker marker, Size oldSize, Size newSize)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnMarkerSizeChanged(object sender, MapMarkerChangedEventArgs e)
 		{
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 			// Update the marker.
-			marker.Update(this.mapBounds, this.mapScale);
+			e.Marker.Update(this.mapBounds, this.mapScale);
 			// Refresh the marker.
-			this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
+			this.Invalidate(e.Marker.Bounds.Add(this.bitmapLocation));
 		}
 
 		/// <summary>

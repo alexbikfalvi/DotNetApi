@@ -23,15 +23,12 @@ using System.Drawing.Design;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void ProgressLegendEventHandler(ProgressLegend legend);
-	public delegate void ProgressLegendItemChangedEventHandler(ProgressLegend legend, ProgressLegendItem item);
-
 	/// <summary>
 	/// A class representing a progress legend.
 	/// </summary>
 	public sealed class ProgressLegend : Component
 	{
-		public ProgressLegendItem.Collection items = new ProgressLegendItem.Collection();
+		public ComponentCollection<ProgressLegendItem> items = new ComponentCollection<ProgressLegendItem>();
 
 		/// <summary>
 		/// Creates a new component instance.
@@ -63,14 +60,16 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public ProgressLegendItem.Collection Items { get { return this.items; } }
+		public ComponentCollection<ProgressLegendItem> Items { get { return this.items; } }
 
 		// Private method.
 
 		/// <summary>
 		/// An event handler called before the item collection has been cleared.
 		/// </summary>
-		private void OnBeforeItemsCleared()
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnBeforeItemsCleared(object sender, EventArgs e)
 		{
 			// Remove the event handlers for all items.
 			foreach (ProgressLegendItem item in this.items)
@@ -83,88 +82,89 @@ namespace DotNetApi.Windows.Controls
 			}
 
 			// Raise the items changed event.
-			if (this.ItemsChanged != null) this.ItemsChanged(this);
+			if (this.ItemsChanged != null) this.ItemsChanged(this, new ProgressLegendEventArgs(this));
 		}
 
 		/// <summary>
 		/// An event handler called after an item has been inserted in the collection.
 		/// </summary>
-		/// <param name="index">The item index.</param>
-		/// <param name="item">The legend item.</param>
-		private void OnAfterItemInserted(int index, ProgressLegendItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemInserted(object sender, ComponentCollection<ProgressLegendItem>.ItemChangedEventArgs e)
 		{
 			// Add the item event handlers.
-			if (item != null)
+			if (e.Item != null)
 			{
-				item.ColorChanged += this.OnItemColorChanged;
-				item.TextChanged += this.OnItemTextChanged;
+				e.Item.ColorChanged += this.OnItemColorChanged;
+				e.Item.TextChanged += this.OnItemTextChanged;
 			}
 
 			// Raise the items changed event.
-			if (this.ItemsChanged != null) this.ItemsChanged(this);
+			if (this.ItemsChanged != null) this.ItemsChanged(this, new ProgressLegendEventArgs(this));
 		}
 
 		/// <summary>
 		/// An event handler called after an item has been removed from the collection.
 		/// </summary>
-		/// <param name="index">The item index.</param>
-		/// <param name="item">The legend item.</param>
-		private void OnAfterItemRemoved(int index, ProgressLegendItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemRemoved(object sender, ComponentCollection<ProgressLegendItem>.ItemChangedEventArgs e)
 		{
 			// Remove the item event handlers.
-			if (item != null)
+			if (e.Item != null)
 			{
-				item.ColorChanged -= this.OnItemColorChanged;
-				item.TextChanged -= this.OnItemTextChanged;
+				e.Item.ColorChanged -= this.OnItemColorChanged;
+				e.Item.TextChanged -= this.OnItemTextChanged;
 			}
 
 			// Raise the items changed event.
-			if (this.ItemsChanged != null) this.ItemsChanged(this);
+			if (this.ItemsChanged != null) this.ItemsChanged(this, new ProgressLegendEventArgs(this));
 		}
 
 		/// <summary>
 		/// An event handler called after an item has been set in the collection.
 		/// </summary>
-		/// <param name="index">The item index.</param>
-		/// <param name="oldItem">The old legend item.</param>
-		/// <param name="newItem">The new legend item.</param>
-		private void OnAfterItemSet(int index, ProgressLegendItem oldItem, ProgressLegendItem newItem)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemSet(object sender, ComponentCollection<ProgressLegendItem>.ItemSetEventArgs e)
 		{
 			// Remove the event handlers from the old item.
-			if (oldItem != null)
+			if (e.OldItem != null)
 			{
-				oldItem.ColorChanged -= this.OnItemColorChanged;
-				oldItem.TextChanged -= this.OnItemTextChanged;
+				e.OldItem.ColorChanged -= this.OnItemColorChanged;
+				e.OldItem.TextChanged -= this.OnItemTextChanged;
 			}
 			// Add the event handler for the new item.
-			if (newItem != null)
+			if (e.NewItem != null)
 			{
-				newItem.ColorChanged += this.OnItemColorChanged;
-				newItem.TextChanged += this.OnItemTextChanged;
+				e.NewItem.ColorChanged += this.OnItemColorChanged;
+				e.NewItem.TextChanged += this.OnItemTextChanged;
 			}
 
 			// Raise the items changed event.
-			if (this.ItemsChanged != null) this.ItemsChanged(this);
+			if (this.ItemsChanged != null) this.ItemsChanged(this, new ProgressLegendEventArgs(this));
 		}
 
 		/// <summary>
 		/// An event handler called when the color of a legend item has changed.
 		/// </summary>
-		/// <param name="item">The legend item.</param>
-		private void OnItemColorChanged(ProgressLegendItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemColorChanged(object sender, ProgressLegendItemEventArgs e)
 		{
 			// Raise the item changed event.
-			if (this.ItemChanged != null) this.ItemChanged(this, item);
+			if (this.ItemChanged != null) this.ItemChanged(this, new ProgressLegendItemChangedEventArgs(this, e.Item));
 		}
 
 		/// <summary>
 		/// An event handler called when the text of a legend item has changed.
 		/// </summary>
-		/// <param name="item">The legend item.</param>
-		private void OnItemTextChanged(ProgressLegendItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemTextChanged(object sender, ProgressLegendItemEventArgs e)
 		{
 			// Raise the item changed event.
-			if (this.ItemChanged != null) this.ItemChanged(this, item);
+			if (this.ItemChanged != null) this.ItemChanged(this, new ProgressLegendItemChangedEventArgs(this, e.Item));
 		}
 	}
 }

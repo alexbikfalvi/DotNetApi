@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class ProgressListBox : ListBox
 	{
-		private ProgressItem.Collection items = new ProgressItem.Collection();
+		private ComponentCollection<ProgressItem> items = new ComponentCollection<ProgressItem>();
 
 		private int itemHeight = 48;
 		private int progressHeight = 12;
@@ -93,7 +93,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
-		public new ProgressItem.Collection Items { get { return this.items; } }
+		public new ComponentCollection<ProgressItem> Items { get { return this.items; } }
 
 		// Public methods.
 
@@ -351,7 +351,9 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called before the item collection has been cleared.
 		/// </summary>
-		private void OnBeforeItemsCleared()
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnBeforeItemsCleared(object sender, EventArgs e)
 		{
 			// Remove the event handlers for all items in the collection.
 			foreach (ProgressItem item in this.items)
@@ -365,43 +367,43 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called after an item has been inserted into the collection.
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="item">The item.</param>
-		private void OnAfterItemInserted(int index, ProgressItem item)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemInserted(object sender, ComponentCollection<ProgressItem>.ItemChangedEventArgs e)
 		{
 			// Add the event handlers to the new item.
-			this.OnItemAdded(item);
+			this.OnItemAdded(e.Item);
 			// Insert the item into the base class items.
-			base.Items.Insert(index, item);
+			base.Items.Insert(e.Index, e.Item);
 		}
 
 		/// <summary>
 		/// An event handler called after an item has been removed from the collection. 
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="item">The item.</param>
-		private void OnAfterItemRemoved(int index, ProgressItem item)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemRemoved(object sender, ComponentCollection<ProgressItem>.ItemChangedEventArgs e)
 		{
 			// Remove the event handlers from the old item.
-			this.OnItemRemoved(item);
+			this.OnItemRemoved(e.Item);
 			// Remove the item from the base class items.
-			base.Items.RemoveAt(index);
+			base.Items.RemoveAt(e.Index);
 		}
 
 		/// <summary>
 		/// An event handler called after an item has been set in the collection.
 		/// </summary>
 		/// <param name="index">The index.</param>
-		/// <param name="oldItem">The old item.</param>
-		/// <param name="newItem">The new item.</param>
-		private void OnAfterItemSet(int index, ProgressItem oldItem, ProgressItem newItem)
+		/// <param name="object">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnAfterItemSet(object sender, ComponentCollection<ProgressItem>.ItemSetEventArgs e)
 		{
 			// Add the event handlers to the new item.
-			this.OnItemAdded(newItem);
+			this.OnItemAdded(e.NewItem);
 			// Remove the event handlers from the old item.
-			this.OnItemRemoved(oldItem);
+			this.OnItemRemoved(e.OldItem);
 			// Set the item into the base class items.
-			base.Items[index] = newItem;
+			base.Items[e.Index] = e.NewItem;
 		}
 
 		/// <summary>
@@ -414,7 +416,7 @@ namespace DotNetApi.Windows.Controls
 			if (null == item) return;
 			// Add the item event handlers.
 			item.TextChanged += this.OnItemTextChanged;
-			item.EnabledChanged += OnItemEnabledChanged;
+			item.EnabledChanged += this.OnItemEnabledChanged;
 			item.ProgressSet += this.OnItemProgressSet;
 			item.ProgressLevelChanged += this.OnItemProgressLevelChanged;
 			item.ProgressDefaultChanged += this.OnItemProgressDefaultChanged;
@@ -465,58 +467,60 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the item text has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		private void OnItemTextChanged(ProgressItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemTextChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 			// Update the item text.
-			this.OnUpdateItemText(item);
+			this.OnUpdateItemText(e.Item);
 			// Update the item measurements.
 			this.OnUpdateGeometrics();
 			// Update the geometrics of the specified item.
-			this.OnUpdateItemGeometrics(item, this.GetItemRectangle(this.Items.IndexOf(item)));
+			this.OnUpdateItemGeometrics(e.Item, this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 			// Refresh the list box item.
-			this.Invalidate(item.geometrics.textBounds);
+			this.Invalidate(e.Item.geometrics.textBounds);
 		}
 
 		/// <summary>
 		/// An event handler called when the item enabled state has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		private void OnItemEnabledChanged(ProgressItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemEnabledChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 			// Refresh the list box item.
-			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress has been set.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <param name="oldProgress">The old progress.</param>
-		/// <param name="newProgress">The new progress.</param>
-		private void OnItemProgressSet(ProgressItem item, ProgressInfo oldProgress, ProgressInfo newProgress)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressSet(object sender, ProgressItemInfoSetEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 			// Update the item progress.
-			this.OnUpdateItemProgress(item);
+			this.OnUpdateItemProgress(e.Item);
 			// Update the item legend.
-			this.OnUpdateItemLegend(item);
+			this.OnUpdateItemLegend(e.Item);
 			// Update the item measurements.
 			this.OnUpdateGeometrics();
 			// Refresh the list box item.
-			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress level has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		private void OnItemProgressLevelChanged(ProgressItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressLevelChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
@@ -529,18 +533,19 @@ namespace DotNetApi.Windows.Controls
 			else
 			{
 				// Update the geometrics of the specified item.
-				this.OnUpdateItemGeometrics(item, this.GetItemRectangle(this.Items.IndexOf(item)));
+				this.OnUpdateItemGeometrics(e.Item, this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 				// Refresh the list box item.
-				this.Invalidate(item.geometrics.legendBounds);
-				this.Invalidate(item.geometrics.progressBounds);
+				this.Invalidate(e.Item.geometrics.legendBounds);
+				this.Invalidate(e.Item.geometrics.progressBounds);
 			}
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress default has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		private void OnItemProgressDefaultChanged(ProgressItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressDefaultChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
@@ -553,15 +558,16 @@ namespace DotNetApi.Windows.Controls
 			else
 			{
 				// Refresh the list box item.
-				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 			}
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress count has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		private void OnItemProgressCountChanged(ProgressItem item)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressCountChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
@@ -574,49 +580,46 @@ namespace DotNetApi.Windows.Controls
 			else
 			{
 				// Update the item progress.
-				this.OnUpdateItemProgress(item);
+				this.OnUpdateItemProgress(e.Item);
 				// Update the item measurements.
 				this.OnUpdateGeometrics();
 				// Refresh the list box item.
-				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+				this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 			}
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress legend has been set.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <param name="progress">The progress.</param>
-		/// <param name="oldLegend">The old legend.</param>
-		/// <param name="newLegend">The new legend.</param>
-		private void OnItemProgressLegendSet(ProgressItem item, ProgressInfo progress, ProgressLegend oldLegend, ProgressLegend newLegend)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressLegendSet(object sender, ProgressItemLegendSetEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 			// Update the item legend.
-			this.OnUpdateItemLegend(item);
+			this.OnUpdateItemLegend(e.Item);
 			// Update the item measurements.
 			this.OnUpdateGeometrics();
 			// Refresh the list box item.
-			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 		}
 
 		/// <summary>
 		/// An event handler called when the item progress legend has changed.
 		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <param name="progress">The progress.</param>
-		/// <param name="legend">The legend.</param>
-		private void OnItemProgressLegendChanged(ProgressItem item, ProgressInfo progress, ProgressLegend legend)
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemProgressLegendChanged(object sender, ProgressItemLegendChangedEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;
 			// Update the item legend.
-			this.OnUpdateItemLegend(item);
+			this.OnUpdateItemLegend(e.Item);
 			// Update the item measurements.
 			this.OnUpdateGeometrics();
 			// Refresh the list box item.
-			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(item)));
+			this.Invalidate(this.GetItemRectangle(this.Items.IndexOf(e.Item)));
 		}
 
 		/// <summary>
@@ -856,7 +859,7 @@ namespace DotNetApi.Windows.Controls
 			if (this.IsDisposed) return;
 
 			// Only updated the geometrics if the bounds are different.
-			if (bounds == item.geometrics.bounds)
+			if (bounds != item.geometrics.bounds)
 			{
 				// Save the bounds.
 				item.geometrics.bounds = bounds;
