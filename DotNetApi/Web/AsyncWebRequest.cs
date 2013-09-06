@@ -191,7 +191,7 @@ namespace DotNetApi.Web
 		public void Cancel(IAsyncResult result)
 		{
 			// Get the state of the asynchronous operation.
-			AsyncWebResult asyncState = (AsyncWebResult)result.AsyncState;
+			AsyncWebResult asyncState = (AsyncWebResult)result;
 
 			// Use the system thread pool to cancel the request on a worker thread.
 			ThreadPool.QueueUserWorkItem(new WaitCallback(this.CancelAsync), asyncState);
