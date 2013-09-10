@@ -27,9 +27,7 @@ namespace DotNetApi.Concurrent
 	/// <summary>
 	/// A class representing a concurrent list.
 	/// </summary>
-	/// <typeparam name="T">The list element type.</typeparam>
-	public sealed class ConcurrentList<T> : IList<T>, ICollection<T>, IEnumerable<T>, IList, ICollection, IEnumerable
-		where T : class
+	public class ConcurrentList : IList, ICollection, IEnumerable
 	{
 		/// <summary>
 		/// A structure representing the lock info.
@@ -112,16 +110,21 @@ namespace DotNetApi.Concurrent
 				}
 			}
 		}
-
 		/// <summary>
 		/// Gets a value indicating whether the list is read-only. The property is always <b>false</b>.
 		/// </summary>
 		public bool IsReadOnly { get { return false; } }
-
+		/// <summary>
+		/// Gets a value indicating whether the list is fixed in size. The property is always <b>false</b>.
+		/// </summary>
 		public bool IsFixedSize { get { return false; } }
-
+		/// <summary>
+		/// Gets a value indicating whether the list is synchronized. The property is always <b>true</b>.
+		/// </summary>
 		public bool IsSynchronized { get { return true; } }
-
+		/// <summary>
+		/// Gets the object used for synchronizing list operations.
+		/// </summary>
 		public object SyncRoot { get { return this.syncRoot; } }
 
 		/// <summary>
@@ -129,7 +132,7 @@ namespace DotNetApi.Concurrent
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns>The element.</returns>
-		object IList.this[int index]
+		public object this[int index]
 		{
 			get
 			{
@@ -163,16 +166,12 @@ namespace DotNetApi.Concurrent
 			}
 		}
 
+		// Protected properties.
+
 		/// <summary>
-		/// Gets or sets the element at the specified index.
+		/// Gets the internal list used for this collection.
 		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <returns>The element.</returns>
-		public T this[int index]
-		{
-			get { return (this as IList)[index] as T; }
-			set	{ (this as IList)[index] = value; }
-		}
+		protected IList List { get { return this.list; } }
 
 		// Public methods.
 
@@ -180,8 +179,8 @@ namespace DotNetApi.Concurrent
 		/// Adds an item to the list.
 		/// </summary>
 		/// <param name="item">The item.</param>
-		/// <returns>The possition to which the item was added.</returns>
-		int IList.Add(object item)
+		/// <returns>The position to which the item was added.</returns>
+		public int Add(object item)
 		{
 			// Acquire a writer lock.
 			LockInfo info = this.AcquireWriterLock();
@@ -195,15 +194,6 @@ namespace DotNetApi.Concurrent
 				// Release the writer lock.
 				this.ReleaseWriterLock(info);
 			}
-		}
-
-		/// <summary>
-		/// Adds an item to the list.
-		/// </summary>
-		/// <param name="item">The item.</param>
-		public void Add(T item)
-		{
-			(this as IList).Add(item);
 		}
 
 		/// <summary>
@@ -246,33 +236,14 @@ namespace DotNetApi.Concurrent
 		}
 
 		/// <summary>
-		/// Indicates whether the list contains the specified item.
-		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <returns><b>True</b> if the list contains the item, <b>false</b> otherwise.</returns>
-		public bool Contains(T item)
-		{
-			return (this as IList).Contains(item);
-		}
-
-		/// <summary>
 		/// Returns the enumeator for the current list.
 		/// </summary>
 		/// <returns>The enumerator.</returns>
-		IEnumerator IEnumerable.GetEnumerator()
+		public IEnumerator GetEnumerator()
 		{
 			// The thread must first acquire a lock before retrieving the enumerator.
 			if (!this.sync.IsReaderLockHeld && !this.sync.IsWriterLockHeld) throw new SynchronizationLockException();
 			return this.list.GetEnumerator();
-		}
-
-		/// <summary>
-		/// Returns the enumerator for the current list.
-		/// </summary>
-		/// <returns>The enumerator.</returns>
-		public IEnumerator<T> GetEnumerator()
-		{
-			return this.Cast<T>().GetEnumerator();
 		}
 
 		/// <summary>
@@ -297,16 +268,6 @@ namespace DotNetApi.Concurrent
 		}
 
 		/// <summary>
-		/// Copies all elements to the specified array starting from the index.
-		/// </summary>
-		/// <param name="array">The array.</param>
-		/// <param name="index">The index.</param>
-		public void CopyTo(T[] array, int index)
-		{
-			(this as ICollection).CopyTo(array, index);
-		}
-
-		/// <summary>
 		/// Determines the index of a specific item in the list.
 		/// </summary>
 		/// <param name="item">The item.</param>
@@ -325,16 +286,6 @@ namespace DotNetApi.Concurrent
 				// Release the reader lock.
 				this.ReleaseReaderLock(info);
 			}
-		}
-
-		/// <summary>
-		/// Determines the index of a specific item in the list.
-		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <returns>The index, or -1 if the item is not found.</returns>
-		public int IndexOf(T item)
-		{
-			return (list as IList).IndexOf(item);
 		}
 
 		/// <summary>
@@ -359,16 +310,6 @@ namespace DotNetApi.Concurrent
 		}
 
 		/// <summary>
-		/// Inserts the specified item in the list.
-		/// </summary>
-		/// <param name="index">The index.</param>
-		/// <param name="item">The item.</param>
-		public void Insert(int index, T item)
-		{
-			(this as IList).Insert(index, item);
-		}
-
-		/// <summary>
 		/// Removes the first occurrence of the specified item from the collection.
 		/// </summary>
 		/// <param name="item">The item.</param>
@@ -380,33 +321,6 @@ namespace DotNetApi.Concurrent
 			{
 				// Insert the item.
 				this.list.Remove(item);
-			}
-			finally
-			{
-				// Release the writer lock.
-				this.ReleaseWriterLock(info);
-			}
-		}
-
-		/// <summary>
-		/// Removes the first occurrence of the specified item from the collection.
-		/// </summary>
-		/// <param name="item">The item.</param>
-		/// <returns><b>True</b> if the item was successfully removed,<b>false</b> otherwise.</returns>
-		public bool Remove(T item)
-		{
-			// Acquire a writer lock.
-			LockInfo info = this.AcquireWriterLock();
-			try
-			{
-				// Get the index.
-				int index;
-				if ((index = this.list.IndexOf(item)) != -1)
-				{
-					this.list.RemoveAt(index);
-					return true;
-				}
-				else return false;
 			}
 			finally
 			{
@@ -474,7 +388,7 @@ namespace DotNetApi.Concurrent
 		/// Acquires a reader lock on the list for the current thread.
 		/// </summary>
 		/// <returns>The lock info.</returns>
-		private LockInfo AcquireReaderLock()
+		protected LockInfo AcquireReaderLock()
 		{
 			//  If there is a reader lock held.
 			if (this.sync.IsReaderLockHeld)
@@ -494,7 +408,7 @@ namespace DotNetApi.Concurrent
 		/// Acquires a write lock on the list for the current thread.
 		/// </summary>
 		/// <returns>The lock info.</returns>
-		private LockInfo AcquireWriterLock()
+		protected LockInfo AcquireWriterLock()
 		{
 			// If there is a writer lock held.
 			if (this.sync.IsWriterLockHeld)
@@ -521,7 +435,7 @@ namespace DotNetApi.Concurrent
 		/// Releases the read lock on the list for the current thread.
 		/// </summary>
 		/// <param name="info">The lock info.</param>
-		private void ReleaseReaderLock(LockInfo info)
+		protected void ReleaseReaderLock(LockInfo info)
 		{
 			// If the a new lock was acquired.
 			if (info.Locked)
@@ -535,7 +449,7 @@ namespace DotNetApi.Concurrent
 		/// Releases the write lock on the list for the current thread.
 		/// </summary>
 		/// <param name="info">The lock info.</param>
-		private void ReleaseWriterLock(LockInfo info)
+		protected void ReleaseWriterLock(LockInfo info)
 		{
 			// If the writer lock was upgrader from a reader lock.
 			if (info.Cookie.HasValue)

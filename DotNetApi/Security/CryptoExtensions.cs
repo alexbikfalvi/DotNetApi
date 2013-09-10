@@ -31,6 +31,44 @@ namespace DotNetApi.Security
 	public static class CryptoExtensions
 	{
 		/// <summary>
+		/// Encrypts the specified byte array using the AES algorithm.
+		/// </summary>
+		/// <param name="bytes">The byte array.</param>
+		/// <param name="key">The cryptographic key.</param>
+		/// <param name="iv">The cryptographic initialization vector.</param>
+		/// <returns>The encrypted data buffer.</returns>
+		public static byte[] EncryptAes(this byte[] bytes, byte[] key, byte[] iv)
+		{
+			// Create an AES cryptographic service provider and transform.
+			using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
+			{
+				ICryptoTransform cryptoTransform = aesProvider.CreateEncryptor(key, iv);
+
+				// Create a memory stream to store the encrypted data. 
+				using (MemoryStream encryptedStream = new MemoryStream())
+				{
+					// Create an encryption stream.
+					using (CryptoStream cryptStream = new CryptoStream(encryptedStream, cryptoTransform, CryptoStreamMode.Write))
+					{
+						// Encrypt the data to the encrypted stream.
+						cryptStream.Write(bytes, 0, bytes.Length);
+						cryptStream.FlushFinalBlock();
+
+						// Set the position of the encrypted stream to zero.
+						encryptedStream.Position = 0;
+
+						// Read the encrypted data inot the result buffer.
+						byte[] result = new byte[encryptedStream.Length];
+						encryptedStream.Read(result, 0, (int)encryptedStream.Length);
+
+						// Return the result byte array buffer.
+						return result;
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Encrypts the specified string using the AES algorithm.
 		/// </summary>
 		/// <param name="value">The string to encrypt.</param>
@@ -39,7 +77,10 @@ namespace DotNetApi.Security
 		/// <returns>The encrypted data buffer.</returns>
 		public static byte[] EncryptStringAes(this string value, byte[] key, byte[] iv)
 		{
-			return value.ConvertToSecureString().EncryptSecureStringAes(key, iv);
+			// If the buffer to decrypt is null, return null.
+			if (null == value) return null;
+
+			return Encoding.UTF8.GetBytes(value).EncryptAes(key, iv);
 		}
 
 		/// <summary>
@@ -63,36 +104,7 @@ namespace DotNetApi.Security
 				unmanagedString = Marshal.SecureStringToGlobalAllocUnicode(value);
 
 				// Convert the string to a byte array using UTF8 encoding.
-				UTF8Encoding utf8Encoder = new UTF8Encoding();
-				byte[] bytes = utf8Encoder.GetBytes(Marshal.PtrToStringUni(unmanagedString));
-
-				// Create an AES cryptographic service provider and transform.
-				using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
-				{
-					ICryptoTransform cryptoTransform = aesProvider.CreateEncryptor(key, iv);
-
-					// Create a memory stream to store the encrypted data. 
-					using (MemoryStream encryptedStream = new MemoryStream())
-					{
-						// Create an encryption stream.
-						using (CryptoStream cryptStream = new CryptoStream(encryptedStream, cryptoTransform, CryptoStreamMode.Write))
-						{
-							// Encrypt the data to the encrypted stream.
-							cryptStream.Write(bytes, 0, bytes.Length);
-							cryptStream.FlushFinalBlock();
-
-							// Set the position of the encrypted stream to zero.
-							encryptedStream.Position = 0;
-
-							// Read the encrypted data inot the result buffer.
-							byte[] result = new byte[encryptedStream.Length];
-							encryptedStream.Read(result, 0, (int)encryptedStream.Length);
-
-							// Return the result byte array buffer.
-							return result;
-						}
-					}
-				}
+				return Encoding.UTF8.GetBytes(Marshal.PtrToStringUni(unmanagedString)).EncryptAes(key, iv);
 			}
 			finally
 			{
@@ -104,30 +116,15 @@ namespace DotNetApi.Security
 		/// <summary>
 		/// Decrypts the specified byte array buffer using the AES algorithm.
 		/// </summary>
-		/// <param name="value">The byte array buffer to decrypt.</param>
+		/// <param name="value">The encrypted data.</param>
 		/// <param name="key">The cryptographic key.</param>
 		/// <param name="iv">The cryptographic initialization vector.</param>
-		/// <returns>The decrypted string.</returns>
-		public static string DecryptStringAes(this byte[] value, byte[] key, byte[] iv)
-		{
-			return value.DecryptSecureStringAes(key, iv).ConvertToUnsecureString();
-		}
-
-		/// <summary>
-		/// Decrypts the specified byte array buffer using the AES algorithm.
-		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="key"></param>
-		/// <param name="iv"></param>
-		/// <returns></returns>
-		public static SecureString DecryptSecureStringAes(this byte[] value, byte[] key, byte[] iv)
+		/// <returns>The decrypted byte array.</returns>
+		public static byte[] DecryptAes(this byte[] value, byte[] key, byte[] iv)
 		{
 			// If the buffer to decrypt is null, return null.
 			if (null == value) return null;
-
-			// Create a new UTF8 encoding.
-			UTF8Encoding utf8Encoding = new UTF8Encoding();
-
+			
 			// Create a new AES cryptographic provider.
 			using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
 			{
@@ -151,11 +148,42 @@ namespace DotNetApi.Security
 						byte[] result = new byte[decryptedStream.Length];
 						decryptedStream.Read(result, 0, (int)decryptedStream.Length);
 
-						// Return the decrypted data converted to string using UTF8 encoding.
-						return utf8Encoding.GetString(result).ConvertToSecureString();
+						// Return the result.
+						return result;
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Decrypts the specified byte array buffer using the AES algorithm.
+		/// </summary>
+		/// <param name="value">The byte array buffer to decrypt.</param>
+		/// <param name="key">The cryptographic key.</param>
+		/// <param name="iv">The cryptographic initialization vector.</param>
+		/// <returns>The decrypted string.</returns>
+		public static string DecryptStringAes(this byte[] value, byte[] key, byte[] iv)
+		{
+			// If the buffer to decrypt is null, return null.
+			if (null == value) return null;
+			
+			return value.DecryptSecureStringAes(key, iv).ConvertToUnsecureString();
+		}
+
+		/// <summary>
+		/// Decrypts the specified byte array buffer using the AES algorithm.
+		/// </summary>
+		/// <param name="value">The encrypted data.</param>
+		/// <param name="key">The cryptographic key.</param>
+		/// <param name="iv">The cryptographic initialization vector.</param>
+		/// <returns>The decrypted secure string.</returns>
+		public static SecureString DecryptSecureStringAes(this byte[] value, byte[] key, byte[] iv)
+		{
+			// If the buffer to decrypt is null, return null.
+			if (null == value) return null;
+
+			// Return the decrypted data converted to string using UTF8 encoding.
+			return Encoding.UTF8.GetString(value.DecryptAes(key, iv)).ConvertToSecureString();
 		}
 	}
 }

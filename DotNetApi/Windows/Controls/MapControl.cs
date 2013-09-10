@@ -25,7 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 using DotNetApi;
 using DotNetApi.Async;
-using DotNetApi.Concurrent;
+using DotNetApi.Concurrent.Generic;
 using DotNetApi.Drawing;
 using DotNetApi.Drawing.Temporal;
 using DotNetApi.Drawing.Transforms;
@@ -40,6 +40,7 @@ namespace DotNetApi.Windows.Controls
 	{
 		private delegate void RefreshEventHandler();
 		private delegate void MessageEventHandler(string text);
+		private delegate void MouseMoveLazyEventHandler(MapMarker marker, MapRegion region);
 
 		private const int mapLevels = 4;
 
@@ -101,7 +102,7 @@ namespace DotNetApi.Windows.Controls
 
 		// Drawing.
 
-		private Mutex mutex = new Mutex();
+		private Mutex mutexDrawing = new Mutex();
 
 		private Bitmap bitmapBackground = new Bitmap(20, 20);
 		private TextureBrush brushBackground;
@@ -112,9 +113,12 @@ namespace DotNetApi.Windows.Controls
 
 		// Interaction.
 
+		private Mutex mutexMouseMove = new Mutex();
+
 		private MotionSpring scrollSpring = new MotionSpring();
 		private TransformAsymptotic scrollTransform = new TransformAsymptotic(100, 100);
 
+		private bool mouseOverFlag = false;
 		private bool mouseGripFlag = false;
 		private Point mouseGripLocation;
 
@@ -127,7 +131,7 @@ namespace DotNetApi.Windows.Controls
 
 		// Markers.
 
-		private ComponentCollection<MapMarker> markers = new ComponentCollection<MapMarker>();
+		private ConcurrentComponentCollection<MapMarker> markers = new ConcurrentComponentCollection<MapMarker>();
 		private bool markerAutoDispose = true;
 
 		// Switches.
@@ -143,6 +147,7 @@ namespace DotNetApi.Windows.Controls
 
 		private RefreshEventHandler delegateRefresh;
 		private MessageEventHandler delegateMessage;
+		private MouseMoveLazyEventHandler delegateMouseMove;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -182,6 +187,7 @@ namespace DotNetApi.Windows.Controls
 			// Create the delegates.
 			this.delegateRefresh = new RefreshEventHandler(this.Refresh);
 			this.delegateMessage = new MessageEventHandler(this.OnMessageChanged);
+			this.delegateMouseMove = new MouseMoveLazyEventHandler(this.OnMouseMoveLazyFinish);
 
 			// Create the spring motion event handler.
 			this.scrollSpring.Tick += this.OnSpringTick;
@@ -287,7 +293,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets the map markers.
 		/// </summary>
-		public ComponentCollection<MapMarker> Markers
+		public ConcurrentComponentCollection<MapMarker> Markers
 		{
 			get { return this.markers; }
 		}
@@ -387,8 +393,13 @@ namespace DotNetApi.Windows.Controls
 				// Dispose the asynchronous task.
 				this.task.Dispose();
 
-				// Dispose the drawing mutex.
-				this.mutex.Dispose();
+				// Wait on the mutexes.
+				this.mutexDrawing.WaitOne();
+				this.mutexMouseMove.WaitOne();
+
+				// Close the mutexes.
+				this.mutexDrawing.Close();
+				this.mutexMouseMove.Close();
 
 				// Get an exclusive reader lock to the regions list.
 				this.regions.Lock();
@@ -409,13 +420,18 @@ namespace DotNetApi.Windows.Controls
 				if (this.markerAutoDispose)
 				{
 					// Get an exclusive lock to the markers collection.
-					lock (this.markers)
+					this.markers.Lock();
+					try
 					{
 						// Dispose the markers.
 						foreach (MapMarker marker in this.markers)
 						{
 							marker.Dispose();
 						}
+					}
+					finally
+					{
+						this.markers.Unlock();
 					}
 				}
 			}
@@ -437,7 +453,7 @@ namespace DotNetApi.Windows.Controls
 			e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 			
 			// Try and lock the drawing mutex.
-			if (this.mutex.WaitOne(0))
+			if (this.mutexDrawing.WaitOne(0))
 			{
 				try
 				{
@@ -473,30 +489,36 @@ namespace DotNetApi.Windows.Controls
 									pen.Color = this.colorMarkerNormalBorder;
 									brush.Color = this.colorMarkerNormalBackground;
 
-									// Lock the markers collection.
-									lock (this.markers)
+									// Try lockLock the markers collection.
+									if (this.markers.TryLock())
 									{
-
-										// Draw the normal markers.
-										foreach (MapMarker marker in this.markers)
+										try
 										{
-											if (!marker.Emphasized)
+											// Draw the normal markers.
+											foreach (MapMarker marker in this.markers)
 											{
-												marker.Draw(e.Graphics, brush, pen);
+												if (!marker.Emphasized)
+												{
+													marker.Draw(e.Graphics, brush, pen);
+												}
+											}
+
+											// Change the pen and brush colors.
+											pen.Color = this.colorMarkerEmphasisBorder;
+											brush.Color = this.colorMarkerEmphasisBackground;
+
+											// Draw the emphasized markers.
+											foreach (MapMarker marker in this.markers)
+											{
+												if (marker.Emphasized)
+												{
+													marker.Draw(e.Graphics, brush, pen);
+												}
 											}
 										}
-
-										// Change the pen and brush colors.
-										pen.Color = this.colorMarkerEmphasisBorder;
-										brush.Color = this.colorMarkerEmphasisBackground;
-
-										// Draw the emphasized markers.
-										foreach (MapMarker marker in this.markers)
+										finally
 										{
-											if (marker.Emphasized)
-											{
-												marker.Draw(e.Graphics, brush, pen);
-											}
+											this.markers.Unlock();
 										}
 									}
 
@@ -558,7 +580,7 @@ namespace DotNetApi.Windows.Controls
 				finally
 				{
 					// Unlock the mutex.
-					this.mutex.ReleaseMutex();
+					this.mutexDrawing.ReleaseMutex();
 				}
 			}
 			else
@@ -602,10 +624,8 @@ namespace DotNetApi.Windows.Controls
 			// Call the base class event handler.
 			base.OnMouseMove(e);
 
-			// The current highlighted marker.
-			MapMarker highlightMarker = null;
-			// The current highlighted region.
-			MapRegion highlightRegion = null;
+			// Set the mouse over flag.
+			this.mouseOverFlag = true;
 
 			// If the mouse grip is set.
 			if (this.mouseGripFlag)
@@ -626,121 +646,8 @@ namespace DotNetApi.Windows.Controls
 				}
 			}
 
-			// Compute the mouse location.
-			Point location = e.Location.Subtract(this.bitmapLocation);
-			// Get an exclusive lock to the markers collection.
-			lock (this.markers)
-			{
-				// Compute the new highlight marker.
-				foreach (MapMarker marker in this.markers)
-				{
-					// If the marker contains the mouse location.
-					if (marker.IsVisible(location))
-					{
-						// Set the current highlighted marker.
-						highlightMarker = marker;
-						// Stop the iteration.
-						break;
-					}
-				}
-			}
-			// Get an exclusive reader lock to the regions list.
-			this.regions.Lock();
-			try
-			{
-				// Compute the new highlight region.
-				foreach (MapRegion region in this.regions)
-				{
-					// If the region contains the mouse location.
-					if (region.IsVisible(location))
-					{
-						// Set the current highlighted region.
-						highlightRegion = region;
-						// Stop the iteration.
-						break;
-					}
-				}
-			}
-			finally
-			{
-				this.regions.Unlock();
-			}
-
-			// If the highlighted marker has changed.
-			if (this.highlightMarker != highlightMarker)
-			{
-				// If there exists a previous highlighted marker.
-				if (null != this.highlightMarker)
-				{
-					// Invalidate the bounds of that marker.
-					this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
-				}
-				// If there exists a current highlighted marker.
-				if ((null != highlightMarker) && this.showMarkers)
-				{
-					// Invalidate the bounds of that marker.
-					this.Invalidate(highlightMarker.Bounds.Add(this.bitmapLocation));
-					// Show the info annotation.
-					this.OnShowAnnotation(this.annotationInfo, highlightMarker.Name, highlightMarker);
-				}
-				else
-				{
-					// If there is an emphasized marker.
-					if ((null != this.emphasizedMarker) && this.showMarkers)
-					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
-					}
-					// Else, if there is a highlighted region.
-					else if (null != highlightRegion)
-					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
-					}
-					// Else.
-					else
-					{
-						// Hide the info annotation.
-						this.OnHideAnnotation(this.annotationInfo);
-					}
-				}
-				// Set the new highlighted marker.
-				this.highlightMarker = highlightMarker;
-			}
-
-			// If the highlighted region has changed.
-			if (this.highlightRegion != highlightRegion)
-			{
-				// If there exists a previous highlighted region.
-				if (null != this.highlightRegion)
-				{
-					// Invalidate the bounds of that region.
-					this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
-				}
-				// If there exists a current highlighted region.
-				if (null != highlightRegion)
-				{
-					// Invalidate the bounds of that region.
-					this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
-					// If there is no highlighted marker and no emphasized marker or if the markers are hidden.
-					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
-					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
-					}
-				}
-				else
-				{
-					// If there is no highlighted marker and no emphasized marker.
-					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
-					{
-						// Hide the info annotation.
-						this.OnHideAnnotation(this.annotationInfo);
-					}
-				}
-				// Set the new highlighted region.
-				this.highlightRegion = highlightRegion;
-			}
+			// Call the mouse move lazy method.
+			this.OnMouseMoveLazyStart(e);
 		}
 
 		/// <summary>
@@ -751,6 +658,10 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Call the base class methods.
 			base.OnMouseLeave(e);
+
+			// Clear the mouse over flag.
+			this.mouseOverFlag = false;
+
 			// If there exists a highlighted marker.
 			if (null != this.highlightMarker)
 			{
@@ -913,7 +824,7 @@ namespace DotNetApi.Windows.Controls
 			if (this.map == map) return;
 
 			// Lock the map mutex.
-			this.mutex.WaitOne();
+			this.mutexDrawing.WaitOne();
 
 			try
 			{
@@ -965,7 +876,7 @@ namespace DotNetApi.Windows.Controls
 			finally
 			{
 				// Unlock the mutex.
-				this.mutex.ReleaseMutex();
+				this.mutexDrawing.ReleaseMutex();
 			}
 
 			// Refresh the current map.
@@ -1342,7 +1253,8 @@ namespace DotNetApi.Windows.Controls
 				}
 			}
 			// Lock the markers collection.
-			lock (this.markers)
+			this.markers.Lock();
+			try
 			{
 				// Invalidate the area corresponding to all markers.
 				foreach (MapMarker marker in this.markers)
@@ -1350,6 +1262,10 @@ namespace DotNetApi.Windows.Controls
 					// Refresh the marker.
 					this.Invalidate(marker.Bounds.Add(this.bitmapLocation));
 				}
+			}
+			finally
+			{
+				this.markers.Unlock();
 			}
 		}
 
@@ -1373,13 +1289,180 @@ namespace DotNetApi.Windows.Controls
 				this.regions.Unlock();
 			}
 			// Get an exclusive lock to the markers collection.
-			lock (this.markers)
+			this.markers.Lock();
+			try
 			{
 				// Update all map markers.
 				foreach (MapMarker marker in this.markers)
 				{
 					marker.Update(this.mapBounds, this.mapScale);
 				}
+			}
+			finally
+			{
+				this.markers.Unlock();
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when starting executing the mouse move lazy code.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		private void OnMouseMoveLazyStart(MouseEventArgs e)
+		{
+			// Compute the mouse location.
+			Point location = e.Location.Subtract(this.bitmapLocation);
+
+			// Execute the lazy code on the thread pool.
+			ThreadPool.QueueUserWorkItem((object state) =>
+				{
+					// Try lock the mouse move mutex.
+					if (!this.mutexMouseMove.WaitOne(0)) return;
+
+					try
+					{
+						// The current highlighted marker.
+						MapMarker highlightMarker = null;
+						// The current highlighted region.
+						MapRegion highlightRegion = null;
+
+						// Get an exclusive lock to the markers collection.
+						this.markers.Lock();
+						try
+						{
+							// Compute the new highlight marker.
+							foreach (MapMarker marker in this.markers)
+							{
+								// If the marker contains the mouse location.
+								if (marker.IsVisible(location))
+								{
+									// Set the current highlighted marker.
+									highlightMarker = marker;
+									// Stop the iteration.
+									break;
+								}
+							}
+						}
+						finally
+						{
+							this.markers.Unlock();
+						}
+						// Get an exclusive reader lock to the regions list.
+						this.regions.Lock();
+						try
+						{
+							// Compute the new highlight region.
+							foreach (MapRegion region in this.regions)
+							{
+								// If the region contains the mouse location.
+								if (region.IsVisible(location))
+								{
+									// Set the current highlighted region.
+									highlightRegion = region;
+									// Stop the iteration.
+									break;
+								}
+							}
+						}
+						finally
+						{
+							this.regions.Unlock();
+						}
+
+						// Call the mouse move lazy finish on the UI thread.
+						this.Invoke(this.delegateMouseMove, new object[] { highlightMarker, highlightRegion });
+					}
+					finally
+					{
+						this.mutexMouseMove.ReleaseMutex();
+					}
+				});
+		}
+
+		/// <summary>
+		/// An event handler called when finishing executing the mouse move lazy code.
+		/// </summary>
+		/// <param name="highlightMarker">The highlighted marker.</param>
+		/// <param name="highlightRegion">The highlighted code.</param>
+		private void OnMouseMoveLazyFinish(MapMarker highlightMarker, MapRegion highlightRegion)
+		{
+			// If the mouse over flag is not set, do nothing.
+			if (!this.mouseOverFlag) return;
+
+			// If the highlighted marker has changed.
+			if (this.highlightMarker != highlightMarker)
+			{
+				// If there exists a previous highlighted marker.
+				if (null != this.highlightMarker)
+				{
+					// Invalidate the bounds of that marker.
+					this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
+				}
+				// If there exists a current highlighted marker.
+				if ((null != highlightMarker) && this.showMarkers)
+				{
+					// Invalidate the bounds of that marker.
+					this.Invalidate(highlightMarker.Bounds.Add(this.bitmapLocation));
+					// Show the info annotation.
+					this.OnShowAnnotation(this.annotationInfo, highlightMarker.Name, highlightMarker);
+				}
+				else
+				{
+					// If there is an emphasized marker.
+					if ((null != this.emphasizedMarker) && this.showMarkers)
+					{
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+					}
+					// Else, if there is a highlighted region.
+					else if (null != highlightRegion)
+					{
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+					}
+					// Else.
+					else
+					{
+						// Hide the info annotation.
+						this.OnHideAnnotation(this.annotationInfo);
+					}
+				}
+				// Set the new highlighted marker.
+				this.highlightMarker = highlightMarker;
+			}
+
+			// If the highlighted region has changed.
+			if (this.highlightRegion != highlightRegion)
+			{
+				// If there exists a previous highlighted region.
+				if (null != this.highlightRegion)
+				{
+					// Invalidate the bounds of that region.
+					this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
+				}
+				// If there exists a current highlighted region.
+				if (null != highlightRegion)
+				{
+					// Invalidate the bounds of that region.
+					this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
+					// If there is no highlighted marker and no emphasized marker or if the markers are hidden.
+					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+					{
+						// Show the info annotation.
+						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+					}
+				}
+				else
+				{
+					// If there is no highlighted marker and no emphasized marker.
+					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+					{
+						// Hide the info annotation.
+						this.OnHideAnnotation(this.annotationInfo);
+					}
+				}
+				// Set the new highlighted region.
+				this.highlightRegion = highlightRegion;
 			}
 		}
 
@@ -1395,7 +1478,7 @@ namespace DotNetApi.Windows.Controls
 				this.task.ExecuteAlways((AsyncState asyncState) =>
 				{
 					// Lock the drawing mutex.
-					this.mutex.WaitOne();
+					this.mutexDrawing.WaitOne();
 					try
 					{
 						// If the current bitmap is not null, dispose the current bitmap.
@@ -1414,7 +1497,7 @@ namespace DotNetApi.Windows.Controls
 					finally
 					{
 						// Unlock the mutex.
-						this.mutex.ReleaseMutex();
+						this.mutexDrawing.ReleaseMutex();
 					}
 					// Refresh the control.
 					this.Refresh();
@@ -1529,7 +1612,8 @@ namespace DotNetApi.Windows.Controls
 		private void OnBeforeMarkersCleared(object sender, EventArgs e)
 		{
 			// Lock the markers collection.
-			lock (this.markers)
+			this.markers.Lock();
+			try
 			{
 				// For all the markers.
 				foreach (MapMarker marker in this.markers)
@@ -1544,6 +1628,10 @@ namespace DotNetApi.Windows.Controls
 						marker.Dispose();
 					}
 				}
+			}
+			finally
+			{
+				this.markers.Unlock();
 			}
 			// If any of the highlighted or emphasized markers are not null.
 			if ((null != this.highlightRegion) || (null != this.emphasizedMarker))
@@ -1571,7 +1659,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void OnAfterMarkerInserted(object sender, ComponentCollection<MapMarker>.ItemChangedEventArgs e)
+		private void OnAfterMarkerInserted(object sender, ConcurrentComponentCollection<MapMarker>.ItemChangedEventArgs e)
 		{
 			// If the marker is null, do nothing.
 			if (null == e.Item) return;
@@ -1588,7 +1676,7 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void OnAfterMarkerRemoved(object sender, ComponentCollection<MapMarker>.ItemChangedEventArgs e)
+		private void OnAfterMarkerRemoved(object sender, ConcurrentComponentCollection<MapMarker>.ItemChangedEventArgs e)
 		{
 			// If the marker is null, do nothing.
 			if (null == e.Item) return;
@@ -1635,13 +1723,13 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
-		private void OnAfterMarkerSet(object sender, ComponentCollection<MapMarker>.ItemSetEventArgs e)
+		private void OnAfterMarkerSet(object sender, ConcurrentComponentCollection<MapMarker>.ItemSetEventArgs e)
 		{
 			// If the old marker is different from the new marker.
 			if (e.OldItem != e.NewItem)
 			{
-				this.OnAfterMarkerRemoved(sender, new ComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.OldItem));
-				this.OnAfterMarkerInserted(sender, new ComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.NewItem));
+				this.OnAfterMarkerRemoved(sender, new ConcurrentComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.OldItem));
+				this.OnAfterMarkerInserted(sender, new ConcurrentComponentCollection<MapMarker>.ItemChangedEventArgs(e.Index, e.NewItem));
 			}
 		}
 

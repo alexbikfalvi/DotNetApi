@@ -174,6 +174,38 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a secure byte array value from the registry.
+		/// </summary>
+		/// <param name="keyName">The key name.</param>
+		/// <param name="valueName">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <param name="cryptoKey">The AES cryptographic key.</param>
+		/// <param name="cryptoIV">The AES cryptographic initialization vector.</param>
+		/// <returns>The value.</returns>
+		public static byte[] GetSecureByteArray(string keyName, string valueName, byte[] defaultValue, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			try
+			{
+				byte[] value;
+				return null != (value = (Microsoft.Win32.Registry.GetValue(keyName, valueName, null) as byte[]).DecryptAes(cryptoKey, cryptoIV)) ? value : defaultValue;
+			}
+			catch (Exception) { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Writes a secure byte array value to the registry.
+		/// </summary>
+		/// <param name="keyName">The key name.</param>
+		/// <param name="valueName">The value name.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="cryptoKey">The AES cryptographic key.</param>
+		/// <param name="cryptoIV">The AES cryptographic initialization vector.</param>
+		public static void SetSecureByteArray(string keyName, string valueName, byte[] value, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.EncryptAes(cryptoKey, cryptoIV), RegistryValueKind.Binary);
+		}
+
+		/// <summary>
 		/// Reads a date-time value from the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>

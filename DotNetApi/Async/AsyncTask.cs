@@ -141,10 +141,14 @@ namespace DotNetApi.Async
 		{
 			if (disposing)
 			{
-				// Dispose the task mutex.
-				this.mutexTask.Dispose();
-				// Dispose the state mutex.
-				this.mutexState.Dispose();
+				// Wait on the task mutex.
+				this.mutexTask.WaitOne();
+				// Wait on the task mutex.
+				this.mutexState.WaitOne();
+				// Close the task mutex.
+				this.mutexTask.Close();
+				// Close the state mutex.
+				this.mutexState.Close();
 			}
 		}
 

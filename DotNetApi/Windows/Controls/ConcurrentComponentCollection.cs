@@ -111,10 +111,10 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		/// <param name="index">The index.</param>
 		/// <returns>The item.</returns>
-		public T this[int index]
+		public new T this[int index]
 		{
-			get { return this.List[index] as T; }
-			set { this.List[index] = value; }
+			get { return this[index] as T; }
+			set { this[index] = value; }
 		}
 
 		// Public events.
@@ -163,9 +163,7 @@ namespace DotNetApi.Windows.Controls
 		public int Add(T item)
 		{
 			// Add the item.
-			int result = this.List.Add(item);
-			// Return the result.
-			return result;
+			return base.Add(item);
 		}
 
 		/// <summary>
@@ -177,7 +175,7 @@ namespace DotNetApi.Windows.Controls
 			// Add the items.
 			foreach (T item in items)
 			{
-				this.Add(item);
+				base.Add(item);
 			}
 		}
 
@@ -188,7 +186,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns>The index of value if found in the list; otherwise, -1.</returns>
 		public int IndexOf(T item)
 		{
-			return this.List.IndexOf(item);
+			return base.IndexOf(item);
 		}
 
 		/// <summary>
@@ -199,7 +197,7 @@ namespace DotNetApi.Windows.Controls
 		public void Insert(int index, T item)
 		{
 			// Insert the item.
-			this.List.Insert(index, item);
+			base.Insert(index, item);
 		}
 
 		/// <summary>
@@ -209,7 +207,7 @@ namespace DotNetApi.Windows.Controls
 		public void Remove(T item)
 		{
 			// Remove the item.
-			this.List.Remove(item);
+			base.Remove(item);
 		}
 
 		/// <summary>
@@ -219,7 +217,7 @@ namespace DotNetApi.Windows.Controls
 		/// <returns><b>True</b> if the element is found in the collection, or <b>false</b> otherwise.</returns>
 		public bool Contains(T item)
 		{
-			return this.List.Contains(item);
+			return base.Contains(item);
 		}
 
 		// Protected methods.
