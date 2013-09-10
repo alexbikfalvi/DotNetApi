@@ -17,15 +17,15 @@
  */
 
 using System;
-using System.Collections;
 using System.ComponentModel;
+using DotNetApi.Concurrent;
 
 namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
-	/// A collection of components.
+	/// A thread-safe collection of components.
 	/// </summary>
-	public sealed class ComponentCollection<T> : CollectionBase where T : Component
+	public sealed class ConcurrentComponentCollection<T> : ConcurrentCollectionBase where T : Component
 	{
 		// Public delegates.
 

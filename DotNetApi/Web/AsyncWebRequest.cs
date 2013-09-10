@@ -281,10 +281,20 @@ namespace DotNetApi.Web
 					asyncState.Exception = exception;
 				}
 
-				// Get the stream corresponding to the web response.
-				asyncState.Stream = asyncState.Response.GetResponseStream();
-				// Begin reading for the returned data.
-				this.BeginStreamRead(asyncState);
+				if (null != asyncState.Response)
+				{
+					// Get the stream corresponding to the web response.
+					asyncState.Stream = asyncState.Response.GetResponseStream();
+					// Begin reading for the returned data.
+					this.BeginStreamRead(asyncState);
+				}
+				else
+				{
+					// Signal that the operation has completed.
+					asyncState.Complete();
+					// Call the callback function
+					if (asyncState.Callback != null) asyncState.Callback(asyncState);
+				}
 			}
 			catch (Exception exception)
 			{

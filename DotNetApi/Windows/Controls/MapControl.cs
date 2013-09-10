@@ -25,6 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 using DotNetApi;
 using DotNetApi.Async;
+using DotNetApi.Concurrent;
 using DotNetApi.Drawing;
 using DotNetApi.Drawing.Temporal;
 using DotNetApi.Drawing.Transforms;
@@ -51,7 +52,7 @@ namespace DotNetApi.Windows.Controls
 
 		private Map map = null;
 
-		private List<MapRegion> regions = new List<MapRegion>();
+		private ConcurrentList<MapRegion> regions = new ConcurrentList<MapRegion>();
 
 		private MapRectangle mapBounds = MapControl.mapBoundsDefault;
 		private MapSize mapSize = MapControl.mapBoundsDefault.Size;
@@ -197,7 +198,13 @@ namespace DotNetApi.Windows.Controls
 
 		// Public events.
 
+		/// <summary>
+		/// An event raised when a marker is clicked.
+		/// </summary>
 		public event EventHandler MarkerClick;
+		/// <summary>
+		/// An event raised when a marker is double clicked.
+		/// </summary>
 		public event EventHandler MarkerDoubleClick;
 
 		// Public properties.
@@ -383,14 +390,19 @@ namespace DotNetApi.Windows.Controls
 				// Dispose the drawing mutex.
 				this.mutex.Dispose();
 
-				// Get an exclusive lock to the regions list.
-				lock (this.regions)
+				// Get an exclusive reader lock to the regions list.
+				this.regions.Lock();
+				try
 				{
 					// Dispose the map regions.
 					foreach (MapRegion region in this.regions)
 					{
 						region.Dispose();
 					}
+				}
+				finally
+				{
+					this.regions.Unlock();
 				}
 
 				// Dispose tha map markers.
@@ -632,8 +644,9 @@ namespace DotNetApi.Windows.Controls
 					}
 				}
 			}
-			// Get an exclusive lock to the regions list.
-			lock (this.regions)
+			// Get an exclusive reader lock to the regions list.
+			this.regions.Lock();
+			try
 			{
 				// Compute the new highlight region.
 				foreach (MapRegion region in this.regions)
@@ -647,6 +660,10 @@ namespace DotNetApi.Windows.Controls
 						break;
 					}
 				}
+			}
+			finally
+			{
+				this.regions.Unlock();
 			}
 
 			// If the highlighted marker has changed.
@@ -903,38 +920,44 @@ namespace DotNetApi.Windows.Controls
 				// Set the current map.
 				this.map = map;
 
-				// Get an exclusive lock to the regions list.
+				// Get an exclusive reader lock to the regions list.
 
-				lock (this.regions)
+				this.regions.Lock();
+				try
 				{
-					// Clear the existing map regions.
+					// Dispose the existing map regions.
 					foreach (MapRegion region in this.regions)
 					{
 						region.Dispose();
 					}
-					this.regions.Clear();
+				}
+				finally
+				{
+					this.regions.Unlock();
+				}
 
-					// If the current map is not null.
-					if (null != this.map)
+				// Clear the regions list.
+				this.regions.Clear();
+				// If the current map is not null.
+				if (null != this.map)
+				{
+					// Create the map shapes.
+					foreach (MapShape shape in map.Shapes)
 					{
-						// Create the map shapes.
-						foreach (MapShape shape in map.Shapes)
+						// Switch according to the shape type.
+						switch (shape.Type)
 						{
-							// Switch according to the shape type.
-							switch (shape.Type)
-							{
-								case MapShapeType.Polygon:
-									// Get the polygon shape.
-									MapShapePolygon shapePolygon = shape as MapShapePolygon;
-									// Create a map region for this shape.
-									MapRegion region = new MapRegion(shapePolygon);
-									// Update the region.
-									region.Update(this.mapBounds, this.mapScale);
-									// Add the map region to the region items.
-									this.regions.Add(region);
-									break;
-								default: continue;
-							}
+							case MapShapeType.Polygon:
+								// Get the polygon shape.
+								MapShapePolygon shapePolygon = shape as MapShapePolygon;
+								// Create a map region for this shape.
+								MapRegion region = new MapRegion(shapePolygon);
+								// Update the region.
+								region.Update(this.mapBounds, this.mapScale);
+								// Add the map region to the region items.
+								this.regions.Add(region);
+								break;
+							default: continue;
 						}
 					}
 				}
@@ -1335,14 +1358,19 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private void OnUpdateItems()
 		{
-			// Get an exclusive lock to the regions list.
-			lock (this.regions)
+			// Get an exclusive reader lock to the regions list.
+			this.regions.Lock();
+			try
 			{
 				// Update all map regions.
 				foreach (MapRegion region in this.regions)
 				{
 					region.Update(this.mapBounds, this.mapScale);
 				}
+			}
+			finally
+			{
+				this.regions.Unlock();
 			}
 			// Get an exclusive lock to the markers collection.
 			lock (this.markers)
@@ -1439,8 +1467,9 @@ namespace DotNetApi.Windows.Controls
 							graphics.SmoothingMode = SmoothingMode.HighQuality;
 							// Change the brush color.
 							brush.Color = this.colorRegionNormalBackground;
-							// Get an exclusive lock to the regions list.
-							lock (this.regions)
+							// Get an exclusive reader lock to the regions list.
+							this.regions.Lock();
+							try
 							{
 								// Draw the map regions.
 								foreach (MapRegion region in this.regions)
@@ -1457,6 +1486,10 @@ namespace DotNetApi.Windows.Controls
 									// Draw the region.
 									region.Draw(graphics, brush, this.showBorders ? pen : null);
 								}
+							}
+							finally
+							{
+								this.regions.Unlock();
 							}
 						}
 					}
