@@ -39,6 +39,11 @@ namespace DotNetApi.Security
 		/// <returns>The encrypted data buffer.</returns>
 		public static byte[] EncryptAes(this byte[] bytes, byte[] key, byte[] iv)
 		{
+			// Validate the arguments.
+			bytes.ValidateNotNull("bytes");
+			key.ValidateNotNull("key");
+			iv.ValidateNotNull("iv");
+
 			// Create an AES cryptographic service provider and transform.
 			using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
 			{
@@ -77,8 +82,8 @@ namespace DotNetApi.Security
 		/// <returns>The encrypted data buffer.</returns>
 		public static byte[] EncryptStringAes(this string value, byte[] key, byte[] iv)
 		{
-			// If the buffer to decrypt is null, return null.
-			if (null == value) return null;
+			// Validate the arguments.
+			value.ValidateNotNull("value");
 
 			return Encoding.UTF8.GetBytes(value).EncryptAes(key, iv);
 		}
@@ -92,8 +97,8 @@ namespace DotNetApi.Security
 		/// <returns>The encrypted data buffer.</returns>
 		public static byte[] EncryptSecureStringAes(this SecureString value, byte[] key, byte[] iv)
 		{
-			// If the string to encrypt is null, return null.
-			if (null == value) return null;
+			// Validate the arguments.
+			value.ValidateNotNull("value");
 
 			// Create an unmanaged string to store the secure string data.
 			IntPtr unmanagedString = IntPtr.Zero;
@@ -124,6 +129,10 @@ namespace DotNetApi.Security
 		{
 			// If the buffer to decrypt is null, return null.
 			if (null == value) return null;
+
+			// Validate the arguments.
+			key.ValidateNotNull("key");
+			iv.ValidateNotNull("iv");
 			
 			// Create a new AES cryptographic provider.
 			using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())

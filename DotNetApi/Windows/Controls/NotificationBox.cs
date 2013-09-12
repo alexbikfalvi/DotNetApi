@@ -74,6 +74,7 @@ namespace DotNetApi.Windows.Controls
 			this.progressBar.Location = new Point(this.Padding.Left, this.Bottom - this.Padding.Bottom - this.progressBar.Height);
 			this.progressBar.MarqueeAnimationSpeed = 10;
 			this.progressBar.Style = ProgressBarStyle.Marquee;
+			this.progressBar.Visible = false;
 
 			// Set the timer event handler.
 			this.timer.Tick += this.OnTick;
