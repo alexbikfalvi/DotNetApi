@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Runtime;
 using System.Windows.Forms;
 using System.Threading;
 
@@ -35,6 +36,30 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public ThreadSafeControl()
 		{
+		}
+
+		// Public methods.
+
+		/// <summary>
+		/// Executes the specified delegate on the thread that owns the control's underlying window handle.
+		/// </summary>
+		/// <param name="method">A delegate that contains a method to be called in the control's thread context.</param>
+		/// <returns>The return value from the delegate being invoked, or null if the delegate has no return value.</returns>
+		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
+		public new object Invoke(Delegate method)
+		{
+			return this.IsDisposed ? null : base.Invoke(method);
+		}
+
+		/// <summary>
+		/// Executes the specified delegate, on the thread that owns the control's underlying window handle, with the specified list of arguments.
+		/// </summary>
+		/// <param name="method">A delegate to a method that takes parameters of the same number and type that are contained in the args parameter.</param>
+		/// <param name="args">An array of objects to pass as arguments to the specified method. This parameter can be null if the method takes no arguments.</param>
+		/// <returns>An System.Object that contains the return value from the delegate being invoked, or null if the delegate has no return value.</returns>
+		public new object Invoke(Delegate method, params object[] args)
+		{
+			return this.IsDisposed ? null : base.Invoke(method, args);
 		}
 
 		// Protected methods.
