@@ -124,14 +124,13 @@ namespace DotNetApi.Drawing
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposed)
 		{
-			// Call the base class event handler.
-			base.Dispose(disposed);
-
 			if (disposed)
 			{
 				// Dispose current objects.
 				if (null != this.bitmap) this.bitmap.Dispose();
 			}
+			// Call the base class event handler.
+			base.Dispose(disposed);
 		}
 
 		// Private methods.

@@ -130,10 +130,10 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
-			// Call the base class method.
-			base.Dispose(disposing);
 			// Dispose the shadow.
 			this.shadow.Dispose();
+			// Call the base class method.
+			base.Dispose(disposing);
 		}
 
 		/// <summary>
