@@ -38,9 +38,8 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class MapControl : ThreadSafeControl, IAnchor, ITranslation
 	{
-		private delegate void RefreshEventHandler();
-		private delegate void MessageEventHandler(string text);
-		private delegate void MouseMoveLazyEventHandler(MapMarker marker, MapRegion region);
+		private delegate void MessageAction(string text);
+		private delegate void MouseMoveLazyAction(MapMarker marker, MapRegion region);
 
 		private const int mapLevels = 4;
 
@@ -145,9 +144,9 @@ namespace DotNetApi.Windows.Controls
 		// Asynchronous.
 		private AsyncTask task = new AsyncTask();
 
-		private RefreshEventHandler delegateRefresh;
-		private MessageEventHandler delegateMessage;
-		private MouseMoveLazyEventHandler delegateMouseMove;
+		private Action delegateRefresh;
+		private MessageAction delegateMessage;
+		private MouseMoveLazyAction delegateMouseMove;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -185,9 +184,9 @@ namespace DotNetApi.Windows.Controls
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
 
 			// Create the delegates.
-			this.delegateRefresh = new RefreshEventHandler(this.Refresh);
-			this.delegateMessage = new MessageEventHandler(this.OnMessageChanged);
-			this.delegateMouseMove = new MouseMoveLazyEventHandler(this.OnMouseMoveLazyFinish);
+			this.delegateRefresh = new Action(this.Refresh);
+			this.delegateMessage = new MessageAction(this.OnMessageChanged);
+			this.delegateMouseMove = new MouseMoveLazyAction(this.OnMouseMoveLazyFinish);
 
 			// Create the spring motion event handler.
 			this.scrollSpring.Tick += this.OnSpringTick;

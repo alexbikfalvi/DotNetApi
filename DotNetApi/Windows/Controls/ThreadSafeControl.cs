@@ -29,7 +29,7 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class ThreadSafeControl : UserControl
 	{
-		private AutoResetEvent eventHandleCreated = new AutoResetEvent(false);
+		private ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
 
 		/// <summary>
 		/// Creates a new thread-safe control instance.

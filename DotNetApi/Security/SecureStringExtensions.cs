@@ -25,12 +25,6 @@ using DotNetApi;
 namespace DotNetApi.Security
 {
 	/// <summary>
-	/// A delegate for executing 
-	/// </summary>
-	/// <param name="data"></param>
-	public delegate void SecureByteArrayCall(byte[] data);
-
-	/// <summary>
 	/// A class with extensions for secure string objects.
 	/// </summary>
 	public static class SecureStringExtensions

@@ -22,7 +22,11 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void NotificationTaskEventHandler(object[] parameters);
+	/// <summary>
+	/// A delegate used for specifying a task to execute by the notification box.
+	/// </summary>
+	/// <param name="parameters">The task parameters.</param>
+	public delegate void NotificationTaskAction(object[] parameters);
 
 	/// <summary>
 	/// A control that displays a message box overlayed on a given control.
@@ -48,7 +52,7 @@ namespace DotNetApi.Windows.Controls
 		private Color colorTitleBackground = Color.FromArgb(239, 239, 242);
 		private Color colorTitleForeground = SystemColors.GrayText;
 
-		private NotificationTaskEventHandler task = null;
+		private NotificationTaskAction task = null;
 		private object[] parameters = null;
 
 		/// <summary>
@@ -101,7 +105,7 @@ namespace DotNetApi.Windows.Controls
 			string text,
 			bool progress,
 			int duration = -1,
-			NotificationTaskEventHandler task = null,
+			NotificationTaskAction task = null,
 			object[] parameters = null)
 		{
 			// Set the message box parameters.

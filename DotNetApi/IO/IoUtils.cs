@@ -35,47 +35,20 @@ namespace DotNetApi.IO
 		/// <returns>The output buffer data or <b>null</b> if no data was read.</returns>
 		public static byte[] ReadToEnd(this Stream stream)
 		{
-			// Set the buffer original position.
-			long originalPosition = 0;
-
-			// If the stream allows seek.
-			if (stream.CanSeek)
+			// Create a new read buffer.
+			byte[] buffer = new byte[IoUtils.bufferSize];
+			// Create a new memory stream.
+			using (MemoryStream memoryStream = new MemoryStream())
 			{
-				// Save the original position.
-				originalPosition = stream.Position;
-				// Set the stream position to zero.
-				stream.Position = 0;
-			}
-
-			try
-			{
-				// Create a new read buffer.
-				byte[] readBuffer = new byte[IoUtils.bufferSize];
-				// The output buffer.
-				byte[] outputBuffer = null;
-			
 				// Read the stream data into the buffer.
-				for (int bytesRead, length = 0; (bytesRead = stream.Read(readBuffer, 0, readBuffer.Length)) > 0; )
+				for (int bytesRead; (bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0; )
 				{
-					// Resize the output buffer to append the data read.
-					Array.Resize<byte>(ref outputBuffer, length + bytesRead);
-					// Copy the bytes read to the output buffer.
-					Buffer.BlockCopy(readBuffer, 0, outputBuffer, length, bytesRead);
-					// Save the length of the output buffer.
-					length = outputBuffer.Length;
+					// Write the buffer data to the memory stream.
+					memoryStream.Write(buffer, 0, bytesRead);
 				}
 
-				// Return the output buffer.
-				return outputBuffer;
-			}
-			finally
-			{
-				// If can seek in the stream.
-				if (stream.CanSeek)
-				{
-					// Restore the original stream position.
-					stream.Position = originalPosition;
-				}
+				// Return the stream bytes.
+				return memoryStream.ToArray();
 			}
 		}
 	}

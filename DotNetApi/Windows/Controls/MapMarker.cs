@@ -23,10 +23,6 @@ using MapApi;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void MarkerLocationChangedEventHandler(MapMarker marker, MapPoint oldLocation, MapPoint newLocation);
-	public delegate void MarkerSizeChangedEventHandler(MapMarker marker, Size oldSize, Size newSize);
-	public delegate void MarkerEmphasisChangedEventHandler(MapMarker marker, bool oldEmphasis, bool newEmphasis);
-
 	/// <summary>
 	/// A class representing a round map marker.
 	/// </summary>

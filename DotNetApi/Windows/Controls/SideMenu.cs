@@ -28,8 +28,6 @@ using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
 {
-	public delegate void SideMenuEventHandler(SideMenu sideMenu);
-
 	/// <summary>
 	/// A class representing a side menu.
 	/// </summary>

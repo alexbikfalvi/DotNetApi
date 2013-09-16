@@ -22,18 +22,18 @@ using DotNetApi.Windows.Controls;
 
 namespace YtAnalytics.Controls
 {
-	public delegate void ShowNotificationEventHandler(Image image, string title, string text, bool progress, int duration, NotificationTaskEventHandler task, object[] parameters);
-	public delegate void HideNotificationEventHandler(NotificationTaskEventHandler task, object[] parameters);
-
 	/// <summary>
 	/// A controls that displays a notification box.
 	/// </summary>
 	public class NotificationControl : ThreadSafeControl
 	{
+		private delegate void ShowNotificationAction(Image image, string title, string text, bool progress, int duration, NotificationTaskAction task, object[] parameters);
+		private delegate void HideNotificationAction(NotificationTaskAction task, object[] parameters);
+
 		private NotificationBox notification = new NotificationBox();
 
-		private ShowNotificationEventHandler delegateShowMessage;
-		private HideNotificationEventHandler delegateHideMessage;
+		private ShowNotificationAction delegateShowMessage;
+		private HideNotificationAction delegateHideMessage;
 
 		/// <summary>
 		/// Creates a new control instance.
@@ -43,8 +43,8 @@ namespace YtAnalytics.Controls
 			// Add the message control.
 			this.Controls.Add(this.notification);
 			// Create the delegates.
-			this.delegateShowMessage = new ShowNotificationEventHandler(this.ShowMessage);
-			this.delegateHideMessage = new HideNotificationEventHandler(this.HideMessage);
+			this.delegateShowMessage = new ShowNotificationAction(this.ShowMessage);
+			this.delegateHideMessage = new HideNotificationAction(this.HideMessage);
 		}
 
 		// Protected methods.
@@ -65,9 +65,11 @@ namespace YtAnalytics.Controls
 			string text,
 			bool progress = true,
 			int duration = -1,
-			NotificationTaskEventHandler task = null,
+			NotificationTaskAction task = null,
 			object[] parameters = null)
 		{
+			// If the control has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Invoke the function on the UI thread.
 			if (this.InvokeRequired)
 				this.Invoke(this.delegateShowMessage, new object[] { image, title, text, progress, duration, task, parameters });
@@ -85,8 +87,10 @@ namespace YtAnalytics.Controls
 		/// </summary>
 		/// <param name="task">A task to execute on the UI thread after the message is hidden.</param>
 		/// <param name="parameters">The task parameters.</param>
-		protected void HideMessage(NotificationTaskEventHandler task = null, object[] parameters = null)
+		protected void HideMessage(NotificationTaskAction task = null, object[] parameters = null)
 		{
+			// If the control has been disposed, do nothing.
+			if (this.IsDisposed) return;
 			// Invoke the function on the UI thread.
 			if (this.InvokeRequired)
 				this.Invoke(this.delegateHideMessage, new object[] { task, parameters });
