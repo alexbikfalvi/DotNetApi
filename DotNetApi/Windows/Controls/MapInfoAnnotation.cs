@@ -46,8 +46,8 @@ namespace DotNetApi.Windows.Controls
 			: base(text, null, translation)
 		{
 			// Validate the parameters.
-			boundary.ValidateNotNull("boundary");
-			translation.ValidateNotNull("translation");
+			if (null == boundary) throw new ArgumentNullException("boundary");
+			if (null == translation) throw new ArgumentNullException("translation");
 			// Set the annotation defaults.
 			this.BackgroundColor = Color.White;
 			this.Visible = false;

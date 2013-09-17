@@ -272,7 +272,7 @@ namespace DotNetApi.Drawing
 		/// <returns>The point.</returns>
 		public static Point Min(this Point[] points)
 		{
-			points.ValidateNotNull("points");
+			if (null == points) throw new ArgumentNullException("points");
 
 			int x = int.MaxValue;
 			int y = int.MaxValue;
@@ -293,7 +293,7 @@ namespace DotNetApi.Drawing
 		/// <returns>The point.</returns>
 		public static Point Max(this Point[] points)
 		{
-			points.ValidateNotNull("points");
+			if (null == points) throw new ArgumentNullException("points");
 
 			int x = int.MinValue;
 			int y = int.MinValue;

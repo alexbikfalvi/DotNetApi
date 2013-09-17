@@ -18,6 +18,7 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 
 namespace DotNetApi
 {
@@ -26,6 +27,32 @@ namespace DotNetApi
 	/// </summary>
 	public static class Formatting
 	{
+		/// <summary>
+		/// Converts the specified object into an extended string.
+		/// </summary>
+		/// <param name="value">The object.</param>
+		/// <returns>The string.</returns>
+		public static string ToExtendedString(this object value)
+		{
+			if (value is byte[]) return (value as byte[]).ToExtendedString();
+			else return value.ToString();
+		}
+
+		/// <summary>
+		/// Converts the specified byte array into an extended string.
+		/// </summary>
+		/// <param name="value">The byte array.</param>
+		/// <returns>The string.</returns>
+		public static string ToExtendedString(this byte[] value)
+		{
+			StringBuilder builder = new StringBuilder();
+			foreach (byte b in value)
+			{
+				builder.AppendFormat(CultureInfo.InvariantCulture, "{0:X2} ", b);
+			}
+			return builder.ToString();
+		}
+
 		/// <summary>
 		/// Formats the specified string using the list of arguments and an invariant culture.
 		/// </summary>

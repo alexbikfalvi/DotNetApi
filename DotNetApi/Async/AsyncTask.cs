@@ -77,7 +77,7 @@ namespace DotNetApi.Async
 		public void ExecuteReady(AsyncTaskCallback method, object userState = null)
 		{
 			// Validate the arguments.
-			method.ValidateNotNull("method");
+			if (null == method) throw new ArgumentNullException("method");
 
 			// Lock the state mutex.
 			this.mutexState.WaitOne();
@@ -103,7 +103,7 @@ namespace DotNetApi.Async
 		public void ExecuteAlways(AsyncTaskCallback method, object userState = null)
 		{
 			// Validate the arguments.
-			method.ValidateNotNull("method");
+			if (null == method) throw new ArgumentNullException("method");
 
 			// Lock the state mutex.
 			this.mutexState.WaitOne();

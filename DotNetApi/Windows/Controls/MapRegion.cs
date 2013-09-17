@@ -49,7 +49,7 @@ namespace DotNetApi.Windows.Controls
 		public MapRegion(MapShapePolygon shape)
 		{
 			// Validate the parameters.
-			shape.ValidateNotNull("shape");
+			if (null == shape) throw new ArgumentNullException("shape");
 
 			// Save the map shape.
 			this.shape = shape;

@@ -176,7 +176,7 @@ namespace DotNetApi.Windows.Controls
 		protected virtual void OnAnchorChanged(IAnchor anchor)
 		{
 			// Check the anchor is not null.
-			anchor.ValidateNotNull("anchor");
+			if (null == anchor) throw new ArgumentNullException("anchor");
 			// Set the anchor.
 			this.anchor = anchor;
 			// Update the bounds measurements.
@@ -190,7 +190,7 @@ namespace DotNetApi.Windows.Controls
 		protected virtual void OnTranslationChanged(ITranslation translation)
 		{
 			// Check the anchor is not null.
-			translation.ValidateNotNull("translation");
+			if (null == translation) throw new ArgumentNullException("translation");
 			// Set the translation.
 			this.translation = translation;
 			// Update the bounds measurements.
