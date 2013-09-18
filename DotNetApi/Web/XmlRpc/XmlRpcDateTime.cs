@@ -48,6 +48,8 @@ namespace DotNetApi.Web.XmlRpc
 			this.Value = DateTime.Parse(element.Value);
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -57,6 +59,51 @@ namespace DotNetApi.Web.XmlRpc
 		/// The object value;
 		/// </summary>
 		public DateTime Value { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcDateTime) return this.Equals(obj as XmlRpcDateTime);
+			if (obj is DateTime) return this.Equals((DateTime)obj);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcDateTime obj)
+		{
+			return this.Value == obj.Value;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(DateTime obj)
+		{
+			return this.Value == obj;
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Value.GetHashCode();
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

@@ -66,6 +66,8 @@ namespace DotNetApi.Web.XmlRpc
 			}
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -77,6 +79,42 @@ namespace DotNetApi.Web.XmlRpc
 		/// <param name="index">The index.</param>
 		/// <returns>The XML RPC parameter.</returns>
 		public XmlRpcParameter this[int index] { get { return this.parameters[index]; } }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcParameters) return this.Equals(obj as XmlRpcParameters);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcParameters obj)
+		{
+			return this.parameters.SequenceEqual(obj.parameters);
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			int code = 0;
+			foreach (XmlRpcParameter parameter in this.parameters) code ^= parameter.GetHashCode();
+			return code;
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this parameters list.

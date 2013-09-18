@@ -72,6 +72,7 @@
     <Compile Include="IO\IoUtils.cs" />
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="UnsafeNativeMethods.cs" />
+    <Compile Include="Web\XmlRpc\XmlRpcExtensions.cs" />
     <Compile Include="Windows\Controls\ConcurrentComponentCollection.cs" />
     <Compile Include="Windows\Controls\ImageListBoxItemActivateEventArgs.cs" />
     <Compile Include="Windows\Controls\MapInfoAnnotation.cs">

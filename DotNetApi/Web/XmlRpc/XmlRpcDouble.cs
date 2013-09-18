@@ -48,6 +48,8 @@ namespace DotNetApi.Web.XmlRpc
 			this.Value = double.Parse(element.Value);
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -57,6 +59,51 @@ namespace DotNetApi.Web.XmlRpc
 		/// The object value;
 		/// </summary>
 		public double Value { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcDouble) return this.Equals(obj as XmlRpcDouble);
+			if (obj is double) return this.Equals((double)obj);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcDouble obj)
+		{
+			return this.Value == obj.Value;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(double obj)
+		{
+			return this.Value == obj;
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Value.GetHashCode();
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

@@ -49,6 +49,8 @@ namespace DotNetApi.Web.XmlRpc
 			this.Value = new XmlRpcValue(element.FirstNode as XElement);
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -58,6 +60,41 @@ namespace DotNetApi.Web.XmlRpc
 		/// Returns the XML RPC value object corresponding to this parameter.
 		/// </summary>
 		public XmlRpcValue Value { get; private set; }
+
+		// Public methods.
+
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcParameter) return this.Equals(obj as XmlRpcParameter);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcParameter obj)
+		{
+			return this.Value.Equals(obj.Value);
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Value.GetHashCode();
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this parameter.

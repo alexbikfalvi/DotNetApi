@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace DotNetApi.Web.XmlRpc
@@ -48,6 +49,8 @@ namespace DotNetApi.Web.XmlRpc
 			this.Value = Convert.FromBase64String(element.Value);
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -57,6 +60,53 @@ namespace DotNetApi.Web.XmlRpc
 		/// The object value;
 		/// </summary>
 		public byte[] Value { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcBase64) return this.Equals(obj as XmlRpcBase64);
+			if (obj is byte[]) return this.Equals(obj as byte[]);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcBase64 obj)
+		{
+			return this.Value.SequenceEqual(obj.Value);
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(byte[] obj)
+		{
+			return this.Value.SequenceEqual(obj);
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			int code = 0;
+			foreach (byte b in this.Value) code ^= b.GetHashCode();
+			return code;
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

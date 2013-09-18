@@ -45,6 +45,8 @@ namespace DotNetApi.Web.XmlRpc
 			if (element.Name.LocalName != XmlRpcNil.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcNil.xmlName, element.Name.LocalName));
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Returns the XML name.
 		/// </summary>
@@ -54,6 +56,30 @@ namespace DotNetApi.Web.XmlRpc
 		/// The object value;
 		/// </summary>
 		public object Value { get { return null; } }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcNil) return true;
+			return false;
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return 0;
+		}
 
 		/// <summary>
 		/// Returns the XML element correspoding to this object.

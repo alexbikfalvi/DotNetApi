@@ -62,12 +62,8 @@ namespace DotNetApi.Web.XmlRpc
 				// Add all parameters to the parameters element.
 				foreach (object parameter in parameters)
 				{
-					using (XmlRpcObject obj = XmlRpcObject.Create(parameter))
-					{
-						XElement elementParam = new XElement(XmlRpcRequest.xmlParam,
-							new XElement(XmlRpcRequest.xmlValue, obj.GetXml()));
-						elementParams.Add(elementParam);
-					}
+					XElement elementParam = new XElement(XmlRpcRequest.xmlParam, new XElement(XmlRpcRequest.xmlValue, XmlRpcObject.Create(parameter).GetXml()));
+					elementParams.Add(elementParam);
 				}
 				// Add the parameters element to the method call.
 				elementMethodCall.Add(elementParams);

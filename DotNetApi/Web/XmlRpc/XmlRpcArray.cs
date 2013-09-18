@@ -48,6 +48,21 @@ namespace DotNetApi.Web.XmlRpc
 		}
 
 		/// <summary>
+		/// Creates a new array instance from the specified values array.
+		/// </summary>
+		/// <param name="values">The values array.</param>
+		public XmlRpcArray(IEnumerable<XmlRpcValue> values)
+		{
+			this.Values = new XmlRpcValue[values.Count()];
+
+			int index = 0;
+			foreach (XmlRpcValue value in values)
+			{
+				this.Values[index++] = value;
+			}
+		}
+
+		/// <summary>
 		/// Creates a new array instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
@@ -65,6 +80,8 @@ namespace DotNetApi.Web.XmlRpc
 				this.Values[index++] = new XmlRpcValue(el);
 			}
 		}
+
+		// Public properties.
 
 		/// <summary>
 		/// Returns the XML name.
@@ -87,6 +104,42 @@ namespace DotNetApi.Web.XmlRpc
 		/// Returns the array values.
 		/// </summary>
 		public XmlRpcValue[] Values { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcArray) return this.Equals(obj as XmlRpcArray);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcArray obj)
+		{
+			return this.Values.SequenceEqual(obj.Values);
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			int code = 0;
+			foreach (XmlRpcValue value in this.Values) code ^= value.GetHashCode();
+			return code;
+		}
 
 		/// <summary>
 		/// Returns the XML element corresponding to this object.

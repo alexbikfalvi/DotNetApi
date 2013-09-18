@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
@@ -122,6 +123,40 @@ namespace DotNetApi.Web.XmlRpc
 		public ICollection<KeyValuePair<string, XmlRpcMember>> Members { get { return this.members; } }
 
 		// Public methods.
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (object.ReferenceEquals(this, obj)) return true;
+			if (obj is XmlRpcStruct) return this.Equals(obj as XmlRpcStruct);
+			return false;
+		}
+
+		/// <summary>
+		/// Compares this object with the specified argument.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two objects are equal, <b>false</b> otherwise.</returns>
+		public bool Equals(XmlRpcStruct obj)
+		{
+			return this.members.SequenceEqual(obj.members);
+		}
+
+		/// <summary>
+		/// Returns the hash code for the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			int code = 0;
+			foreach (KeyValuePair<string, XmlRpcMember> member in this.members) code ^= member.Key.GetHashCode() ^ member.Value.GetHashCode();
+			return code;
+		}
 
 		/// <summary>
 		/// Returns the XML element corresponding to this object.

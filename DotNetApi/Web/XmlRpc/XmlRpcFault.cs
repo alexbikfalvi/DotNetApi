@@ -40,11 +40,11 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcFault(XElement element)
 		{
 			if (element.Name.LocalName != XmlRpcFault.xmlFault) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcFault.xmlFault, element.Name.LocalName));
-			using (XmlRpcStruct structFault = new XmlRpcStruct(element.Elements(XmlRpcFault.xmlValue).FirstOrDefault()))
-			{
-				this.FaultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
-				this.FaultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;
-			}
+
+			XmlRpcStruct structFault = new XmlRpcValue(element.Elements(XmlRpcFault.xmlValue).FirstOrDefault()).Value as XmlRpcStruct;
+
+			this.FaultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
+			this.FaultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;
 		}
 
 		/// <summary>

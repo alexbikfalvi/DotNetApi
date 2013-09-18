@@ -139,7 +139,6 @@ namespace DotNetApi.Windows.Controls
 		private bool showBorders = true;
 		private bool showMarkers = true;
 		private bool showMajorGrid = true;
-		private bool showMinorGrid = true;
 
 		// Asynchronous.
 		private AsyncTask task = new AsyncTask();

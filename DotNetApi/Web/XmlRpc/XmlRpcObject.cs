@@ -26,7 +26,7 @@ namespace DotNetApi.Web.XmlRpc
 	/// An XML RPC object.
 	/// </summary>
 	[Serializable]
-	public abstract class XmlRpcObject : IDisposable
+	public abstract class XmlRpcObject
 	{
 		/// <summary>
 		/// Create a new object from the specified value. If the value is an <code>XmlRpcObject</code>, the object is returned with
@@ -88,17 +88,6 @@ namespace DotNetApi.Web.XmlRpc
 		/// <returns>The object value.</returns>
 		public abstract object GetValue();
 
-		/// <summary>
-		/// Disposes the current object.
-		/// </summary>
-		public void Dispose()
-		{
-			// Call the event handler.
-			this.Dispose(true);
-			// Supress the finalizer.
-			GC.SuppressFinalize(this);
-		}
-
 		// Public properties.
 
 		/// <summary>
@@ -143,16 +132,6 @@ namespace DotNetApi.Web.XmlRpc
 		public T[] AsArray<T>()
 		{
 			return this is XmlRpcArray ? (this as XmlRpcArray).GetArray<T>() : null;
-		}
-
-		// Protected methods.
-
-		/// <summary>
-		/// An event handler called when the object is being disposed.
-		/// </summary>
-		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
-		protected virtual void Dispose(bool disposed)
-		{
 		}
 	}
 }
