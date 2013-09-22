@@ -111,6 +111,8 @@
     <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
     <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\WizardControl.cs" />
+    <Compile Include="Windows\Controls\WizardPage.cs" />
     <Compile Include="Windows\Cursors.cs" />
     <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
