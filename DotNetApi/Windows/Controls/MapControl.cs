@@ -306,6 +306,9 @@ namespace DotNetApi.Windows.Controls
 			set { this.markerAutoDispose = value; }
 		}
 
+		/// <summary>
+		/// Gets the highlighted marker.
+		/// </summary>
 		[Browsable(false)]
 		public MapMarker HighlightedMarker
 		{
