@@ -74,6 +74,7 @@
     <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcExtensions.cs" />
     <Compile Include="Windows\Controls\ConcurrentComponentCollection.cs" />
+    <Compile Include="Windows\Controls\Extensions.cs" />
     <Compile Include="Windows\Controls\ImageListBoxItemActivateEventArgs.cs" />
     <Compile Include="Windows\Controls\MapInfoAnnotation.cs">
       <SubType>Component</SubType>
