@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -30,7 +31,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Returns the first element in the list view items collection that matches the specified predicate.
 		/// </summary>
-		/// <param name="items">The list of items.</param>
+		/// <param name="items">The collection of list view items.</param>
 		/// <param name="predicate">The predicate.</param>
 		/// <returns>The list view item found, or the default value otherwise.</returns>
 		public static ListViewItem FirstOrDefault(this ListView.ListViewItemCollection items, Func<ListViewItem, bool> predicate)
@@ -40,6 +41,24 @@ namespace DotNetApi.Windows.Controls
 				if (predicate(item)) return item;
 			}
 			return default(ListViewItem);
+		}
+
+		/// <summary>
+		/// Returns an array with the checked list view items.
+		/// </summary>
+		/// <param name="items">The collection of list view items.</param>
+		/// <returns>The array with the checked list view items.</returns>
+		public static IList<ListViewItem> Checked(this ListView.ListViewItemCollection items)
+		{
+			// Create a list with the checked list view items.
+			List<ListViewItem> list = new List<ListViewItem>();
+			// Add the checked list view items.
+			foreach (ListViewItem item in items)
+			{
+				if (item.Checked) list.Add(item);
+			}
+			// Return the list.
+			return list;
 		}
 	}
 }
