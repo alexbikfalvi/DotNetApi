@@ -47,8 +47,10 @@
     <Compile Include="Async\AsyncResult.cs" />
     <Compile Include="Async\AsyncState.cs" />
     <Compile Include="Async\AsyncTask.cs" />
+    <Compile Include="Concurrent\ConcurrentBase.cs" />
     <Compile Include="Concurrent\ConcurrentCollectionBase.cs" />
     <Compile Include="Concurrent\ConcurrentList.cs" />
+    <Compile Include="Concurrent\Generic\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentList.cs" />
     <Compile Include="Conversion.cs" />
     <Compile Include="Drawing\Effect.cs" />
