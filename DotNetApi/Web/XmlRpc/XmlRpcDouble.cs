@@ -42,10 +42,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new double instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcDouble(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcDouble(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcDouble.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcDouble.xmlName, element.Name.LocalName));
-			this.Value = double.Parse(element.Value);
+			this.Value = double.Parse(element.Value, format);
 		}
 
 		// Public properties.

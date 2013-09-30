@@ -51,7 +51,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new instance of XML RPC parameters from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcParameters(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcParameters(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcParameters.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcParameters.xmlName, element.Name.LocalName));
 			// Create the value of each XML RPC parameter from the inner XML elements.
@@ -62,7 +63,7 @@ namespace DotNetApi.Web.XmlRpc
 			int index = 0;
 			foreach (XElement el in elements)
 			{
-				this.parameters[index++] = new XmlRpcParameter(el);
+				this.parameters[index++] = new XmlRpcParameter(el, format);
 			}
 		}
 

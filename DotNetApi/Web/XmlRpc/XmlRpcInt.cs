@@ -42,10 +42,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new integer instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcInt(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcInt(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcInt.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcInt.xmlName, element.Name.LocalName));
-			this.Value = int.Parse(element.Value);
+			this.Value = int.Parse(element.Value, format);
 		}
 
 		// Public properties.

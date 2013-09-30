@@ -109,6 +109,38 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		/// <summary>
+		/// Checks all items.
+		/// </summary>
+		public void CheckAll()
+		{
+			foreach (CheckedListItem item in this.items)
+			{
+				item.State = CheckState.Checked;
+			}
+			for (int index = 0; index < this.listBox.Items.Count; index++)
+			{
+				this.listBox.SetItemCheckState(index, CheckState.Checked);
+			}
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// Unchecks all items.
+		/// </summary>
+		public void UncheckAll()
+		{
+			foreach (CheckedListItem item in this.items)
+			{
+				item.State = CheckState.Unchecked;
+			}
+			for (int index = 0; index < this.listBox.Items.Count; index++)
+			{
+				this.listBox.SetItemCheckState(index, CheckState.Unchecked);
+			}
+			this.Refresh();
+		}
+
 		// Private methods.
 
 		/// <summary>
@@ -130,7 +162,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A structure representing a value check-state pair.
 	/// </summary>
-	public struct CheckedListItem
+	public sealed class CheckedListItem
 	{
 		private object item;
 		private string name;

@@ -78,13 +78,14 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new struct instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcStruct(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcStruct(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcStruct.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcStruct.xmlName, element.Name.LocalName));
 			foreach (XElement child in element.Elements(XmlRpcMember.XmlName))
 			{
 				// Create a new member for each public property.
-				XmlRpcMember member = new XmlRpcMember(child);
+				XmlRpcMember member = new XmlRpcMember(child, format);
 				// Add the member to the struct list.
 				this.members.Add(member.Name, member);
 			}		

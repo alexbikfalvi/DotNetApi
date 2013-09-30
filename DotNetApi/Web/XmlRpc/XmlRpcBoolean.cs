@@ -45,7 +45,6 @@ namespace DotNetApi.Web.XmlRpc
 		public XmlRpcBoolean(XElement element)
 		{
 			if(element.Name.LocalName != XmlRpcBoolean.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcBoolean.xmlName, element.Name.LocalName));
-
 			switch (element.Value.ToLower())
 			{
 				case "0": this.Value = false; break;

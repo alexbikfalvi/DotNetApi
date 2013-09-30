@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Globalization;
 using DotNetApi.Web;
 
 namespace DotNetApi.Web.XmlRpc
@@ -28,18 +29,37 @@ namespace DotNetApi.Web.XmlRpc
 		/// </summary>
 		public class XmlRpcResponseRequestFunction : IAsyncFunction<XmlRpcResponse>
 		{
+			private IFormatProvider format;
+
+			public XmlRpcResponseRequestFunction(IFormatProvider format)
+			{
+				this.format = format;
+			}
+
 			/// <summary>
 			/// Returns a string for the received asynchronous data.
 			/// </summary>
 			/// <param name="data">The data string.</param>
+			/// <param name="format">The format.</param>
 			/// <returns>The XML RPC response.</returns>
 			public XmlRpcResponse GetResult(string data)
 			{
-				return XmlRpcResponse.Create(data);
+				return XmlRpcResponse.Create(data, this.format);
 			}
 		}
 
-		private XmlRpcResponseRequestFunction funcConvert = new XmlRpcResponseRequestFunction();
+		private readonly XmlRpcResponseRequestFunction funcConvert;
+		private readonly CultureInfo culture;
+
+		/// <summary>
+		/// Creates a new request instance.
+		/// </summary>
+		/// <param name="culture">The culture used for the current request.</param>
+		public XmlRpcAsyncRequest(CultureInfo culture)
+		{
+			this.funcConvert = new XmlRpcResponseRequestFunction(culture);
+			this.culture = culture;
+		}
 
 		/// <summary>
 		/// Begins an asynchronous XML RPC request.
@@ -66,6 +86,7 @@ namespace DotNetApi.Web.XmlRpc
 			asyncState.Request.Method = "POST";
 			asyncState.Request.ContentType = "text/xml";
 			asyncState.Request.ContentLength = request.Length;
+			asyncState.Request.Headers["Accept-Language"] = this.culture.Name;
 			asyncState.Request.GetRequestStream().Write(request, 0, request.Length);
 
 			// Begin the request.

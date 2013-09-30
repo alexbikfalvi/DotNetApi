@@ -37,11 +37,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new XML RPC fault instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcFault(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcFault(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcFault.xmlFault) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcFault.xmlFault, element.Name.LocalName));
 
-			XmlRpcStruct structFault = new XmlRpcValue(element.Elements(XmlRpcFault.xmlValue).FirstOrDefault()).Value as XmlRpcStruct;
+			XmlRpcStruct structFault = new XmlRpcValue(element.Elements(XmlRpcFault.xmlValue).FirstOrDefault(), format).Value as XmlRpcStruct;
 
 			this.FaultCode = (structFault[XmlRpcFault.xmlFaultCode].Value.Value as XmlRpcInt).Value;
 			this.FaultString = (structFault[XmlRpcFault.xmlFaultString].Value.Value as XmlRpcString).Value;

@@ -43,11 +43,12 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new XML-RPC value object from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcValue(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcValue(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcValue.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcValue.xmlName, element.Name.LocalName));
 			// Create the value XML RPC object from the inner XML element.
-			this.Value = XmlRpcObject.Create(element.Elements().FirstOrDefault());
+			this.Value = XmlRpcObject.Create(element.Elements().FirstOrDefault(), format);
 		}
 
 		// Public properties.

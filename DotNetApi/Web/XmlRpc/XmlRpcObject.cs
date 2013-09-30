@@ -60,18 +60,19 @@ namespace DotNetApi.Web.XmlRpc
 		/// Create a new object from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
+		/// <param name="format">The format.</param>
 		/// <returns>The XML RPC object.</returns>
-		public static XmlRpcObject Create(XElement element)
+		public static XmlRpcObject Create(XElement element, IFormatProvider format)
 		{
 			if (element == null) return null;
-			else if (element.Name == XmlRpcInt.XmlName) return new XmlRpcInt(element);
+			else if (element.Name == XmlRpcInt.XmlName) return new XmlRpcInt(element, format);
 			else if (element.Name == XmlRpcBoolean.XmlName) return new XmlRpcBoolean(element);
 			else if (element.Name == XmlRpcString.XmlName) return new XmlRpcString(element);
-			else if (element.Name == XmlRpcDouble.XmlName) return new XmlRpcDouble(element);
-			else if (element.Name == XmlRpcDateTime.XmlName) return new XmlRpcDateTime(element);
+			else if (element.Name == XmlRpcDouble.XmlName) return new XmlRpcDouble(element, format);
+			else if (element.Name == XmlRpcDateTime.XmlName) return new XmlRpcDateTime(element, format);
 			else if (element.Name == XmlRpcBase64.XmlName) return new XmlRpcBase64(element);
-			else if (element.Name == XmlRpcStruct.XmlName) return new XmlRpcStruct(element);
-			else if (element.Name == XmlRpcArray.XmlName) return new XmlRpcArray(element);
+			else if (element.Name == XmlRpcStruct.XmlName) return new XmlRpcStruct(element, format);
+			else if (element.Name == XmlRpcArray.XmlName) return new XmlRpcArray(element, format);
 			else if (element.Name == XmlRpcNil.XmlName) return new XmlRpcNil(element);
 			else throw new XmlRpcException(string.Format("Unknown XML element \'{0}\'.", element.Name));
 		}

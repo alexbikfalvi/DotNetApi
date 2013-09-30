@@ -42,10 +42,11 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new boolean instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcDateTime(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcDateTime(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcDateTime.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcDateTime.xmlName, element.Name.LocalName));
-			this.Value = DateTime.Parse(element.Value);
+			this.Value = DateTime.Parse(element.Value, format);
 		}
 
 		// Public properties.

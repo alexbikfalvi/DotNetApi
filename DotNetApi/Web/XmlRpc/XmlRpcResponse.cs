@@ -35,7 +35,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// Private constructor.
 		/// </summary>
 		/// <param name="xml">The XML string corresponding to this response.</param>
-		private XmlRpcResponse(string xml)
+		/// <param name="format">The format.</param>
+		private XmlRpcResponse(string xml, IFormatProvider format)
 		{
 			// Set the XML string.
 			this.Xml = xml;
@@ -50,14 +51,14 @@ namespace DotNetApi.Web.XmlRpc
 			// Parse the XML from the response parameter, if any.
 			if(null != (element = document.Root.Element(XmlRpcResponse.xmlParams)))
 			{
-				try { this.Value = (new XmlRpcParameters(element))[0].Value.Value; }
+				try { this.Value = (new XmlRpcParameters(element, format))[0].Value.Value; }
 				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
 			}
 
 			// Parse the XML from the response fault, if any.
 			if (null != (element = document.Root.Element(XmlRpcResponse.xmlFault)))
 			{
-				try { this.Fault = new XmlRpcFault(element); }
+				try { this.Fault = new XmlRpcFault(element, format); }
 				catch (Exception exception) { throw new XmlRpcException(string.Format("Cannot parse the XML element. {0}", exception.Message), exception); }
 			}
 		}
@@ -66,8 +67,9 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates an XML RPC response.
 		/// </summary>
 		/// <param name="xml">The XML string representing the response.</param>
+		/// <param name="format">The format.</param>
 		/// <returns>The XML RPC response object.</returns>
-		public static XmlRpcResponse Create(string xml)
+		public static XmlRpcResponse Create(string xml, IFormatProvider format)
 		{
 			XElement element = XDocument.Parse(xml).Root;
 
@@ -75,7 +77,7 @@ namespace DotNetApi.Web.XmlRpc
 			if (element.Name.LocalName != XmlRpcResponse.xmlMethodResponse) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcResponse.xmlMethodResponse, element.Name.LocalName));
 
 			// Create and return a new response object.
-			return new XmlRpcResponse(xml);
+			return new XmlRpcResponse(xml, format);
 		}
 
 		/// <summary>

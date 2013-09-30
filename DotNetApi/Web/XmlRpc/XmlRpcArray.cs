@@ -66,7 +66,8 @@ namespace DotNetApi.Web.XmlRpc
 		/// Creates a new array instance from the specified XML element.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
-		public XmlRpcArray(XElement element)
+		/// <param name="format">The format.</param>
+		public XmlRpcArray(XElement element, IFormatProvider format)
 		{
 			if (element.Name.LocalName != XmlRpcArray.xmlName) throw new XmlRpcException(string.Format("Invalid \'{0}\' XML element name \'{1}\'.", XmlRpcArray.xmlName, element.Name.LocalName));
 			// Get the sub-elements of the "data" element.
@@ -77,7 +78,7 @@ namespace DotNetApi.Web.XmlRpc
 			uint index = 0;
 			foreach (XElement el in elements)
 			{
-				this.Values[index++] = new XmlRpcValue(el);
+				this.Values[index++] = new XmlRpcValue(el, format);
 			}
 		}
 
