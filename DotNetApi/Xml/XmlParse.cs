@@ -37,17 +37,17 @@ namespace DotNetApi.Xml
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a signed integer.
+		/// Parses the specified value string to a signed integer using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The signed integer value.</returns>
 		public static int ToInt(this string value)
 		{
-			return int.Parse(value);
+			return int.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a signed integer.
+		/// Parses the specified value string to a signed integer using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="defaultValue">The default value, if the string cannot be parsed.</param>
@@ -55,11 +55,11 @@ namespace DotNetApi.Xml
 		public static int ToInt(this string value, int defaultValue)
 		{
 			int result;
-			return int.TryParse(value, out result) ? result : defaultValue;
+			return int.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a signed integer, using the specified style for an invariant culture.
+		/// Parses the specified value string to a signed integer, using the specified style for the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="style">The number style.</param>
@@ -68,7 +68,7 @@ namespace DotNetApi.Xml
 		public static int ToInt(this string value, NumberStyles style, int defaultValue)
 		{
 			int result;
-			return int.TryParse(value, style, NumberFormatInfo.InvariantInfo, out result) ? result : defaultValue;
+			return int.TryParse(value, style, CultureInfo.CurrentCulture, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
@@ -78,31 +78,31 @@ namespace DotNetApi.Xml
 		/// <returns>The unsigned integer value.</returns>
 		public static uint ToUint(this string value)
 		{
-			return uint.Parse(value);
+			return uint.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a signed 64-bit integer.
+		/// Parses the specified value string to a signed 64-bit integer using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The signed 64-bit integer value.</returns>
 		public static Int64 ToInt64(this string value)
 		{
-			return Int64.Parse(value);
+			return Int64.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a double floating-point number.
+		/// Parses the specified value string to a double floating-point number using the current cultures.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The double value.</returns>
 		public static double ToDouble(this string value)
 		{
-			return double.Parse(value);
+			return double.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a double floating-point number.
+		/// Parses the specified value string to a double floating-point number using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="defaultValue">The default value, if the string cannot be parsed.</param>
@@ -110,21 +110,21 @@ namespace DotNetApi.Xml
 		public static double ToDouble(this string value, double defaultValue)
 		{
 			double result;
-			return double.TryParse(value, out result) ? result : defaultValue;
+			return double.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a decimal number.
+		/// Parses the specified value string to a decimal number using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The decimal value.</returns>
 		public static decimal ToDecimal(this string value)
 		{
-			return decimal.Parse(value);
+			return decimal.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a decimal number.
+		/// Parses the specified value string to a decimal number using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="defaultValue">The default value, if the string cannot be parsed.</param>
@@ -132,21 +132,21 @@ namespace DotNetApi.Xml
 		public static decimal ToDecimal(this string value, decimal defaultValue)
 		{
 			decimal result;
-			return decimal.TryParse(value, out result) ? result : defaultValue;
+			return decimal.TryParse(value, NumberStyles.Any, CultureInfo.CurrentCulture, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a date-time.
+		/// Parses the specified value string to a date-time using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The date-time value.</returns>
 		public static DateTime ToDateTime(this string value)
 		{
-			return DateTime.Parse(value);
+			return DateTime.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a date-time.
+		/// Parses the specified value string to a date-time using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="defaultValue">The default value, if the string cannot be parsed.</param>
@@ -154,21 +154,21 @@ namespace DotNetApi.Xml
 		public static DateTime ToDateTime(this string value, DateTime defaultValue)
 		{
 			DateTime result;
-			return DateTime.TryParse(value, out result) ? result : defaultValue;
+			return DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a time-span.
+		/// Parses the specified value string to a time-span using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <returns>The time-span value.</returns>
 		public static TimeSpan ToTimeSpan(this string value)
 		{
-			return TimeSpan.Parse(value);
+			return TimeSpan.Parse(value, CultureInfo.CurrentCulture);
 		}
 
 		/// <summary>
-		/// Parses the specified value string to a time-span.
+		/// Parses the specified value string to a time-span using the current culture.
 		/// </summary>
 		/// <param name="value">The value string to parse.</param>
 		/// <param name="defaultValue">The default value, if the string cannot be parsed.</param>
@@ -176,7 +176,7 @@ namespace DotNetApi.Xml
 		public static TimeSpan ToTimeSpan(this string value, TimeSpan defaultValue)
 		{
 			TimeSpan result;
-			return TimeSpan.TryParse(value, out result) ? result : defaultValue;
+			return TimeSpan.TryParse(value, CultureInfo.CurrentCulture, out result) ? result : defaultValue;
 		}
 
 		/// <summary>
