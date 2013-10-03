@@ -280,7 +280,7 @@ namespace DotNetApi.Concurrent
 			LockInfo info = this.AcquireWriterLock();
 			try
 			{
-				// Insert the item.
+				// Remove the item.
 				this.list.Remove(item);
 			}
 			finally
