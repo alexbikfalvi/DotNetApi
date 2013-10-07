@@ -203,7 +203,7 @@ namespace DotNetApi.Concurrent
 		public IEnumerator GetEnumerator()
 		{
 			// The thread must first acquire a lock before retrieving the enumerator.
-			if (!this.HasLock()) throw new SynchronizationLockException();
+			if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 			return this.list.GetEnumerator();
 		}
 

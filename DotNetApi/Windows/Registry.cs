@@ -27,7 +27,7 @@ namespace DotNetApi.Windows
 	/// <summary>
 	/// A class that simplifies access to the registry for common data types.
 	/// </summary>
-	public class Registry
+	public static class Registry
 	{
 		/// <summary>
 		/// Reads a boolean value from the registry.
@@ -47,7 +47,24 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
-		/// Writes an integer value to the registry.
+		/// Reads a boolean value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static bool GetBoolean(this RegistryKey key, string name, bool defaultValue)
+		{
+			try
+			{
+				object value = key.GetValue(name, defaultValue, RegistryValueOptions.None);
+				return null != value ? Convert.ToBoolean(value) : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Writes a boolean value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
 		/// <param name="valueName">The value name.</param>
@@ -55,6 +72,17 @@ namespace DotNetApi.Windows
 		public static void SetBoolean(string keyName, string valueName, bool value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value ? 1 : 0, RegistryValueKind.DWord);
+		}
+
+		/// <summary>
+		/// Writes a boolean value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetBoolean(this RegistryKey key, string name, bool value)
+		{
+			key.SetValue(name, value, RegistryValueKind.DWord);
 		}
 
 		/// <summary>
@@ -75,6 +103,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads an integer value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static int GetInteger(this RegistryKey key, string name, int defaultValue)
+		{
+			try
+			{
+				object value = key.GetValue(name, defaultValue, RegistryValueOptions.None);
+				return null != value ? Convert.ToInt32(value) : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes an integer value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -83,6 +128,17 @@ namespace DotNetApi.Windows
 		public static void SetInteger(string keyName, string valueName, int value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value, RegistryValueKind.DWord);
+		}
+
+		/// <summary>
+		/// Writes an integer value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetInteger(this RegistryKey key, string name, int value)
+		{
+			key.SetValue(name, value, RegistryValueKind.DWord);
 		}
 
 		/// <summary>
@@ -99,7 +155,24 @@ namespace DotNetApi.Windows
 				string value;
 				return null != (value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue) as string) ? value : defaultValue;
 			}
-			catch (Exception) { return defaultValue; }
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Reads a string value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static string GetString(this RegistryKey key, string name, string defaultValue)
+		{
+			try
+			{
+				string value;
+				return null != (value = key.GetValue(name, defaultValue, RegistryValueOptions.None) as string) ? value : defaultValue;
+			}
+			catch { return defaultValue; }
 		}
 
 		/// <summary>
@@ -111,6 +184,17 @@ namespace DotNetApi.Windows
 		public static void SetString(string keyName, string valueName, string value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value, RegistryValueKind.String);
+		}
+
+		/// <summary>
+		/// Writes a string value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetString(this RegistryKey key, string name, string value)
+		{
+			key.SetValue(name, value, RegistryValueKind.String);
 		}
 
 		/// <summary>
@@ -127,7 +211,24 @@ namespace DotNetApi.Windows
 				string[] value;
 				return null != (value = Microsoft.Win32.Registry.GetValue(keyName, valueName, defaultValue) as string[]) ? value : defaultValue;
 			}
-			catch (Exception) { return defaultValue; }
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Reads a multi-string value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static string[] GetMultiString(this RegistryKey key, string name, string[] defaultValue)
+		{
+			try
+			{
+				string[] value;
+				return null != (value = key.GetValue(name, defaultValue, RegistryValueOptions.None) as string[]) ? value : defaultValue;
+			}
+			catch { return defaultValue; }
 		}
 
 		/// <summary>
@@ -139,6 +240,17 @@ namespace DotNetApi.Windows
 		public static void SetMultiString(string keyName, string valueName, string[] value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value, RegistryValueKind.MultiString);
+		}
+
+		/// <summary>
+		/// Writes a multi-string value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetMultiString(this RegistryKey key, string name, string[] value)
+		{
+			key.SetValue(name, value, RegistryValueKind.MultiString);
 		}
 
 		/// <summary>
@@ -161,6 +273,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a secure string value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static SecureString GetSecureString(this RegistryKey key, string name, SecureString defaultValue, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			try
+			{
+				SecureString value;
+				return null != (value = (key.GetValue(name, defaultValue, RegistryValueOptions.None) as byte[]).DecryptSecureStringAes(cryptoKey, cryptoIV)) ? value : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes a secure string value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -171,6 +300,17 @@ namespace DotNetApi.Windows
 		public static void SetSecureString(string keyName, string valueName, SecureString value, byte[] cryptoKey, byte[] cryptoIV)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.EncryptSecureStringAes(cryptoKey, cryptoIV), RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Writes a secure string value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetSecureString(this RegistryKey key, string name, SecureString value, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			key.SetValue(name, value.EncryptSecureStringAes(cryptoKey, cryptoIV), RegistryValueKind.Binary);
 		}
 
 		/// <summary>
@@ -193,6 +333,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a secure byte array value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static byte[] GetSecureByteArray(this RegistryKey key, string name, byte[] defaultValue, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			try
+			{
+				byte[] value;
+				return null != (value = (key.GetValue(name, defaultValue, RegistryValueOptions.None) as byte[]).DecryptAes(cryptoKey, cryptoIV)) ? value : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes a secure byte array value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -203,6 +360,17 @@ namespace DotNetApi.Windows
 		public static void SetSecureByteArray(string keyName, string valueName, byte[] value, byte[] cryptoKey, byte[] cryptoIV)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.EncryptAes(cryptoKey, cryptoIV), RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Writes a secure byte array value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetSecureByteArray(this RegistryKey key, string name, byte[] value, byte[] cryptoKey, byte[] cryptoIV)
+		{
+			key.SetValue(name, value.EncryptAes(cryptoKey, cryptoIV), RegistryValueKind.Binary);
 		}
 
 		/// <summary>

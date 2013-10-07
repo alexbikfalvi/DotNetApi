@@ -167,7 +167,7 @@ namespace DotNetApi.Concurrent.Generic
 			get
 			{
 				// The thread must first acquire a lock before retrieving the enumerator.
-				if (!this.HasLock()) throw new SynchronizationLockException();
+				if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 				return (this.dictionary as IDictionary).Keys;
 			}
 		}
@@ -179,7 +179,7 @@ namespace DotNetApi.Concurrent.Generic
 			get
 			{
 				// The thread must first acquire a lock before retrieving the enumerator.
-				if (!this.HasLock()) throw new SynchronizationLockException();
+				if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 				return this.dictionary.Keys;
 			}
 		}
@@ -191,7 +191,7 @@ namespace DotNetApi.Concurrent.Generic
 			get
 			{
 				// The thread must first acquire a lock before retrieving the enumerator.
-				if (!this.HasLock()) throw new SynchronizationLockException();
+				if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 				return (this.dictionary as IDictionary).Values;
 			}
 		}
@@ -203,7 +203,7 @@ namespace DotNetApi.Concurrent.Generic
 			get
 			{
 				// The thread must first acquire a lock before retrieving the enumerator.
-				if (!this.HasLock()) throw new SynchronizationLockException();
+				if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 				return this.dictionary.Values;
 			}
 		}
@@ -254,7 +254,7 @@ namespace DotNetApi.Concurrent.Generic
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			// The thread must first acquire a lock before retrieving the enumerator.
-			if (!this.HasLock()) throw new SynchronizationLockException();
+			if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 			return (this.dictionary as IEnumerable).GetEnumerator();
 		}
 
@@ -265,7 +265,7 @@ namespace DotNetApi.Concurrent.Generic
 		IDictionaryEnumerator IDictionary.GetEnumerator()
 		{
 			// The thread must first acquire a lock before retrieving the enumerator.
-			if (!this.HasLock()) throw new SynchronizationLockException();
+			if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 			return (this.dictionary as IDictionary).GetEnumerator();
 		}
 
@@ -276,7 +276,7 @@ namespace DotNetApi.Concurrent.Generic
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
 			// The thread must first acquire a lock before retrieving the enumerator.
-			if (!this.HasLock()) throw new SynchronizationLockException();
+			if (!this.HasLock()) throw new InvalidOperationException("Thread must own a lock on this concurrent collection.");
 			return this.dictionary.GetEnumerator();
 		}
 
