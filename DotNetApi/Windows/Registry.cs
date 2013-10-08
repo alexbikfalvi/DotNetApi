@@ -391,6 +391,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a date-time value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static DateTime GetDateTime(this RegistryKey key, string name, DateTime defaultValue)
+		{
+			try
+			{
+				object value = key.GetValue(name, defaultValue.Ticks);
+				return null != value ? new DateTime(Convert.ToInt64(value)) : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes a date-time value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -399,6 +416,17 @@ namespace DotNetApi.Windows
 		public static void SetDateTime(string keyName, string valueName, DateTime value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.Ticks, RegistryValueKind.QWord);
+		}
+
+		/// <summary>
+		/// Writes a date-time value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetDateTime(this RegistryKey key, string name, DateTime value)
+		{
+			key.SetValue(name, value.Ticks, RegistryValueKind.QWord);
 		}
 
 		/// <summary>
@@ -419,6 +447,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a time-span value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static TimeSpan GetTimeSpan(this RegistryKey key, string name, TimeSpan defaultValue)
+		{
+			try
+			{
+				object value = key.GetValue(name, defaultValue.Ticks);
+				return null != value ? new TimeSpan(Convert.ToInt64(value)) : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes a time-span value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -427,6 +472,17 @@ namespace DotNetApi.Windows
 		public static void SetTimeSpan(string keyName, string valueName, TimeSpan value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.Ticks, RegistryValueKind.QWord);
+		}
+
+		/// <summary>
+		/// Writes a time-span value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetTimeSpan(this RegistryKey key, string name, TimeSpan value)
+		{
+			key.SetValue(name, value.Ticks, RegistryValueKind.QWord);
 		}
 
 		/// <summary>
@@ -447,6 +503,23 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
+		/// Reads a byte array value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static byte[] GetBytes(this RegistryKey key, string name, byte[] defaultValue)
+		{
+			try
+			{
+				byte[] value;
+				return null != (value = key.GetValue(name, defaultValue) as byte[]) ? value : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
 		/// Writes a byte array value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
@@ -455,6 +528,17 @@ namespace DotNetApi.Windows
 		public static void SetBytes(string keyName, string valueName, byte[] value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value, RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Writes a byte array value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetByte(this RegistryKey key, string name, byte[] value)
+		{
+			key.SetValue(name, value, RegistryValueKind.Binary);
 		}
 
 		/// <summary>
@@ -475,7 +559,24 @@ namespace DotNetApi.Windows
 		}
 
 		/// <summary>
-		/// Writes an array value to the registry.
+		/// Reads a 32-bit integer array value from the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>The value.</returns>
+		public static Int32[] GetInt32Array(this RegistryKey key, string name, Int32[] defaultValue)
+		{
+			try
+			{
+				byte[] value;
+				return null != (value = key.GetValue(name, defaultValue) as byte[]) ? value.ToInt32Array() : defaultValue;
+			}
+			catch { return defaultValue; }
+		}
+
+		/// <summary>
+		/// Writes a 32-bit integer array value to the registry.
 		/// </summary>
 		/// <param name="keyName">The key name.</param>
 		/// <param name="valueName">The value name.</param>
@@ -483,6 +584,17 @@ namespace DotNetApi.Windows
 		public static void SetInt32Array(string keyName, string valueName, Int32[] value)
 		{
 			Microsoft.Win32.Registry.SetValue(keyName, valueName, value.GetBytes(), RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Writes a 32-bit integer array value to the registry key.
+		/// </summary>
+		/// <param name="key">The key.</param>
+		/// <param name="name">The value name.</param>
+		/// <param name="value">The value.</param>
+		public static void SetInt32Array(this RegistryKey key, string name, Int32[] value)
+		{
+			key.SetValue(name, value.GetBytes(), RegistryValueKind.Binary);
 		}
 	}
 }

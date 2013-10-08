@@ -340,6 +340,9 @@ namespace DotNetApi.Windows.Controls
 			// Load the map data on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 				{
+					// If the object has been disposed, do nothing.
+					if (this.IsDisposed) return;
+
 					try
 					{
 						// Get the map.
@@ -1317,6 +1320,9 @@ namespace DotNetApi.Windows.Controls
 			// Execute the lazy code on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 				{
+					// If the object has been disposed, do nothing.
+					if (this.IsDisposed) return;
+
 					// Try lock the mouse move mutex.
 					if (!this.mutexMouseMove.WaitOne(0)) return;
 
