@@ -27,9 +27,9 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcMember : XmlRpcObject
 	{
-		private static string xmlName = "member";
-		private static string xmlNameName = "name";
-		private static string xmlNameValue = "value";
+		private static readonly string xmlName = "member";
+		private static readonly string xmlNameName = "name";
+		private static readonly string xmlNameValue = "value";
 
 		/// <summary>
 		/// Creates a new struct member instance from the specified name and value.

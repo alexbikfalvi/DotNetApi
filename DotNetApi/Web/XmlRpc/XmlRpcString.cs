@@ -28,7 +28,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcString : XmlRpcObject
 	{
-		private static string xmlName = "string";
+		private static readonly string xmlName = "string";
 
 		/// <summary>
 		/// Creates a new string instance.

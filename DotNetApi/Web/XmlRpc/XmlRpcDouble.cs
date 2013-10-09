@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcDouble : XmlRpcObject
 	{
-		private static string xmlName = "double";
+		private static readonly string xmlName = "double";
 
 		/// <summary>
 		/// Creates a new double instance.

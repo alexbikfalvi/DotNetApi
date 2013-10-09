@@ -29,8 +29,8 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcArray : XmlRpcObject
 	{
-		private static string xmlName = "array";
-		private static string xmlNameData = "data";
+		private static readonly string xmlName = "array";
+		private static readonly string xmlNameData = "data";
 
 		/// <summary>
 		/// Creates a new array instance from the specified object array.

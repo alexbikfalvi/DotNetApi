@@ -28,7 +28,7 @@ namespace MapApi
 	[Serializable]
 	public sealed class MapShapeCollection : IEnumerable<MapShape>
 	{
-		private List<MapShape> shapes = new List<MapShape>();
+		private readonly List<MapShape> shapes = new List<MapShape>();
 
 		/// <summary>
 		/// Creates an empty map part collection.

@@ -41,13 +41,13 @@ namespace DotNetApi.Async
 	/// <summary>
 	/// A class representing a single asynchronous task.
 	/// </summary>
-	public class AsyncTask : IDisposable
+	public class AsyncTask
 	{
 		private AsyncTaskState taskState = AsyncTaskState.Ready;
 		private AsyncState asyncState = null;
-		
-		private Mutex mutexState = new Mutex();
-		private Mutex mutexTask = new Mutex();
+
+		private readonly object syncState = new object();
+		private readonly object syncTask = new object();
 
 		/// <summary>
 		/// Creates a new asynchronous task instance.
@@ -59,17 +59,6 @@ namespace DotNetApi.Async
 		// Public methods.
 
 		/// <summary>
-		/// Disposes the current object.
-		/// </summary>
-		public void Dispose()
-		{
-			// Call the event handler.
-			this.Dispose(true);
-			// Supress the finalizer.
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
 		/// Executes the specified task if the asynchronous task is in a ready state. Otherwise, it throws an exception.
 		/// </summary>
 		/// <param name="method">The method to execute.</param>
@@ -79,19 +68,13 @@ namespace DotNetApi.Async
 			// Validate the arguments.
 			if (null == method) throw new ArgumentNullException("method");
 
-			// Lock the state mutex.
-			this.mutexState.WaitOne();
-			try
+			// Lock the state.
+			lock (this.syncState)
 			{
 				// If the task state is not ready, throw an exception.
 				if (this.taskState != AsyncTaskState.Ready) throw new InvalidOperationException("Cannot execute the method because the asynchronous task is not in the ready state.");
 				// Execute the method on the thread pool.
 				this.Execute(method, userState);
-			}
-			finally
-			{
-				// Unlock the state mutex.
-				this.mutexState.ReleaseMutex();
 			}
 		}
 
@@ -105,9 +88,8 @@ namespace DotNetApi.Async
 			// Validate the arguments.
 			if (null == method) throw new ArgumentNullException("method");
 
-			// Lock the state mutex.
-			this.mutexState.WaitOne();
-			try
+			// Lock the state.
+			lock (this.syncState)
 			{
 				// If the task state is not ready.
 				if (this.taskState != AsyncTaskState.Ready)
@@ -124,34 +106,8 @@ namespace DotNetApi.Async
 					this.Execute(method, userState);
 				}
 			}
-			finally
-			{
-				// Unlock the state mutex.
-				this.mutexState.ReleaseMutex();
-			}
 		}
 		
-		// Protected methods.
-
-		/// <summary>
-		/// An event handler called when the object is being disposed.
-		/// </summary>
-		/// <param name="disposing">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
-		protected virtual void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				// Wait on the task mutex.
-				this.mutexTask.WaitOne();
-				// Wait on the task mutex.
-				this.mutexState.WaitOne();
-				// Close the task mutex.
-				this.mutexTask.Close();
-				// Close the state mutex.
-				this.mutexState.Close();
-			}
-		}
-
 		// Private methods.
 
 		/// <summary>
@@ -166,24 +122,16 @@ namespace DotNetApi.Async
 			// Execute the method on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 			{
-				// Lock the task mutex.
-				this.mutexTask.WaitOne();
-
-				try
+				// Lock the task.
+				lock (this.syncTask)
 				{
-					// Lock the state mutex.
-					this.mutexState.WaitOne();
-					try
+					// Lock the state.
+					lock (this.syncState)
 					{
 						// Change the task state.
 						this.taskState = AsyncTaskState.Running;
 						// Set the current asychronous state.
 						this.asyncState = asyncState;
-					}
-					finally
-					{
-						// Unlock the state mutex.
-						this.mutexState.ReleaseMutex();
 					}
 					// Execute the task method.
 					method(asyncState);
@@ -193,9 +141,8 @@ namespace DotNetApi.Async
 						// Execute the cancel callback method.
 						asyncState.CancelCallback();
 					}
-					// Lock the state mutex.
-					this.mutexState.WaitOne();
-					try
+					// Lock the state.
+					lock (this.syncState)
 					{
 						// Change the task state.
 						this.taskState = AsyncTaskState.Ready;
@@ -204,18 +151,8 @@ namespace DotNetApi.Async
 						// Signal the completion of the asynchronous operation.
 						asyncState.Complete();
 					}
-					finally
-					{
-						// Unlock the state mutex.
-						this.mutexState.ReleaseMutex();
-					}
 					// Dispose of the asynchronous state.
 					asyncState.Dispose();
-				}
-				finally
-				{
-					// Unlock the task mutex.
-					this.mutexTask.ReleaseMutex();
 				}
 			});
 		}

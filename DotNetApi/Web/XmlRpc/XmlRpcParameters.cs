@@ -29,7 +29,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public class XmlRpcParameters : XmlRpcObject
 	{
-		private static string xmlName = "params";
+		private static readonly string xmlName = "params";
 
 		private XmlRpcParameter[] parameters;
 

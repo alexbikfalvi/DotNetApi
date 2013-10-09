@@ -28,7 +28,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcBase64 : XmlRpcObject
 	{
-		private static string xmlName = "base64";
+		private static readonly string xmlName = "base64";
 
 		/// <summary>
 		/// Creates a new base 64 instance.

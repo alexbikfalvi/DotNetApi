@@ -27,9 +27,9 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcResponse
 	{
-		private static string xmlMethodResponse = "methodResponse";
-		private static string xmlParams = "params";
-		private static string xmlFault = "fault";
+		private static readonly string xmlMethodResponse = "methodResponse";
+		private static readonly string xmlParams = "params";
+		private static readonly string xmlFault = "fault";
 
 		/// <summary>
 		/// Private constructor.

@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcDateTime : XmlRpcObject
 	{
-		private static string xmlName = "dateTime.iso8601";
+		private static readonly string xmlName = "dateTime.iso8601";
 
 		/// <summary>
 		/// Creates a new boolean instance.

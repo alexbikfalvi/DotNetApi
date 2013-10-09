@@ -30,11 +30,11 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcRequest
 	{
-		private static string xmlMethodCall = "methodCall";
-		private static string xmlMethodName = "methodName";
-		private static string xmlParams = "params";
-		private static string xmlParam = "param";
-		private static string xmlValue = "value";
+		private static readonly string xmlMethodCall = "methodCall";
+		private static readonly string xmlMethodName = "methodName";
+		private static readonly string xmlParams = "params";
+		private static readonly string xmlParam = "param";
+		private static readonly string xmlValue = "value";
 
 		/// <summary>
 		/// Private constructor.

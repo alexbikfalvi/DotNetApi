@@ -28,10 +28,10 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcFault
 	{
-		private static string xmlFault = "fault";
-		private static string xmlValue = "value";
-		private static string xmlFaultCode = "faultCode";
-		private static string xmlFaultString = "faultString";
+		private static readonly string xmlFault = "fault";
+		private static readonly string xmlValue = "value";
+		private static readonly string xmlFaultCode = "faultCode";
+		private static readonly string xmlFaultString = "faultString";
 
 		/// <summary>
 		/// Creates a new XML RPC fault instance from the specified XML element.

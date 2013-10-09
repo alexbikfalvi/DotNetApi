@@ -28,9 +28,9 @@ namespace MapApi
 	/// </summary>
 	public static class Maps
 	{
-		private static Mutex mutex = new Mutex();
-		private static ManualResetEvent load = new ManualResetEvent(false);
-		private static Dictionary<string, Map> maps = new Dictionary<string, Map>();
+		private static readonly object sync = new object();
+		private static readonly ManualResetEvent load = new ManualResetEvent(false);
+		private static readonly Dictionary<string, Map> maps = new Dictionary<string, Map>();
 
 		/// <summary>
 		/// Loads all maps in the current resource file.
@@ -40,31 +40,31 @@ namespace MapApi
 			// Load all maps on the thread pool.
 			ThreadPool.QueueUserWorkItem((object state) =>
 				{
-					// Lock the mutex.
-					Maps.mutex.WaitOne();
-					try
+					// Synchronize access.
+					lock (Maps.sync)
 					{
-						// For all public and static properties. 
-						foreach (PropertyInfo property in typeof(MapsBinary).GetProperties(BindingFlags.Public | BindingFlags.Static))
+						try
 						{
-							// If the property type is a byte array.
-							if (property.PropertyType.Equals(typeof(byte[])))
+							// For all public and static properties. 
+							foreach (PropertyInfo property in typeof(MapsBinary).GetProperties(BindingFlags.Public | BindingFlags.Static))
 							{
-								// Get the property data.
-								byte[] data = property.GetValue(null, null) as byte[];
-								// Create a map from the specified data.
-								Map map = Map.Read(data);
-								// Add the map to the maps list.
-								Maps.maps.Add(property.Name, map);
+								// If the property type is a byte array.
+								if (property.PropertyType.Equals(typeof(byte[])))
+								{
+									// Get the property data.
+									byte[] data = property.GetValue(null, null) as byte[];
+									// Create a map from the specified data.
+									Map map = Map.Read(data);
+									// Add the map to the maps list.
+									Maps.maps.Add(property.Name, map);
+								}
 							}
 						}
-					}
-					finally
-					{
-						// Change the load event state.
-						Maps.load.Set();
-						// Unlock the mutex.
-						Maps.mutex.ReleaseMutex();
+						finally
+						{
+							// Change the load event state.
+							Maps.load.Set();
+						}
 					}
 				});
 		}
@@ -80,17 +80,11 @@ namespace MapApi
 		{
 			// Wait for the maps to load.
 			Maps.load.WaitOne();
-			// Lock the mutex.
-			Maps.mutex.WaitOne();
-			try
+			// Syunchronize access.
+			lock (Maps.sync)
 			{
 				// Return the map.
 				return Maps.maps[name];
-			}
-			finally
-			{
-				// Unlock the mutex.
-				Maps.mutex.ReleaseMutex();
 			}
 		}
 	}

@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcInt : XmlRpcObject
 	{
-		private static string xmlName = "int";
+		private static readonly string xmlName = "int";
 
 		/// <summary>
 		/// Creates a new integer instance.

@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcNil : XmlRpcObject
 	{
-		private static string xmlName = "nil";
+		private static readonly string xmlName = "nil";
 
 		/// <summary>
 		/// Creates a new nil instance.

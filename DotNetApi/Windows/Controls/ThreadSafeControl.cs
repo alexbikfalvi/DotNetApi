@@ -30,6 +30,7 @@ namespace DotNetApi.Windows.Controls
 	public class ThreadSafeControl : UserControl
 	{
 		private ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
+		private bool disposing = false;
 
 		/// <summary>
 		/// Creates a new thread-safe control instance.
@@ -67,13 +68,18 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Waits for the window handle of the current control to be created.
 		/// </summary>
-		protected void WaitForHandle()
+		/// <returns><b>True</b> if the wait was successful, <b>false</b> if the method exited because the control was disposed.</returns>
+		protected bool WaitForHandle()
 		{
 			// Wait for the control handle to be created.
 			while (!this.IsHandleCreated)
 			{
+				// If the control is disposing, return false.
+				if (this.disposing) return false;
+				// Wait for the control handle to be created.
 				this.eventHandleCreated.WaitOne();
 			}
+			return true;
 		}
 
 		/// <summary>
@@ -82,10 +88,12 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
+			// Set the disposing to true.
+			this.disposing = true;
 			// Dispose the current resources.
 			if (disposing)
 			{
-				this.eventHandleCreated.Dispose();
+				this.eventHandleCreated.Close();
 			}
 			// Call the base class method.
 			base.Dispose(disposing);

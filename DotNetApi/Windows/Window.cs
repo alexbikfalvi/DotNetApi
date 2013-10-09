@@ -28,11 +28,11 @@ namespace DotNetApi.Windows
 	/// </summary>
 	public static class Window
 	{
-		private static bool fontChange = false;
-		private static FontFamily fontDefaultFamily = null;
+		private static readonly bool fontChange = false;
+		private static readonly FontFamily fontDefaultFamily = null;
 		private static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
-		private static Font defaultFont;
+		private static readonly Font defaultFont;
 
 		/// <summary>
 		/// Initializes the parameters of the static class.

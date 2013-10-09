@@ -52,7 +52,7 @@ namespace DotNetApi.Windows.Controls
 
 		private Map map = null;
 
-		private ConcurrentList<MapRegion> regions = new ConcurrentList<MapRegion>();
+		private readonly ConcurrentList<MapRegion> regions = new ConcurrentList<MapRegion>();
 
 		private MapRectangle mapBounds = MapControl.mapBoundsDefault;
 		private MapSize mapSize = MapControl.mapBoundsDefault.Size;
@@ -101,21 +101,21 @@ namespace DotNetApi.Windows.Controls
 
 		// Drawing.
 
-		private Mutex mutexDrawing = new Mutex();
+		private readonly object syncDrawing = new object();
 
-		private Bitmap bitmapBackground = new Bitmap(20, 20);
+		private readonly Bitmap bitmapBackground = new Bitmap(20, 20);
 		private TextureBrush brushBackground;
 
-		private Shadow shadow = new Shadow(Color.Black, 0, 20);
+		private readonly Shadow shadow = new Shadow(Color.Black, 0, 20);
 
 		private Font fontGrid;
 
 		// Interaction.
 
-		private Mutex mutexMouseMove = new Mutex();
+		private readonly object syncMouseMove = new object();
 
-		private MotionSpring scrollSpring = new MotionSpring();
-		private TransformAsymptotic scrollTransform = new TransformAsymptotic(100, 100);
+		private readonly MotionSpring scrollSpring = new MotionSpring();
+		private readonly TransformAsymptotic scrollTransform = new TransformAsymptotic(100, 100);
 
 		private bool mouseOverFlag = false;
 		private bool mouseGripFlag = false;
@@ -130,7 +130,7 @@ namespace DotNetApi.Windows.Controls
 
 		// Markers.
 
-		private ConcurrentComponentCollection<MapMarker> markers = new ConcurrentComponentCollection<MapMarker>();
+		private readonly ConcurrentComponentCollection<MapMarker> markers = new ConcurrentComponentCollection<MapMarker>();
 		private bool markerAutoDispose = true;
 
 		// Switches.
@@ -141,7 +141,7 @@ namespace DotNetApi.Windows.Controls
 		private bool showMajorGrid = true;
 
 		// Asynchronous.
-		private AsyncTask task = new AsyncTask();
+		private readonly AsyncTask task = new AsyncTask();
 
 		private Action delegateRefresh;
 		private MessageAction delegateMessage;
@@ -392,17 +392,6 @@ namespace DotNetApi.Windows.Controls
 				// Dispose the motion spring.
 				this.scrollSpring.Dispose();
 
-				// Dispose the asynchronous task.
-				this.task.Dispose();
-
-				// Wait on the mutexes.
-				this.mutexDrawing.WaitOne();
-				this.mutexMouseMove.WaitOne();
-
-				// Close the mutexes.
-				this.mutexDrawing.Close();
-				this.mutexMouseMove.Close();
-
 				// Get an exclusive reader lock to the regions list.
 				this.regions.Lock();
 				try
@@ -456,8 +445,8 @@ namespace DotNetApi.Windows.Controls
 			// Draw the checkerboard background.
 			e.Graphics.FillRectangle(this.brushBackground, this.ClientRectangle);
 			
-			// Try and lock the drawing mutex.
-			if (this.mutexDrawing.WaitOne(0))
+			// Try and lock the drawing synchronization objecy.
+			if (Monitor.TryEnter(this.syncDrawing))
 			{
 				try
 				{
@@ -583,8 +572,8 @@ namespace DotNetApi.Windows.Controls
 				}
 				finally
 				{
-					// Unlock the mutex.
-					this.mutexDrawing.ReleaseMutex();
+					// Unlock the drawing synchronization object.
+					Monitor.Exit(this.syncDrawing);
 				}
 			}
 			else
@@ -827,10 +816,8 @@ namespace DotNetApi.Windows.Controls
 			// If the map has not changed, do nothing.
 			if (this.map == map) return;
 
-			// Lock the map mutex.
-			this.mutexDrawing.WaitOne();
-
-			try
+			// Lock the drawing synchronization object.
+			lock (this.syncDrawing)
 			{
 				// Set the current map.
 				this.map = map;
@@ -876,11 +863,6 @@ namespace DotNetApi.Windows.Controls
 						}
 					}
 				}
-			}
-			finally
-			{
-				// Unlock the mutex.
-				this.mutexDrawing.ReleaseMutex();
 			}
 
 			// Refresh the current map.
@@ -1324,64 +1306,65 @@ namespace DotNetApi.Windows.Controls
 					if (this.IsDisposed) return;
 
 					// Try lock the mouse move mutex.
-					if (!this.mutexMouseMove.WaitOne(0)) return;
-
-					try
+					if (Monitor.TryEnter(this.syncMouseMove))
 					{
-						// The current highlighted marker.
-						MapMarker highlightMarker = null;
-						// The current highlighted region.
-						MapRegion highlightRegion = null;
-
-						// Get an exclusive lock to the markers collection.
-						this.markers.Lock();
 						try
 						{
-							// Compute the new highlight marker.
-							foreach (MapMarker marker in this.markers)
+							// The current highlighted marker.
+							MapMarker highlightMarker = null;
+							// The current highlighted region.
+							MapRegion highlightRegion = null;
+
+							// Get an exclusive lock to the markers collection.
+							this.markers.Lock();
+							try
 							{
-								// If the marker contains the mouse location.
-								if (marker.IsVisible(location))
+								// Compute the new highlight marker.
+								foreach (MapMarker marker in this.markers)
 								{
-									// Set the current highlighted marker.
-									highlightMarker = marker;
-									// Stop the iteration.
-									break;
+									// If the marker contains the mouse location.
+									if (marker.IsVisible(location))
+									{
+										// Set the current highlighted marker.
+										highlightMarker = marker;
+										// Stop the iteration.
+										break;
+									}
 								}
 							}
+							finally
+							{
+								this.markers.Unlock();
+							}
+							// Get an exclusive reader lock to the regions list.
+							this.regions.Lock();
+							try
+							{
+								// Compute the new highlight region.
+								foreach (MapRegion region in this.regions)
+								{
+									// If the region contains the mouse location.
+									if (region.IsVisible(location))
+									{
+										// Set the current highlighted region.
+										highlightRegion = region;
+										// Stop the iteration.
+										break;
+									}
+								}
+							}
+							finally
+							{
+								this.regions.Unlock();
+							}
+
+							// Call the mouse move lazy finish on the UI thread.
+							this.Invoke(this.delegateMouseMove, new object[] { highlightMarker, highlightRegion });
 						}
 						finally
 						{
-							this.markers.Unlock();
+							Monitor.Exit(this.syncMouseMove);
 						}
-						// Get an exclusive reader lock to the regions list.
-						this.regions.Lock();
-						try
-						{
-							// Compute the new highlight region.
-							foreach (MapRegion region in this.regions)
-							{
-								// If the region contains the mouse location.
-								if (region.IsVisible(location))
-								{
-									// Set the current highlighted region.
-									highlightRegion = region;
-									// Stop the iteration.
-									break;
-								}
-							}
-						}
-						finally
-						{
-							this.regions.Unlock();
-						}
-
-						// Call the mouse move lazy finish on the UI thread.
-						this.Invoke(this.delegateMouseMove, new object[] { highlightMarker, highlightRegion });
-					}
-					finally
-					{
-						this.mutexMouseMove.ReleaseMutex();
 					}
 				});
 		}
@@ -1484,9 +1467,8 @@ namespace DotNetApi.Windows.Controls
 				// Create a new bitmap and draw the bitmap on an asynchronous task.
 				this.task.ExecuteAlways((AsyncState asyncState) =>
 				{
-					// Lock the drawing mutex.
-					this.mutexDrawing.WaitOne();
-					try
+					// Lock the drawing synchronization object.
+					lock (this.syncDrawing)
 					{
 						// If the current bitmap is not null, dispose the current bitmap.
 						if (null != this.bitmapMap)
@@ -1500,11 +1482,6 @@ namespace DotNetApi.Windows.Controls
 						if (asyncState.IsCanceled) return;
 						// Hide the message.
 						this.annotationMessage.Visible = false;
-					}
-					finally
-					{
-						// Unlock the mutex.
-						this.mutexDrawing.ReleaseMutex();
 					}
 					// Refresh the control.
 					this.Refresh();

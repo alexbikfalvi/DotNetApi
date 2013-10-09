@@ -31,7 +31,7 @@ namespace DotNetApi.Windows.Controls
 		private CheckedListBox listBox = new CheckedListBox();
 		private int minimumVisibleItems = 10;
 		private int totalItemsHeight = 0;
-		private List<CheckedListItem> items = new List<CheckedListItem>();
+		private readonly List<CheckedListItem> items = new List<CheckedListItem>();
 
 		/// <summary>
 		/// Creates a new class instance.

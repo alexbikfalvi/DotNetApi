@@ -31,9 +31,9 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public class XmlRpcStruct : XmlRpcObject
 	{
-		private static string xmlName = "struct";
+		private static readonly string xmlName = "struct";
 
-		private Dictionary<string, XmlRpcMember> members = new Dictionary<string, XmlRpcMember>();
+		private readonly Dictionary<string, XmlRpcMember> members = new Dictionary<string, XmlRpcMember>();
 
 		/// <summary>
 		/// Creates a new empty structure.

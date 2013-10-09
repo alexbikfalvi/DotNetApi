@@ -28,7 +28,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public sealed class XmlRpcValue : XmlRpcObject
 	{
-		private static string xmlName = "value";
+		private static readonly string xmlName = "value";
 
 		/// <summary>
 		/// Creates a new XML RPC parameter for the specified value.

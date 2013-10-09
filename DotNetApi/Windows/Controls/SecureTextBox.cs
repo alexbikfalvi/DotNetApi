@@ -34,7 +34,7 @@ namespace DotNetApi.Windows.Controls
 		private const int WM_CLEAR = 0x303;
 		private const int WM_UNDO = 0x304;
 
-		private static char passwordChar = '●';
+		private static readonly char passwordChar = '●';
 
 		private SecureString secureText = new SecureString();
 		private bool keyProcessed = false;

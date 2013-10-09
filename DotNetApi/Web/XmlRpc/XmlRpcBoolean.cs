@@ -27,7 +27,7 @@ namespace DotNetApi.Web.XmlRpc
 	[Serializable]
 	public class XmlRpcBoolean : XmlRpcObject
 	{
-		private static string xmlName = "boolean";
+		private static readonly string xmlName = "boolean";
 
 		/// <summary>
 		/// Creates a new boolean instance.
