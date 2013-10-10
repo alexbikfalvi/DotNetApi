@@ -39,6 +39,19 @@ namespace DotNetApi
 		}
 
 		/// <summary>
+		/// Converts the specified object array into their extended string representation.
+		/// </summary>
+		/// <param name="value">The object array.</param>
+		/// <returns>An array with the extended string representation.</returns>
+		public static string[] ToExtendedString(this object[] value)
+		{
+			string[] str = new string[value.Length];
+			for (int index = 0; index < value.Length; index++)
+				str[index] = value[index] != null ? value[index].ToExtendedString() : null;
+			return str;
+		}
+
+		/// <summary>
 		/// Converts the specified byte array into an extended string.
 		/// </summary>
 		/// <param name="value">The byte array.</param>
