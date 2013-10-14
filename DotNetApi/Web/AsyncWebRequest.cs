@@ -230,15 +230,29 @@ namespace DotNetApi.Web
 		{
 			AsyncWebResult asyncState = state as AsyncWebResult;
 
-			// If there is send data.
-			if (asyncState.SendData.Data != null)
+			try
 			{
-				// Get the request stream.
-				using (Stream stream = asyncState.Request.GetRequestStream())
+				// If there is send data.
+				if (asyncState.SendData.Data != null)
 				{
-					// Write the send data to the stream.
-					stream.Write(asyncState.SendData.Data, 0, asyncState.SendData.Data.Length);
+					// Get the request stream.
+					using (Stream stream = asyncState.Request.GetRequestStream())
+					{
+						// Write the send data to the stream.
+						stream.Write(asyncState.SendData.Data, 0, asyncState.SendData.Data.Length);
+					}
 				}
+			}
+			catch (Exception exception)
+			{
+				// If an exception occurred while writing to the stream, set the exception.
+				asyncState.Exception = exception;
+				// Signal that the operation has completed.
+				asyncState.Complete();
+				// Call the callback function
+				if (asyncState.Callback != null) asyncState.Callback(asyncState);
+				// Return.
+				return;
 			}
 
 			// Begin the web request.
