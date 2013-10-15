@@ -151,8 +151,20 @@ namespace DotNetApi.Windows.Controls
 				}
 				else
 				{
-					// Select the next collection.
-					nodes = nodes[indices[index]].Nodes;
+					// If the next collection is empty.
+					if (nodes[indices[index]].Nodes.Count == 0)
+					{
+						// Select the node.
+						this.SelectedNode = nodes[indices[index]];
+						// Scroll to the selected node.
+						this.SelectedNode.EnsureVisible();
+						break;
+					}
+					else
+					{
+						// Select the next collection.
+						nodes = nodes[indices[index]].Nodes;
+					}
 				}
 			}
 		}
