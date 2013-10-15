@@ -109,12 +109,8 @@ namespace YtAnalytics.Controls
 		/// <param name="e">The event arguments.</param>
 		protected override void OnResize(EventArgs e)
 		{
-			// If the notification box is visible.
-			if (this.notification.Visible)
-			{
-				// Reposition the notification box.
-				this.notification.Reposition();
-			}
+			// Reposition the notification box.
+			this.notification.Reposition();
 			// Call the base class method.
 			base.OnResize(e);
 		}
