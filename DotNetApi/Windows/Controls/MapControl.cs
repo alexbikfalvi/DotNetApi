@@ -356,6 +356,26 @@ namespace DotNetApi.Windows.Controls
 				});
 		}
 
+		/// <summary>
+		/// Saves the current map as an image to the specified file.
+		/// </summary>
+		/// <param name="fileName">The file name.</param>
+		/// <param name="size">The image size.</param>
+		/// <returns>A wait handle which indicates when saving has completed.</returns>
+		public WaitHandle SaveMap(string fileName, Size size)
+		{
+			// Create a manual reset event.
+			ManualResetEvent wait = new ManualResetEvent(false);
+			
+			// Save the map on the thread pool.
+			ThreadPool.QueueUserWorkItem((object param) =>
+				{
+				});
+
+			// Return the wait handle.
+			return wait;
+		}
+
 		// Protected methods.
 
 		/// <summary>
@@ -1505,7 +1525,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Creates a new bitmap for the current map, scaled at the specified size. The scaled version of the map fits the largest dimension between width and height.
 		/// </summary>
-		/// <param name="asyncState">The asynchrnous state.</param>
+		/// <param name="asyncState">The asynchronous state.</param>
 		/// <returns>The map bitmap.</returns>
 		private Bitmap OnDrawMap(AsyncState asyncState)
 		{

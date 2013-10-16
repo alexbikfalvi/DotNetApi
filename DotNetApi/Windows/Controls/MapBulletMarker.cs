@@ -146,6 +146,52 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics.</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		internal override void Draw(Graphics graphics, MapRectangle bounds, MapScale scale)
+		{
+			// Create the brush.
+			using (SolidBrush brush = new SolidBrush(this.BackgroundColor))
+			{
+				// Create the pen.
+				using (Pen pen = new Pen(this.BorderColor))
+				{
+					this.Draw(graphics, bounds, scale, brush, pen);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		/// <param name="brush">The brush.</param>
+		/// <param name="pen">The pen.</param>
+		internal override void Draw(Graphics graphics, MapRectangle bounds, MapScale scale, Brush brush, Pen pen)
+		{
+			// Create a new graphics path.
+			using (GraphicsPath path = new GraphicsPath())
+			{
+				// Compute the marker center.
+				PointF center = new PointF(
+					(float)((this.Location.X - bounds.Left) * scale.Width),
+					(float)((bounds.Top - this.Location.Y) * scale.Height)
+					);
+				// Add a circle to the path.
+				path.AddEllipse((float)(center.X - this.Size.Width / 2.0), (float)(center.Y - this.Size.Height / 2.0), this.Size.Width, this.Size.Height);
+				// Fill the path.
+				if (null != brush) graphics.FillPath(brush, this.path);
+				// Draw the path.
+				if (null != pen) graphics.DrawPath(pen, this.path);
+			}
+		}
+
 		// Protected methods.
 
 		/// <summary>

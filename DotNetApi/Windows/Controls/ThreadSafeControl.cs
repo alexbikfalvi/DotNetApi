@@ -31,6 +31,7 @@ namespace DotNetApi.Windows.Controls
 	{
 		private ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
 		private bool disposing = false;
+		private object sync = new object();
 
 		/// <summary>
 		/// Creates a new thread-safe control instance.
@@ -49,7 +50,10 @@ namespace DotNetApi.Windows.Controls
 		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
 		public new object Invoke(Delegate method)
 		{
-			return this.IsDisposed ? null : base.Invoke(method);
+			lock (this.sync)
+			{
+				return this.disposing ? null : base.Invoke(method);
+			}
 		}
 
 		/// <summary>
@@ -58,9 +62,13 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="method">A delegate to a method that takes parameters of the same number and type that are contained in the args parameter.</param>
 		/// <param name="args">An array of objects to pass as arguments to the specified method. This parameter can be null if the method takes no arguments.</param>
 		/// <returns>An System.Object that contains the return value from the delegate being invoked, or null if the delegate has no return value.</returns>
+		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
 		public new object Invoke(Delegate method, params object[] args)
 		{
-			return this.IsDisposed ? null : base.Invoke(method, args);
+			lock (this.sync)
+			{
+				return this.disposing ? null : base.Invoke(method, args);
+			}
 		}
 
 		// Protected methods.
@@ -88,8 +96,11 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
-			// Set the disposing to true.
-			this.disposing = true;
+			lock (this.sync)
+			{
+				// Set the disposing to true.
+				this.disposing = true;
+			}
 			// Dispose the current resources.
 			if (disposing)
 			{

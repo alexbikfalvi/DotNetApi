@@ -81,5 +81,23 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="brush">The brush.</param>
 		/// <param name="pen">The pen.</param>
 		internal abstract void Draw(Graphics graphics, Brush brush, Pen pen);
+
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics.</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		internal abstract void Draw(Graphics graphics, MapRectangle bounds, MapScale scale);
+
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		/// <param name="brush">The brush.</param>
+		/// <param name="pen">The pen.</param>
+		internal abstract void Draw(Graphics graphics, MapRectangle bounds, MapScale scale, Brush brush, Pen pen);
 	}
 }

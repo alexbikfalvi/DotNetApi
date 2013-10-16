@@ -173,6 +173,57 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics.</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		internal override void Draw(Graphics graphics, MapRectangle bounds, MapScale scale)
+		{
+			// Create the brush.
+			using (SolidBrush brush = new SolidBrush(this.colorBackground))
+			{
+				// Create the pen.
+				using (Pen pen = new Pen(this.colorBackground))
+				{
+					this.Draw(graphics, bounds, scale, brush, pen);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draws the item on the specified graphics object within the specified map bounds and scale.
+		/// </summary>
+		/// <param name="graphics">The graphics</param>
+		/// <param name="bounds">The bounds.</param>
+		/// <param name="scale">The scale.</param>
+		/// <param name="brush">The brush.</param>
+		/// <param name="pen">The pen.</param>
+		internal override void Draw(Graphics graphics, MapRectangle bounds, MapScale scale, Brush brush, Pen pen)
+		{
+			// Create a new graphics path.
+			using (GraphicsPath path = new GraphicsPath())
+			{
+				// For all shape parts.
+				for (int indexPart = 0; indexPart < shape.Parts.Count; indexPart++)
+				{
+					// Update the list of points for each part polygon.
+					for (int indexPoint = 0; indexPoint < shape.Parts[indexPart].Points.Count; indexPoint++)
+					{
+						this.points[indexPart][indexPoint].X = (float)((shape.Parts[indexPart].Points[indexPoint].X - bounds.Left) * scale.Width);
+						this.points[indexPart][indexPoint].Y = (float)((bounds.Top - shape.Parts[indexPart].Points[indexPoint].Y) * scale.Height);
+					}
+					// Add the polygon to the graphics path.
+					path.AddPolygon(this.points[indexPart]);
+				}
+				// Fill the path.
+				if (null != brush) graphics.FillPath(brush, path);
+				// Draw the path.
+				if (null != pen) graphics.DrawPath(pen, path);
+			}
+		}
+
 		// Protected methods.
 
 		/// <summary>
