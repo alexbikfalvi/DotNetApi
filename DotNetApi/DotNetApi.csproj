@@ -74,6 +74,7 @@
     <Compile Include="IO\IoUtils.cs" />
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="Templates.cs" />
+    <Compile Include="Types.cs" />
     <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcExtensions.cs" />
     <Compile Include="Windows\Controls\ConcurrentComponentCollection.cs" />

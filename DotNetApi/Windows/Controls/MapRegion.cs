@@ -39,7 +39,7 @@ namespace DotNetApi.Windows.Controls
 		private Color colorBackground = Color.Green;
 		private Color colorBorder = Color.White;
 
-		private object sync = new object();
+		private readonly object sync = new object();
 		private bool disposed = false;
 
 		/// <summary>

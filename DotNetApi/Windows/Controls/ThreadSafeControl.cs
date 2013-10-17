@@ -29,15 +29,18 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class ThreadSafeControl : UserControl
 	{
-		private ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
+		private readonly ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
 		private bool disposing = false;
-		private object sync = new object();
+		private readonly object sync = new object();
+
+		private readonly Action<Action> action;
 
 		/// <summary>
 		/// Creates a new thread-safe control instance.
 		/// </summary>
 		public ThreadSafeControl()
 		{
+			this.action = new Action<Action>(this.Invoke);
 		}
 
 		// Public methods.
@@ -69,6 +72,16 @@ namespace DotNetApi.Windows.Controls
 			{
 				return this.disposing ? null : base.Invoke(method, args);
 			}
+		}
+
+		/// <summary>
+		/// Executes the specified action, on the thread that owns the control's underlying window handle, with the specified list of arguments.
+		/// </summary>
+		/// <param name="action">The action.</param>
+		public void Invoke(Action action)
+		{
+			if (this.InvokeRequired) this.Invoke(this.action, new object[] { action });
+			else action();
 		}
 
 		// Protected methods.

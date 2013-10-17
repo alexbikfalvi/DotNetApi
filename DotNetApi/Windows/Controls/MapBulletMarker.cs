@@ -31,10 +31,10 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public class MapBulletMarker : MapMarker
 	{
-		private GraphicsPath path = new GraphicsPath();
+		private readonly GraphicsPath path = new GraphicsPath();
 		private Rectangle bounds;
 		private bool disposed = false;
-		private object sync = new object();
+		private readonly object sync = new object();
 
 		/// <summary>
 		/// Creates a new circular map marker instance at the default location.

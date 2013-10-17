@@ -42,23 +42,5 @@ namespace DotNetApi.Windows.Controls
 			}
 			return default(ListViewItem);
 		}
-
-		/// <summary>
-		/// Returns an array with the checked list view items.
-		/// </summary>
-		/// <param name="items">The collection of list view items.</param>
-		/// <returns>The array with the checked list view items.</returns>
-		public static IList<ListViewItem> Checked(this ListView.ListViewItemCollection items)
-		{
-			// Create a list with the checked list view items.
-			List<ListViewItem> list = new List<ListViewItem>();
-			// Add the checked list view items.
-			foreach (ListViewItem item in items)
-			{
-				if (item.Checked) list.Add(item);
-			}
-			// Return the list.
-			return list;
-		}
 	}
 }
