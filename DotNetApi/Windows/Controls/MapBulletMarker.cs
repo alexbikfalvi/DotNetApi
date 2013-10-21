@@ -186,9 +186,9 @@ namespace DotNetApi.Windows.Controls
 				// Add a circle to the path.
 				path.AddEllipse((float)(center.X - this.Size.Width / 2.0), (float)(center.Y - this.Size.Height / 2.0), this.Size.Width, this.Size.Height);
 				// Fill the path.
-				if (null != brush) graphics.FillPath(brush, this.path);
+				if (null != brush) graphics.FillPath(brush, path);
 				// Draw the path.
-				if (null != pen) graphics.DrawPath(pen, this.path);
+				if (null != pen) graphics.DrawPath(pen, path);
 			}
 		}
 

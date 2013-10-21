@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Threading;
 using System.Windows.Forms;
 using DotNetApi;
@@ -38,6 +39,142 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class MapControl : ThreadSafeControl, IAnchor, ITranslation
 	{
+		/// <summary>
+		/// A class representing the map export properties.
+		/// </summary>
+		public sealed class ExportProperties
+		{
+			/// <summary>
+			/// The map export properties.
+			/// </summary>
+			public ExportProperties()
+			{
+				// Reset the properties.
+				this.Reset();
+			}
+
+			// Public properties.
+
+			/// <summary>
+			/// Gets or sets the export image size.
+			/// </summary>
+			[DisplayName("Size"), Description("The export image size."), Category("Image")]
+			public Size Size { get; set; }
+			/// <summary>
+			/// Gets or sets whether the map regions have borders.
+			/// </summary>
+			[DisplayName("Borders"), Description("Specifies whether the map regions have borders."), Category("Image")]
+			public Boolean Borders { get; set; }
+			/// <summary>
+			/// Gets or sets whether the major grid is displayed.
+			/// </summary>
+			[DisplayName("Major grid"), Description("Specifies whether the major grid is displayed."), Category("Image")]
+			public Boolean MajorGrid { get; set; }
+			/// <summary>
+			/// Gets or sets whether the markers are displayed.
+			/// </summary>
+			[DisplayName("Markers"), Description("Specifies whether the markers are displayed."), Category("Image")]
+			public Boolean Markers { get; set; }
+			/// <summary>
+			/// Gets or sets the smoothing mode.
+			/// </summary>
+			[DisplayName("Smoothing mode"), Description("Specifies the smoothing mode."), Category("Image")]
+			public SmoothingMode Smoothing { get; set; }
+			/// <summary>
+			/// Gets or sets the background color.
+			/// </summary>
+			[DisplayName("Background color"), Description("The map background color."), Category("Colors")]
+			public Color BackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the region normal border color.
+			/// </summary>
+			[DisplayName("Region normal border color"), Description("The region normal border color."), Category("Colors")]
+			public Color RegionNormalBorderColor { get; set; }
+			/// <summary>
+			/// Gets or sets the region normal background color.
+			/// </summary>
+			[DisplayName("Region normal background color"), Description("The region normal background color."), Category("Colors")]
+			public Color RegionNormalBackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the region lighlight border color.
+			/// </summary>
+			[DisplayName("Region highlight border color"), Description("The region highlight border color."), Category("Colors")]
+			public Color RegionHighlightBorderColor { get; set; }
+			/// <summary>
+			/// Gets or sets the region highlight background color.
+			/// </summary>
+			[DisplayName("Region highlight background color"), Description("The region highlight background color."), Category("Colors")]
+			public Color RegionHighlightBackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker normal border color.
+			/// </summary>
+			[DisplayName("Marker normal border color"), Description("The marker normal border color."), Category("Colors")]
+			public Color MarkerNormalBorderColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker normal background color.
+			/// </summary>
+			[DisplayName("Marker normal background color"), Description("The marker normal background color."), Category("Colors")]
+			public Color MarkerNormalBackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker emphasis border color.
+			/// </summary>
+			[DisplayName("Marker emphasis border color"), Description("The marker emphasis border color."), Category("Colors")]
+			public Color MarkerEmphasisBorderColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker emphasis background color.
+			/// </summary>
+			[DisplayName("Marker emphasis background color"), Description("The marker emphasis background color."), Category("Colors")]
+			public Color MarkerEmphasisBackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker highlight border color.
+			/// </summary>
+			[DisplayName("Marker highlight border color"), Description("The marker highlight border color."), Category("Colors")]
+			public Color MarkerHighlightBorderColor { get; set; }
+			/// <summary>
+			/// Gets or sets the marker highlight background color.
+			/// </summary>
+			[DisplayName("Marker highlight background color"), Description("The marker highlight background color."), Category("Colors")]
+			public Color MarkerHighlightBackgroundColor { get; set; }
+			/// <summary>
+			/// Gets or sets the major grid color.
+			/// </summary>
+			[DisplayName("Major grid color"), Description("The major grid color."), Category("Colors")]
+			public Color MajorGridColor { get; set; }
+			/// <summary>
+			/// Gets or sets the minor grid color.
+			/// </summary>
+			[DisplayName("Minor grid color"), Description("The minor grid color."), Category("Colors")]
+			public Color MinorGridColor { get; set; }
+
+			// Public methods.
+
+			/// <summary>
+			/// Resets the export properties with the default values. 
+			/// </summary>
+			public void Reset()
+			{
+				this.Size = new Size(2000, 1000);
+				this.Borders = true;
+				this.MajorGrid = true;
+				this.Markers = true;
+				this.Smoothing = SmoothingMode.HighQuality;
+
+				this.BackgroundColor = Color.SkyBlue;
+				this.RegionNormalBorderColor = Color.White;
+				this.RegionNormalBackgroundColor = Color.Green;
+				this.RegionHighlightBorderColor = Color.White;
+				this.RegionHighlightBackgroundColor = Color.YellowGreen;
+				this.MarkerNormalBorderColor = Color.DarkOrange;
+				this.MarkerNormalBackgroundColor = Color.Yellow;
+				this.MarkerEmphasisBorderColor = Color.DarkRed;
+				this.MarkerEmphasisBackgroundColor = Color.Red;
+				this.MarkerHighlightBorderColor = Color.DarkViolet;
+				this.MarkerHighlightBackgroundColor = Color.Violet;
+				this.MajorGridColor = Color.FromArgb(128, Color.Gray);
+				this.MinorGridColor = Color.FromArgb(48, Color.Gray);
+			}
+		}
+
 		private delegate void MessageAction(string text);
 		private delegate void MouseMoveLazyAction(MapMarker marker, MapRegion region);
 
@@ -360,20 +497,248 @@ namespace DotNetApi.Windows.Controls
 		/// Saves the current map as an image to the specified file.
 		/// </summary>
 		/// <param name="fileName">The file name.</param>
-		/// <param name="size">The image size.</param>
-		/// <returns>A wait handle which indicates when saving has completed.</returns>
-		public WaitHandle SaveMap(string fileName, Size size)
+		/// <param name="properties">The export properties.</param>
+		/// <param name="format">The image format.</param>
+		public void SaveMap(string fileName, ExportProperties properties, ImageFormat format)
 		{
-			// Create a manual reset event.
-			ManualResetEvent wait = new ManualResetEvent(false);
-			
-			// Save the map on the thread pool.
-			ThreadPool.QueueUserWorkItem((object param) =>
-				{
-				});
+			// Create a new bitmap.
+			Bitmap bitmap = new Bitmap(properties.Size.Width, properties.Size.Height);
 
-			// Return the wait handle.
-			return wait;
+			// Compute the map scale.
+			MapScale mapScale = new MapScale(
+				properties.Size.Width / this.mapBounds.Width,
+				properties.Size.Height / this.mapBounds.Height
+				);
+
+			// Compute the grid.
+			MapSize majorGridSize = new MapSize(1.0, 1.0);
+			MapSize minorGridSize = new MapSize(1.0, 1.0);
+			Point majorGridBegin;
+			Point majorGridEnd;
+			Point minorGridBegin;
+			Point minorGridEnd;
+
+			// Compute the grid size.
+			majorGridSize = new MapSize(
+				Math.Pow(10.0, Math.Floor(Math.Log10(this.mapSize.Width))),
+				Math.Pow(10.0, Math.Floor(Math.Log10(this.mapSize.Height)))
+				);
+			// Adjust the horizontal grid.
+			if (majorGridSize.Width > 10.0)
+			{
+				// Select the first value than results in a displayed width greater than the minimum width.
+				for (int index = 0; index < MapControl.majorGridValues.Length; index++)
+				{
+					if (majorGridValues[index] * mapScale.Width >= MapControl.majorGridMinimumSize.Width)
+					{
+						majorGridSize.Width = MapControl.majorGridValues[index];
+						minorGridSize.Width = MapControl.minorGridValues[index];
+						break;
+					}
+				}
+				// Limit the grid size to the highest value.
+				if (majorGridSize.Width > MapControl.majorGridValues[MapControl.majorGridValues.Length - 1])
+				{
+					majorGridSize.Width = MapControl.majorGridValues[MapControl.majorGridValues.Length - 1];
+					minorGridSize.Width = MapControl.minorGridValues[MapControl.majorGridValues.Length - 1];
+				}
+			}
+			else
+			{
+				// Select the first factor that results in a displayed width greater than the minimum width.
+				for (int index = 0; index < MapControl.majorGridFactor.Length; index++)
+				{
+					if (majorGridSize.Width * MapControl.majorGridFactor[index] >= MapControl.majorGridMinimumSize.Width)
+					{
+						majorGridSize.Width *= MapControl.majorGridFactor[index];
+						minorGridSize.Width = majorGridSize.Width * minorGridFactor[index];
+						break;
+					}
+				}
+			}
+			// Adjust the vertical grid.
+			if (majorGridSize.Height > 10.0)
+			{
+				// Select the first value than results in a displayed height greater than the minimum height.
+				for (int index = 0; index < MapControl.majorGridValues.Length; index++)
+				{
+					if (MapControl.majorGridValues[index] * mapScale.Height >= MapControl.majorGridMinimumSize.Height)
+					{
+						majorGridSize.Height = MapControl.majorGridValues[index];
+						minorGridSize.Height = MapControl.minorGridValues[index];
+						break;
+					}
+				}
+				// Limit the grid size to the highest value.
+				if (majorGridSize.Height > MapControl.majorGridValues[MapControl.majorGridValues.Length - 1])
+				{
+					majorGridSize.Height = MapControl.majorGridValues[MapControl.majorGridValues.Length - 1];
+					minorGridSize.Height = MapControl.minorGridValues[MapControl.majorGridValues.Length - 1];
+				}
+			}
+			else
+			{
+				// Select the first factor that results in a displayed height greater than the minimum height.
+				for (int index = 0; index < MapControl.majorGridFactor.Length; index++)
+				{
+					if (majorGridSize.Height * MapControl.majorGridFactor[index] >= MapControl.majorGridMinimumSize.Height)
+					{
+						majorGridSize.Height *= MapControl.majorGridFactor[index];
+						minorGridSize.Height = majorGridSize.Height * MapControl.minorGridFactor[index];
+						break;
+					}
+				}
+			}
+			// Compute the major grid begin and end.
+			majorGridBegin = new Point(
+				this.mapBounds.Left % majorGridSize.Width == 0 ? (int)Math.Ceiling(this.mapBounds.Left / majorGridSize.Width) + 1 : (int)Math.Ceiling(this.mapBounds.Left / majorGridSize.Width),
+				this.mapBounds.Top % majorGridSize.Height == 0 ? (int)Math.Floor(this.mapBounds.Top / majorGridSize.Height) - 1 : (int)Math.Floor(this.mapBounds.Top / majorGridSize.Height)
+				);
+			majorGridEnd = new Point(
+				this.mapBounds.Right % majorGridSize.Width == 0 ? (int)Math.Floor(this.mapBounds.Right / majorGridSize.Width) - 1 : (int)Math.Floor(this.mapBounds.Right / majorGridSize.Width),
+				this.mapBounds.Bottom % majorGridSize.Height == 0 ? (int)Math.Ceiling(this.mapBounds.Bottom / majorGridSize.Height) + 1 : (int)Math.Ceiling(this.mapBounds.Bottom / majorGridSize.Height)
+				);
+			// Compute the minor grid begin and end.
+			minorGridBegin = new Point(
+				this.mapBounds.Left % minorGridSize.Width == 0 ? (int)Math.Ceiling(this.mapBounds.Left / minorGridSize.Width) + 1 : (int)Math.Ceiling(this.mapBounds.Left / minorGridSize.Width),
+				this.mapBounds.Top % minorGridSize.Height == 0 ? (int)Math.Floor(this.mapBounds.Top / minorGridSize.Height) - 1 : (int)Math.Floor(this.mapBounds.Top / minorGridSize.Height)
+				);
+			minorGridEnd = new Point(
+				this.mapBounds.Right % minorGridSize.Width == 0 ? (int)Math.Floor(this.mapBounds.Right / minorGridSize.Width) - 1 : (int)Math.Floor(this.mapBounds.Right / minorGridSize.Width),
+				this.mapBounds.Bottom % minorGridSize.Height == 0 ? (int)Math.Ceiling(this.mapBounds.Bottom / minorGridSize.Height) + 1 : (int)Math.Ceiling(this.mapBounds.Bottom / minorGridSize.Height)
+				);
+
+			// Compute the horizontal major grid.
+			double[] majorGridHorizontalCoordinate = new double[majorGridEnd.X - majorGridBegin.X + 1];
+			float[] majorGridHorizontalPoint = new float[majorGridHorizontalCoordinate.Length];
+			for (int index = 0; index < majorGridHorizontalPoint.Length; index++)
+			{
+				majorGridHorizontalCoordinate[index] = (majorGridBegin.X + index) * majorGridSize.Width;
+				majorGridHorizontalPoint[index] = (float)((majorGridHorizontalCoordinate[index] - this.mapBounds.Left) * mapScale.Width);
+			}
+			// Compute the vertical major grid.
+			double[] majorGridVerticalCoordinate = new double[majorGridBegin.Y - majorGridEnd.Y + 1];
+			float[] majorGridVerticalPoint = new float[majorGridVerticalCoordinate.Length];
+			for (int index = 0; index < majorGridVerticalPoint.Length; index++)
+			{
+				majorGridVerticalCoordinate[index] = (majorGridEnd.Y + index) * majorGridSize.Height;
+				majorGridVerticalPoint[index] = (float)((this.mapBounds.Top - majorGridVerticalCoordinate[index]) * mapScale.Height);
+			}
+
+			// Draw the bitmap.
+			using (Graphics graphics = Graphics.FromImage(bitmap))
+			{
+				// Set the smooting mode.
+				graphics.SmoothingMode = properties.Smoothing;
+				using (SolidBrush brush = new SolidBrush(properties.BackgroundColor))
+				{
+					using (Pen pen = new Pen(properties.RegionNormalBorderColor))
+					{
+						// Fill the background.
+						graphics.FillRectangle(brush, 0, 0, properties.Size.Width, properties.Size.Height);
+						// Change the brush color.
+						brush.Color = properties.RegionNormalBackgroundColor;
+						// Get an exclusive reader lock to the regions list.
+						this.regions.Lock();
+						try
+						{
+							// Draw the map regions.
+							foreach (MapRegion region in this.regions)
+							{
+								// Draw the region.
+								region.Draw(graphics, this.mapBounds, mapScale, brush, properties.Borders ? pen : null);
+							}
+						}
+						finally
+						{
+							this.regions.Unlock();
+						}
+
+						// Draw the major grid.
+						if (properties.MajorGrid)
+						{
+							// Set the pen color.
+							pen.Color = properties.MajorGridColor;
+							// Set the brush color.
+							brush.Color = Color.Black;
+							// Draw the horizontal grid.
+							if (null != majorGridHorizontalPoint)
+							{
+								for (int index = 0; index < majorGridHorizontalPoint.Length; index++)
+								{
+									// Draw the grid line.
+									graphics.DrawLine(pen, majorGridHorizontalPoint[index], 0, majorGridHorizontalPoint[index], properties.Size.Height - 1);
+									// Draw the coordinates.
+									graphics.DrawString(
+										majorGridHorizontalCoordinate[index].LongitudeToString(),
+										this.fontGrid,
+										brush,
+										new Point((int)majorGridHorizontalPoint[index], 0));
+								}
+							}
+							// Draw the vertical grid.
+							if (null != majorGridVerticalPoint)
+							{
+								for (int index = 0; index < majorGridVerticalPoint.Length; index++)
+								{
+									// Draw the grid line.
+									graphics.DrawLine(pen, 0, majorGridVerticalPoint[index], properties.Size.Width - 1, majorGridVerticalPoint[index]);
+									// Draw the coordinates.
+									graphics.DrawString(
+										majorGridVerticalCoordinate[index].LatitudeToString(),
+										this.fontGrid,
+										brush,
+										new Point(0, (int)majorGridVerticalPoint[index]));
+								}
+							}
+						}
+
+						// If the show markers flag is set.
+						if (properties.Markers)
+						{
+							// Change the pen and brush colors.
+							pen.Color = properties.MarkerNormalBorderColor;
+							brush.Color = properties.MarkerNormalBackgroundColor;
+
+							// Try lockLock the markers collection.
+							if (this.markers.TryLock())
+							{
+								try
+								{
+									// Draw the normal markers.
+									foreach (MapMarker marker in this.markers)
+									{
+										if (!marker.Emphasized)
+										{
+											marker.Draw(graphics, this.mapBounds, mapScale, brush, pen);
+										}
+									}
+
+									// Change the pen and brush colors.
+									pen.Color = properties.MarkerEmphasisBorderColor;
+									brush.Color = properties.MarkerEmphasisBackgroundColor;
+
+									// Draw the emphasized markers.
+									foreach (MapMarker marker in this.markers)
+									{
+										if (marker.Emphasized)
+										{
+											marker.Draw(graphics, this.mapBounds, mapScale, brush, pen);
+										}
+									}
+								}
+								finally
+								{
+									this.markers.Unlock();
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Save the bitmap to file.
+			bitmap.Save(fileName, format);
 		}
 
 		// Protected methods.
@@ -492,8 +857,6 @@ namespace DotNetApi.Windows.Controls
 									// Draw the highlighted region.
 									this.highlightRegion.Draw(e.Graphics, brush, pen);
 								}
-
-								// Draw the major grid.
 
 								// If the show markers flag is set.
 								if (this.showMarkers)
