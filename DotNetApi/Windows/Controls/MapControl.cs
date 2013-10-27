@@ -280,10 +280,6 @@ namespace DotNetApi.Windows.Controls
 		// Asynchronous.
 		private readonly AsyncTask task = new AsyncTask();
 
-		private Action delegateRefresh;
-		private MessageAction delegateMessage;
-		private MouseMoveLazyAction delegateMouseMove;
-
 		/// <summary>
 		/// Creates a new control instance.
 		/// </summary>
@@ -318,11 +314,6 @@ namespace DotNetApi.Windows.Controls
 
 			// Create the background brush.
 			this.brushBackground = new TextureBrush(this.bitmapBackground);
-
-			// Create the delegates.
-			this.delegateRefresh = new Action(this.Refresh);
-			this.delegateMessage = new MessageAction(this.OnMessageChanged);
-			this.delegateMouseMove = new MouseMoveLazyAction(this.OnMouseMoveLazyFinish);
 
 			// Create the spring motion event handler.
 			this.scrollSpring.Tick += this.OnSpringTick;
@@ -459,11 +450,11 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public override void Refresh()
 		{
-			if (this.InvokeRequired) this.Invoke(this.delegateRefresh);
-			else
-			{
-				base.Refresh();
-			}
+			// Execute the code on the UI thread.
+			this.Invoke(() =>
+				{
+					base.Refresh();
+				});
 		}
 
 		/// <summary>
@@ -1507,31 +1498,29 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="text">The new message text.</param>
 		private void OnMessageChanged(string text)
 		{
-			// Execute the method on the UI thread.
-			if (this.InvokeRequired)
-			{
-				this.Invoke(this.delegateMessage, new object[] { text });
-				return;
-			}
-			// Get the old message bounds.
-			Rectangle oldBounds = this.annotationMessage.Bounds;
-			// Set the new message text.
-			this.annotationMessage.Text = text;
-			// Get the new message bounds.
-			Rectangle newBounds = this.annotationMessage.Bounds;
-			// If the bounds have changed.
-			if (oldBounds != newBounds)
-			{
-				// Invalidate the area corresponding to the old bounds.
-				this.Invalidate(oldBounds);
-				// Invalidate the area corresponding to the new bounds.
-				this.Invalidate(newBounds);
-			}
-			else
-			{
-				// Invalidate the area corresponding to the new bounds.
-				this.Invalidate(newBounds);
-			}
+			// Execute the code on the UI thread.
+			this.Invoke(() =>
+				{
+					// Get the old message bounds.
+					Rectangle oldBounds = this.annotationMessage.Bounds;
+					// Set the new message text.
+					this.annotationMessage.Text = text;
+					// Get the new message bounds.
+					Rectangle newBounds = this.annotationMessage.Bounds;
+					// If the bounds have changed.
+					if (oldBounds != newBounds)
+					{
+						// Invalidate the area corresponding to the old bounds.
+						this.Invalidate(oldBounds);
+						// Invalidate the area corresponding to the new bounds.
+						this.Invalidate(newBounds);
+					}
+					else
+					{
+						// Invalidate the area corresponding to the new bounds.
+						this.Invalidate(newBounds);
+					}
+				});
 		}
 
 		/// <summary>
@@ -1741,8 +1730,8 @@ namespace DotNetApi.Windows.Controls
 								this.regions.Unlock();
 							}
 
-							// Call the mouse move lazy finish on the UI thread.
-							this.Invoke(this.delegateMouseMove, new object[] { highlightMarker, highlightRegion });
+							// Call the mouse move lazy finish.
+							this.OnMouseMoveLazyFinish(highlightMarker, highlightRegion);
 						}
 						finally
 						{
@@ -1759,84 +1748,88 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="highlightRegion">The highlighted code.</param>
 		private void OnMouseMoveLazyFinish(MapMarker highlightMarker, MapRegion highlightRegion)
 		{
-			// If the mouse over flag is not set, do nothing.
-			if (!this.mouseOverFlag) return;
+			// Execute the code on the UI thread.
+			this.Invoke(() =>
+				{
+					// If the mouse over flag is not set, do nothing.
+					if (!this.mouseOverFlag) return;
 
-			// If the highlighted marker has changed.
-			if (this.highlightMarker != highlightMarker)
-			{
-				// If there exists a previous highlighted marker.
-				if (null != this.highlightMarker)
-				{
-					// Invalidate the bounds of that marker.
-					this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
-				}
-				// If there exists a current highlighted marker.
-				if ((null != highlightMarker) && this.showMarkers)
-				{
-					// Invalidate the bounds of that marker.
-					this.Invalidate(highlightMarker.Bounds.Add(this.bitmapLocation));
-					// Show the info annotation.
-					this.OnShowAnnotation(this.annotationInfo, highlightMarker.Name, highlightMarker);
-				}
-				else
-				{
-					// If there is an emphasized marker.
-					if ((null != this.emphasizedMarker) && this.showMarkers)
+					// If the highlighted marker has changed.
+					if (this.highlightMarker != highlightMarker)
 					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+						// If there exists a previous highlighted marker.
+						if (null != this.highlightMarker)
+						{
+							// Invalidate the bounds of that marker.
+							this.Invalidate(this.highlightMarker.Bounds.Add(this.bitmapLocation));
+						}
+						// If there exists a current highlighted marker.
+						if ((null != highlightMarker) && this.showMarkers)
+						{
+							// Invalidate the bounds of that marker.
+							this.Invalidate(highlightMarker.Bounds.Add(this.bitmapLocation));
+							// Show the info annotation.
+							this.OnShowAnnotation(this.annotationInfo, highlightMarker.Name, highlightMarker);
+						}
+						else
+						{
+							// If there is an emphasized marker.
+							if ((null != this.emphasizedMarker) && this.showMarkers)
+							{
+								// Show the info annotation.
+								this.OnShowAnnotation(this.annotationInfo, this.emphasizedMarker.Name, this.emphasizedMarker);
+							}
+							// Else, if there is a highlighted region.
+							else if (null != highlightRegion)
+							{
+								// Show the info annotation.
+								this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+							}
+							// Else.
+							else
+							{
+								// Hide the info annotation.
+								this.OnHideAnnotation(this.annotationInfo);
+							}
+						}
+						// Set the new highlighted marker.
+						this.highlightMarker = highlightMarker;
 					}
-					// Else, if there is a highlighted region.
-					else if (null != highlightRegion)
-					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
-					}
-					// Else.
-					else
-					{
-						// Hide the info annotation.
-						this.OnHideAnnotation(this.annotationInfo);
-					}
-				}
-				// Set the new highlighted marker.
-				this.highlightMarker = highlightMarker;
-			}
 
-			// If the highlighted region has changed.
-			if (this.highlightRegion != highlightRegion)
-			{
-				// If there exists a previous highlighted region.
-				if (null != this.highlightRegion)
-				{
-					// Invalidate the bounds of that region.
-					this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
-				}
-				// If there exists a current highlighted region.
-				if (null != highlightRegion)
-				{
-					// Invalidate the bounds of that region.
-					this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
-					// If there is no highlighted marker and no emphasized marker or if the markers are hidden.
-					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+					// If the highlighted region has changed.
+					if (this.highlightRegion != highlightRegion)
 					{
-						// Show the info annotation.
-						this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+						// If there exists a previous highlighted region.
+						if (null != this.highlightRegion)
+						{
+							// Invalidate the bounds of that region.
+							this.Invalidate(this.highlightRegion.Bounds.Add(this.bitmapLocation));
+						}
+						// If there exists a current highlighted region.
+						if (null != highlightRegion)
+						{
+							// Invalidate the bounds of that region.
+							this.Invalidate(highlightRegion.Bounds.Add(this.bitmapLocation));
+							// If there is no highlighted marker and no emphasized marker or if the markers are hidden.
+							if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+							{
+								// Show the info annotation.
+								this.OnShowAnnotation(this.annotationInfo, highlightRegion.Name, highlightRegion);
+							}
+						}
+						else
+						{
+							// If there is no highlighted marker and no emphasized marker.
+							if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
+							{
+								// Hide the info annotation.
+								this.OnHideAnnotation(this.annotationInfo);
+							}
+						}
+						// Set the new highlighted region.
+						this.highlightRegion = highlightRegion;
 					}
-				}
-				else
-				{
-					// If there is no highlighted marker and no emphasized marker.
-					if (((null == this.highlightMarker) && (null == this.emphasizedMarker)) || !this.showMarkers)
-					{
-						// Hide the info annotation.
-						this.OnHideAnnotation(this.annotationInfo);
-					}
-				}
-				// Set the new highlighted region.
-				this.highlightRegion = highlightRegion;
-			}
+				});
 		}
 
 		/// <summary>

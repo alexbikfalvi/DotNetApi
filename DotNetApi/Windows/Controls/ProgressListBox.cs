@@ -142,8 +142,6 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
-			// Check whether this method must be called on a different thread.
-			if (this.InvokeRequired) System.Diagnostics.Debugger.Break();
 			// Dispose the control variables.
 			if (disposing)
 			{

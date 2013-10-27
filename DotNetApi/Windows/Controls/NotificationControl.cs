@@ -32,9 +32,6 @@ namespace YtAnalytics.Controls
 
 		private NotificationBox notification = new NotificationBox();
 
-		private ShowNotificationAction delegateShowMessage;
-		private HideNotificationAction delegateHideMessage;
-
 		/// <summary>
 		/// Creates a new control instance.
 		/// </summary>
@@ -42,9 +39,6 @@ namespace YtAnalytics.Controls
 		{
 			// Add the message control.
 			this.Controls.Add(this.notification);
-			// Create the delegates.
-			this.delegateShowMessage = new ShowNotificationAction(this.ShowMessage);
-			this.delegateHideMessage = new HideNotificationAction(this.HideMessage);
 		}
 
 		// Protected methods.
@@ -68,18 +62,14 @@ namespace YtAnalytics.Controls
 			NotificationTaskAction task = null,
 			object[] parameters = null)
 		{
-			// If the control has been disposed, do nothing.
-			if (this.IsDisposed) return;
-			// Invoke the function on the UI thread.
-			if (this.InvokeRequired)
-				this.Invoke(this.delegateShowMessage, new object[] { image, title, text, progress, duration, task, parameters });
-			else
-			{
-				// Set the message on top of all other controls.
-				this.Controls.SetChildIndex(this.notification, 0);
-				// Show the message.
-				this.notification.Show(image, title, text, progress, duration, task, parameters);
-			}
+			// Execute the code on the UI thread.
+			this.Invoke(() =>
+				{
+					// Set the message on top of all other controls.
+					this.Controls.SetChildIndex(this.notification, 0);
+					// Show the message.
+					this.notification.Show(image, title, text, progress, duration, task, parameters);
+				});
 		}
 
 		/// <summary>
@@ -89,18 +79,14 @@ namespace YtAnalytics.Controls
 		/// <param name="parameters">The task parameters.</param>
 		protected void HideMessage(NotificationTaskAction task = null, object[] parameters = null)
 		{
-			// If the control has been disposed, do nothing.
-			if (this.IsDisposed) return;
-			// Invoke the function on the UI thread.
-			if (this.InvokeRequired)
-				this.Invoke(this.delegateHideMessage, new object[] { task, parameters });
-			else
-			{
-				// Hide the message.
-				this.notification.Hide();
-				// Execute the task on the UI thread.
-				if (task != null) task(parameters);
-			}
+			// Execute the code on the UI thread.
+			this.Invoke(() =>
+				{
+					// Hide the message.
+					this.notification.Hide();
+					// Execute the task on the UI thread.
+					if (task != null) task(parameters);
+				});
 		}
 
 		/// <summary>

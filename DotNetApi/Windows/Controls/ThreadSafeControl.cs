@@ -30,9 +30,6 @@ namespace DotNetApi.Windows.Controls
 	public class ThreadSafeControl : UserControl
 	{
 		private readonly ManualResetEvent eventHandleCreated = new ManualResetEvent(false);
-		private bool disposing = false;
-		private readonly object sync = new object();
-
 		private readonly Action<Action> action;
 
 		/// <summary>
@@ -46,42 +43,22 @@ namespace DotNetApi.Windows.Controls
 		// Public methods.
 
 		/// <summary>
-		/// Executes the specified delegate on the thread that owns the control's underlying window handle.
-		/// </summary>
-		/// <param name="method">A delegate that contains a method to be called in the control's thread context.</param>
-		/// <returns>The return value from the delegate being invoked, or null if the delegate has no return value.</returns>
-		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
-		public new object Invoke(Delegate method)
-		{
-			lock (this.sync)
-			{
-				return this.disposing ? null : base.Invoke(method);
-			}
-		}
-
-		/// <summary>
-		/// Executes the specified delegate, on the thread that owns the control's underlying window handle, with the specified list of arguments.
-		/// </summary>
-		/// <param name="method">A delegate to a method that takes parameters of the same number and type that are contained in the args parameter.</param>
-		/// <param name="args">An array of objects to pass as arguments to the specified method. This parameter can be null if the method takes no arguments.</param>
-		/// <returns>An System.Object that contains the return value from the delegate being invoked, or null if the delegate has no return value.</returns>
-		[TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
-		public new object Invoke(Delegate method, params object[] args)
-		{
-			lock (this.sync)
-			{
-				return this.disposing ? null : base.Invoke(method, args);
-			}
-		}
-
-		/// <summary>
 		/// Executes the specified action, on the thread that owns the control's underlying window handle, with the specified list of arguments.
 		/// </summary>
 		/// <param name="action">The action.</param>
 		public void Invoke(Action action)
 		{
-			if (this.InvokeRequired) this.Invoke(this.action, new object[] { action });
-			else action();
+			// If the method is called on a different thread.
+			if (this.InvokeRequired)
+			{
+				// Invoke the action delegate.
+				this.Invoke(this.action, new object[] { action });
+			}
+			else if(!this.IsDisposed)
+			{
+				// Call the action.
+				action();
+			}
 		}
 
 		// Protected methods.
@@ -95,8 +72,8 @@ namespace DotNetApi.Windows.Controls
 			// Wait for the control handle to be created.
 			while (!this.IsHandleCreated)
 			{
-				// If the control is disposing, return false.
-				if (this.disposing) return false;
+				// If the control is disposed, return false.
+				if (this.IsDisposed) return false;
 				// Wait for the control handle to be created.
 				this.eventHandleCreated.WaitOne();
 			}
@@ -109,11 +86,6 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="disposed">If <b>true</b>, clean both managed and native resources. If <b>false</b>, clean only native resources.</param>
 		protected override void Dispose(bool disposing)
 		{
-			lock (this.sync)
-			{
-				// Set the disposing to true.
-				this.disposing = true;
-			}
 			// Dispose the current resources.
 			if (disposing)
 			{

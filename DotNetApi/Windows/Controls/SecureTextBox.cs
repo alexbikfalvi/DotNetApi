@@ -57,7 +57,7 @@ namespace DotNetApi.Windows.Controls
 			get { return base.Text; }
 			set
 			{
-				this.OnSecureTextSet(value.ConvertToSecureString());
+				this.OnSecureTextSet(value != null ? value.ConvertToSecureString() : SecureStringExtensions.Empty);
 			}
 		}
 
