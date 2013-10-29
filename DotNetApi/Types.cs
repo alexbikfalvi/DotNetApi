@@ -94,6 +94,7 @@ namespace DotNetApi
 		public static string GetName(this Type type)
 		{
 			if (type.IsNullable()) return "*{0}".FormatWith(type.GetNullable().Name);
+			else if (type.IsGenericType) return type.Name.Remove(type.Name.IndexOf('`'));
 			else return type.Name;
 		}
 	}
