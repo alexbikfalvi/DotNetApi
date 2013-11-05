@@ -18,9 +18,8 @@
 
 using System;
 using System.Drawing;
-using DotNetApi.Windows.Controls;
 
-namespace YtAnalytics.Controls
+namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
 	/// A controls that displays a notification box.

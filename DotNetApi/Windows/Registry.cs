@@ -29,6 +29,15 @@ namespace DotNetApi.Windows
 	/// </summary>
 	public static class Registry
 	{
+		// Static properties.
+
+		/// <summary>
+		/// Gets the HKEY_CURRENT_USER registry key.
+		/// </summary>
+		public static RegistryKey CurrentUser { get { return Microsoft.Win32.Registry.CurrentUser; } }
+
+		// Static methods.
+
 		/// <summary>
 		/// Reads a boolean value from the registry.
 		/// </summary>
@@ -595,6 +604,69 @@ namespace DotNetApi.Windows
 		public static void SetInt32Array(this RegistryKey key, string name, Int32[] value)
 		{
 			key.SetValue(name, value.GetBytes(), RegistryValueKind.Binary);
+		}
+
+		/// <summary>
+		/// Copies recursivelly the registry data from the source to the destination key.
+		/// </summary>
+		/// <param name="srcKey">The source key.</param>
+		/// <param name="srcPath">The source path.</param>
+		/// <param name="dstKey">The destination key.</param>
+		/// <param name="dstPath">The detination path.</param>
+		/// <param name="progress">A delegate to the progress.</param>
+		/// <returns><b>True</b> if the copy was successful, <b>false</b> otherwise.</returns>
+		public static bool CopyKey(RegistryKey srcKey, string srcPath, RegistryKey dstKey, string dstPath, Action<string, string> progress = null)
+		{
+			// Open the source key.
+			using (RegistryKey src = srcKey.OpenSubKey(srcPath, RegistryKeyPermissionCheck.ReadWriteSubTree))
+			{
+				// If the source key is null, return.
+				if (null == src) return false;
+
+				// Create the destination key.
+				using (RegistryKey dst = dstKey.CreateSubKey(dstPath, RegistryKeyPermissionCheck.ReadWriteSubTree))
+				{
+					// If the destination key is null, return.
+					if (null == dst) return false;
+
+					// If the progress delegate is not null, update the progress.
+					if (null != progress) progress(src.Name, dst.Name);
+
+					// Copy all values.
+					foreach (string value in src.GetValueNames())
+					{
+						// Copy the values.
+						dst.SetValue(value, src.GetValue(value), src.GetValueKind(value));
+					}
+
+					// Perform a recursive copy of the registry keys.
+					foreach (string subkey in src.GetSubKeyNames())
+					{
+						// Copy the registry key.
+						Registry.CopyKey(src, subkey, dst, subkey, progress);
+					}
+
+					return true;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Copies recursivelly the registry data from the source to the destination key.
+		/// </summary>
+		/// <param name="srcKey">The source key.</param>
+		/// <param name="srcPath">The source path.</param>
+		/// <param name="dstKey">The destination key.</param>
+		/// <param name="dstPath">The detination path.</param>
+		/// <param name="progress">A delegate to the progress.</param>
+		public static void MoveKey(RegistryKey srcKey, string srcPath, RegistryKey dstKey, string dstPath, Action<string, string> progress = null)
+		{
+			// Copy the key.
+			if (Registry.CopyKey(srcKey, srcPath, dstKey, dstPath, progress))
+			{
+				// Delete the old key.
+				srcKey.DeleteSubKeyTree(srcPath);
+			}
 		}
 	}
 }
