@@ -22,9 +22,9 @@ using System.IO;
 namespace DotNetApi.IO
 {
 	/// <summary>
-	/// A class with input-output utility methods.
+	/// A class with input-output extensions methods.
 	/// </summary>
-	public static class IoUtils
+	public static class Extensions
 	{
 		private const uint bufferSize = 0x10000;
 
@@ -36,7 +36,7 @@ namespace DotNetApi.IO
 		public static byte[] ReadToEnd(this Stream stream)
 		{
 			// Create a new read buffer.
-			byte[] buffer = new byte[IoUtils.bufferSize];
+			byte[] buffer = new byte[Extensions.bufferSize];
 			// Create a new memory stream.
 			using (MemoryStream memoryStream = new MemoryStream())
 			{

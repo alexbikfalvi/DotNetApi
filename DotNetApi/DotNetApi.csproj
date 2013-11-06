@@ -71,7 +71,10 @@
     <Compile Include="Drawing\Transforms\Transform.cs" />
     <Compile Include="Drawing\Transforms\TransformAsymptotic.cs" />
     <Compile Include="Formatting.cs" />
-    <Compile Include="IO\IoUtils.cs" />
+    <Compile Include="IO\Directory.cs" />
+    <Compile Include="IO\Extensions.cs" />
+    <Compile Include="IO\File.cs" />
+    <Compile Include="IO\Operations.cs" />
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="Templates.cs" />
     <Compile Include="Types.cs" />

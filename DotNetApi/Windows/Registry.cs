@@ -659,14 +659,19 @@ namespace DotNetApi.Windows
 		/// <param name="dstKey">The destination key.</param>
 		/// <param name="dstPath">The detination path.</param>
 		/// <param name="progress">A delegate to the progress.</param>
-		public static void MoveKey(RegistryKey srcKey, string srcPath, RegistryKey dstKey, string dstPath, Action<string, string> progress = null)
+		/// <returns><b>True</b> if the move was successful, <b>false</b> otherwise.</returns>
+		public static bool MoveKey(RegistryKey srcKey, string srcPath, RegistryKey dstKey, string dstPath, Action<string, string> progress = null)
 		{
 			// Copy the key.
 			if (Registry.CopyKey(srcKey, srcPath, dstKey, dstPath, progress))
 			{
 				// Delete the old key.
 				srcKey.DeleteSubKeyTree(srcPath);
+				// Return true.
+				return true;
 			}
+			// Return false.
+			return false;
 		}
 	}
 }

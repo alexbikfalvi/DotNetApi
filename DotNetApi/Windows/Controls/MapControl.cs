@@ -30,6 +30,7 @@ using DotNetApi.Concurrent.Generic;
 using DotNetApi.Drawing;
 using DotNetApi.Drawing.Temporal;
 using DotNetApi.Drawing.Transforms;
+using DotNetApi.IO;
 using MapApi;
 
 namespace DotNetApi.Windows.Controls
@@ -728,8 +729,12 @@ namespace DotNetApi.Windows.Controls
 				}
 			}
 
-			// Save the bitmap to file.
-			bitmap.Save(fileName, format);
+			// Check the directory exists.
+			if (Directory.EnsureFileDirectoryExists(fileName))
+			{
+				// Save the bitmap to file.
+				bitmap.Save(fileName, format);
+			}
 		}
 
 		// Protected methods.
