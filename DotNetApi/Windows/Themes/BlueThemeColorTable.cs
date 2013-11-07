@@ -17,14 +17,13 @@ namespace DotNetApi.Windows.Themes
 
 		}
 
-		/*
 		// Summary:
 		//     Gets the starting color of the gradient used when the button is checked.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used when
 		//     the button is checked.
-		public virtual Color ButtonCheckedGradientBegin { get; }
+		public override Color ButtonCheckedGradientBegin { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used when the button is checked.
@@ -32,7 +31,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used when the
 		//     button is checked.
-		public virtual Color ButtonCheckedGradientEnd { get; }
+		public override Color ButtonCheckedGradientEnd { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used when the button is checked.
@@ -40,21 +39,21 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used when
 		//     the button is checked.
-		public virtual Color ButtonCheckedGradientMiddle { get; }
+		public override Color ButtonCheckedGradientMiddle { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the solid color used when the button is checked.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the solid color used when the button is checked.
-		public virtual Color ButtonCheckedHighlight { get; }
+		public override Color ButtonCheckedHighlight { get { return Color.FromArgb(255, 252, 244); } }
 		//
 		// Summary:
 		//     Gets the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonCheckedHighlight.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonCheckedHighlight.
-		public virtual Color ButtonCheckedHighlightBorder { get; }
+		public override Color ButtonCheckedHighlightBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the border color to use with the System.Windows.Forms.ProfessionalColorTable.ButtonPressedGradientBegin,
@@ -67,7 +66,7 @@ namespace DotNetApi.Windows.Themes
 		//     System.Windows.Forms.ProfessionalColorTable.ButtonPressedGradientMiddle,
 		//     and System.Windows.Forms.ProfessionalColorTable.ButtonPressedGradientEnd
 		//     colors.
-		public virtual Color ButtonPressedBorder { get; }
+		public override Color ButtonPressedBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used when the button is pressed.
@@ -75,7 +74,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used when
 		//     the button is pressed.
-		public virtual Color ButtonPressedGradientBegin { get; }
+		public override Color ButtonPressedGradientBegin { get { return Color.FromArgb(255, 242, 157); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used when the button is pressed.
@@ -83,7 +82,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used when the
 		//     button is pressed.
-		public virtual Color ButtonPressedGradientEnd { get; }
+		public override Color ButtonPressedGradientEnd { get { return Color.FromArgb(255, 242, 157); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used when the button is pressed.
@@ -91,21 +90,21 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used when
 		//     the button is pressed.
-		public virtual Color ButtonPressedGradientMiddle { get; }
+		public override Color ButtonPressedGradientMiddle { get { return Color.FromArgb(255, 242, 157); } }
 		//
 		// Summary:
 		//     Gets the solid color used when the button is pressed.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the solid color used when the button is pressed.
-		public virtual Color ButtonPressedHighlight { get; }
+		public override Color ButtonPressedHighlight { get { return Color.FromArgb(255, 242, 157); } }
 		//
 		// Summary:
 		//     Gets the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonPressedHighlight.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonPressedHighlight.
-		public virtual Color ButtonPressedHighlightBorder { get; }
+		public override Color ButtonPressedHighlightBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the border color to use with the System.Windows.Forms.ProfessionalColorTable.ButtonSelectedGradientBegin,
@@ -118,7 +117,7 @@ namespace DotNetApi.Windows.Themes
 		//     System.Windows.Forms.ProfessionalColorTable.ButtonSelectedGradientMiddle,
 		//     and System.Windows.Forms.ProfessionalColorTable.ButtonSelectedGradientEnd
 		//     colors.
-		public virtual Color ButtonSelectedBorder { get; }
+		public override Color ButtonSelectedBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used when the button is selected.
@@ -126,7 +125,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used when
 		//     the button is selected.
-		public virtual Color ButtonSelectedGradientBegin { get; }
+		public override Color ButtonSelectedGradientBegin { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used when the button is selected.
@@ -134,7 +133,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used when the
 		//     button is selected.
-		public virtual Color ButtonSelectedGradientEnd { get; }
+		public override Color ButtonSelectedGradientEnd { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used when the button is selected.
@@ -142,21 +141,21 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used when
 		//     the button is selected.
-		public virtual Color ButtonSelectedGradientMiddle { get; }
+		public override Color ButtonSelectedGradientMiddle { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the solid color used when the button is selected.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the solid color used when the button is selected.
-		public virtual Color ButtonSelectedHighlight { get; }
+		public override Color ButtonSelectedHighlight { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonSelectedHighlight.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use with System.Windows.Forms.ProfessionalColorTable.ButtonSelectedHighlight.
-		public virtual Color ButtonSelectedHighlightBorder { get; }
+		public override Color ButtonSelectedHighlightBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the solid color to use when the button is checked and gradients are
@@ -165,7 +164,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the solid color to use when the button is
 		//     checked and gradients are being used.
-		public virtual Color CheckBackground { get; }
+		public override Color CheckBackground { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the solid color to use when the button is checked and selected and gradients
@@ -174,7 +173,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the solid color to use when the button is
 		//     checked and selected and gradients are being used.
-		public virtual Color CheckPressedBackground { get; }
+		public override Color CheckPressedBackground { get { return Color.FromArgb(255, 252, 244); } }
 		//
 		// Summary:
 		//     Gets the solid color to use when the button is checked and selected and gradients
@@ -183,7 +182,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the solid color to use when the button is
 		//     checked and selected and gradients are being used.
-		public virtual Color CheckSelectedBackground { get; }
+		public override Color CheckSelectedBackground { get { return Color.FromArgb(255, 252, 244); } }
 		//
 		// Summary:
 		//     Gets the color to use for shadow effects on the grip (move handle).
@@ -191,7 +190,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the color to use for shadow effects on the
 		//     grip (move handle).
-		public virtual Color GripDark { get; }
+		public override Color GripDark { get { return Color.FromArgb(207, 214, 229); } }
 		//
 		// Summary:
 		//     Gets the color to use for highlight effects on the grip (move handle).
@@ -199,7 +198,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the color to use for highlight effects on
 		//     the grip (move handle).
-		public virtual Color GripLight { get; }
+		public override Color GripLight { get { return Color.FromArgb(207, 214, 229); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu.
@@ -207,7 +206,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the image margin of a System.Windows.Forms.ToolStripDropDownMenu.
-		public virtual Color ImageMarginGradientBegin { get; }
+		public override Color ImageMarginGradientBegin { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu.
@@ -215,7 +214,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     image margin of a System.Windows.Forms.ToolStripDropDownMenu.
-		public virtual Color ImageMarginGradientEnd { get; }
+		public override Color ImageMarginGradientEnd { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu.
@@ -223,7 +222,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used in the
 		//     image margin of a System.Windows.Forms.ToolStripDropDownMenu.
-		public virtual Color ImageMarginGradientMiddle { get; }
+		public override Color ImageMarginGradientMiddle { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu
@@ -233,7 +232,7 @@ namespace DotNetApi.Windows.Themes
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the image margin of a System.Windows.Forms.ToolStripDropDownMenu when an
 		//     item is revealed.
-		public virtual Color ImageMarginRevealedGradientBegin { get; }
+		public override Color ImageMarginRevealedGradientBegin { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu
@@ -243,7 +242,7 @@ namespace DotNetApi.Windows.Themes
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     image margin of a System.Windows.Forms.ToolStripDropDownMenu when an item
 		//     is revealed.
-		public virtual Color ImageMarginRevealedGradientEnd { get; }
+		public override Color ImageMarginRevealedGradientEnd { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used in the image margin of a System.Windows.Forms.ToolStripDropDownMenu
@@ -253,21 +252,21 @@ namespace DotNetApi.Windows.Themes
 		//     A System.Drawing.Color that is the middle color of the gradient used in the
 		//     image margin of a System.Windows.Forms.ToolStripDropDownMenu when an item
 		//     is revealed.
-		public virtual Color ImageMarginRevealedGradientMiddle { get; }
+		public override Color ImageMarginRevealedGradientMiddle { get { return Color.FromArgb(242, 244, 254); } }
 		//
 		// Summary:
 		//     Gets the color that is the border color to use on a System.Windows.Forms.MenuStrip.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use on a System.Windows.Forms.MenuStrip.
-		public virtual Color MenuBorder { get; }
+		public override Color MenuBorder { get { return Color.FromArgb(155, 167, 183); } }
 		//
 		// Summary:
 		//     Gets the border color to use with a System.Windows.Forms.ToolStripMenuItem.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use with a System.Windows.Forms.ToolStripMenuItem.
-		public virtual Color MenuItemBorder { get; }
+		public override Color MenuItemBorder { get { return Color.FromArgb(229, 195, 101); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used when a top-level System.Windows.Forms.ToolStripMenuItem
@@ -276,7 +275,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used when
 		//     a top-level System.Windows.Forms.ToolStripMenuItem is pressed.
-		public virtual Color MenuItemPressedGradientBegin { get; }
+		public override Color MenuItemPressedGradientBegin { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used when a top-level System.Windows.Forms.ToolStripMenuItem
@@ -285,7 +284,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used when a
 		//     top-level System.Windows.Forms.ToolStripMenuItem is pressed.
-		public virtual Color MenuItemPressedGradientEnd { get; }
+		public override Color MenuItemPressedGradientEnd { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used when a top-level System.Windows.Forms.ToolStripMenuItem
@@ -294,7 +293,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used when
 		//     a top-level System.Windows.Forms.ToolStripMenuItem is pressed.
-		public virtual Color MenuItemPressedGradientMiddle { get; }
+		public override Color MenuItemPressedGradientMiddle { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the solid color to use when a System.Windows.Forms.ToolStripMenuItem
@@ -303,7 +302,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the solid color to use when a System.Windows.Forms.ToolStripMenuItem
 		//     other than the top-level System.Windows.Forms.ToolStripMenuItem is selected.
-		public virtual Color MenuItemSelected { get; }
+		public override Color MenuItemSelected { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used when the System.Windows.Forms.ToolStripMenuItem
@@ -312,7 +311,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used when
 		//     the System.Windows.Forms.ToolStripMenuItem is selected.
-		public virtual Color MenuItemSelectedGradientBegin { get; }
+		public override Color MenuItemSelectedGradientBegin { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used when the System.Windows.Forms.ToolStripMenuItem
@@ -321,7 +320,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used when the
 		//     System.Windows.Forms.ToolStripMenuItem is selected.
-		public virtual Color MenuItemSelectedGradientEnd { get; }
+		public override Color MenuItemSelectedGradientEnd { get { return Color.FromArgb(253, 244, 191); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.MenuStrip.
@@ -329,7 +328,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.MenuStrip.
-		public virtual Color MenuStripGradientBegin { get; }
+		public override Color MenuStripGradientBegin { get { return Color.FromArgb(214, 219, 233); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.MenuStrip.
@@ -337,7 +336,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.MenuStrip.
-		public virtual Color MenuStripGradientEnd { get; }
+		public override Color MenuStripGradientEnd { get { return Color.FromArgb(214, 219, 233); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.ToolStripOverflowButton.
@@ -345,7 +344,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.ToolStripOverflowButton.
-		public virtual Color OverflowButtonGradientBegin { get; }
+		public override Color OverflowButtonGradientBegin { get { return Color.FromArgb(220, 224, 236); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.ToolStripOverflowButton.
@@ -353,7 +352,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.ToolStripOverflowButton.
-		public virtual Color OverflowButtonGradientEnd { get; }
+		public override Color OverflowButtonGradientEnd { get { return Color.FromArgb(220, 224, 236); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used in the System.Windows.Forms.ToolStripOverflowButton.
@@ -361,15 +360,15 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used in the
 		//     System.Windows.Forms.ToolStripOverflowButton.
-		public virtual Color OverflowButtonGradientMiddle { get; }
-		//
+		public override Color OverflowButtonGradientMiddle { get { return Color.FromArgb(220, 224, 236); } }
+/*		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.ToolStripContainer.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.ToolStripContainer.
-		public virtual Color RaftingContainerGradientBegin { get; }
+		public override Color RaftingContainerGradientBegin { get; }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.ToolStripContainer.
@@ -377,7 +376,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.ToolStripContainer.
-		public virtual Color RaftingContainerGradientEnd { get; }
+		public override Color RaftingContainerGradientEnd { get; }*/
 		//
 		// Summary:
 		//     Gets the color to use to for shadow effects on the System.Windows.Forms.ToolStripSeparator.
@@ -385,7 +384,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the color to use to for shadow effects on
 		//     the System.Windows.Forms.ToolStripSeparator.
-		public virtual Color SeparatorDark { get; }
+		public override Color SeparatorDark { get { return Color.FromArgb(133, 145, 162); } }
 		//
 		// Summary:
 		//     Gets the color to use to for highlight effects on the System.Windows.Forms.ToolStripSeparator.
@@ -393,7 +392,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the color to use to for highlight effects
 		//     on the System.Windows.Forms.ToolStripSeparator.
-		public virtual Color SeparatorLight { get; }
+		public override Color SeparatorLight { get { return Color.FromArgb(214, 219, 233); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used on the System.Windows.Forms.StatusStrip.
@@ -401,7 +400,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used on
 		//     the System.Windows.Forms.StatusStrip.
-		public virtual Color StatusStripGradientBegin { get; }
+		public override Color StatusStripGradientBegin { get { return Color.FromArgb(0, 122, 204); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used on the System.Windows.Forms.StatusStrip.
@@ -409,7 +408,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used on the
 		//     System.Windows.Forms.StatusStrip.
-		public virtual Color StatusStripGradientEnd { get; }
+		public override Color StatusStripGradientEnd { get { return Color.FromArgb(0, 122, 204); } }
 		//
 		// Summary:
 		//     Gets the border color to use on the bottom edge of the System.Windows.Forms.ToolStrip.
@@ -417,7 +416,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the border color to use on the bottom edge
 		//     of the System.Windows.Forms.ToolStrip.
-		public virtual Color ToolStripBorder { get; }
+		public override Color ToolStripBorder { get { return Color.FromArgb(220, 224, 236); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.ToolStripContentPanel.
@@ -425,7 +424,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.ToolStripContentPanel.
-		public virtual Color ToolStripContentPanelGradientBegin { get; }
+		public override Color ToolStripContentPanelGradientBegin { get { return Color.FromArgb(41, 58, 86); }  }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.ToolStripContentPanel.
@@ -433,14 +432,14 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.ToolStripContentPanel.
-		public virtual Color ToolStripContentPanelGradientEnd { get; }
+		public override Color ToolStripContentPanelGradientEnd { get { return Color.FromArgb(41, 58, 86); } }
 		//
 		// Summary:
 		//     Gets the solid background color of the System.Windows.Forms.ToolStripDropDown.
 		//
 		// Returns:
 		//     A System.Drawing.Color that is the solid background color of the System.Windows.Forms.ToolStripDropDown.
-		public virtual Color ToolStripDropDownBackground { get; }
+		public override Color ToolStripDropDownBackground { get { return Color.FromArgb(234, 240, 255); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.ToolStrip
@@ -449,7 +448,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.ToolStrip background.
-		public virtual Color ToolStripGradientBegin { get; }
+		public override Color ToolStripGradientBegin { get { return Color.FromArgb(207, 214, 229); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.ToolStrip
@@ -458,7 +457,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.ToolStrip background.
-		public virtual Color ToolStripGradientEnd { get; }
+		public override Color ToolStripGradientEnd { get { return Color.FromArgb(207, 214, 229); } }
 		//
 		// Summary:
 		//     Gets the middle color of the gradient used in the System.Windows.Forms.ToolStrip
@@ -467,7 +466,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the middle color of the gradient used in the
 		//     System.Windows.Forms.ToolStrip background.
-		public virtual Color ToolStripGradientMiddle { get; }
+		public override Color ToolStripGradientMiddle { get { return Color.FromArgb(207, 214, 229); } }
 		//
 		// Summary:
 		//     Gets the starting color of the gradient used in the System.Windows.Forms.ToolStripPanel.
@@ -475,7 +474,7 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the starting color of the gradient used in
 		//     the System.Windows.Forms.ToolStripPanel.
-		public virtual Color ToolStripPanelGradientBegin { get; }
+		public override Color ToolStripPanelGradientBegin { get { return Color.FromArgb(41, 58, 86); } }
 		//
 		// Summary:
 		//     Gets the end color of the gradient used in the System.Windows.Forms.ToolStripPanel.
@@ -483,15 +482,6 @@ namespace DotNetApi.Windows.Themes
 		// Returns:
 		//     A System.Drawing.Color that is the end color of the gradient used in the
 		//     System.Windows.Forms.ToolStripPanel.
-		public virtual Color ToolStripPanelGradientEnd { get; }
-		//
-		// Summary:
-		//     Gets or sets a value indicating whether to use System.Drawing.SystemColors
-		//     rather than colors that match the current visual style.
-		//
-		// Returns:
-		//     true to use System.Drawing.SystemColors; otherwise, false. The default is
-		//     false.
-		public bool UseSystemColors { get; set; }*/
+		public override Color ToolStripPanelGradientEnd { get { return Color.FromArgb(41, 58, 86); } }
 	}
 }
