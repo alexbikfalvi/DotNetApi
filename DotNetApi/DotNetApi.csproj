@@ -119,6 +119,8 @@
     <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
     <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\ToolSplitContainer.cs" />
+    <Compile Include="Windows\Controls\ThemeControl.cs" />
     <Compile Include="Windows\Controls\WizardControl.cs" />
     <Compile Include="Windows\Controls\WizardPage.cs" />
     <Compile Include="Windows\Controls\WizardPageEventArgs.cs" />
@@ -207,8 +209,10 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Themes\BlueThemeColorTable.cs" />
+    <Compile Include="Windows\Themes\BlueThemeSettings.cs" />
     <Compile Include="Windows\Themes\ThemeColorTable.cs" />
     <Compile Include="Windows\Themes\ThemeRenderer.cs" />
+    <Compile Include="Windows\Themes\ThemeSettings.cs" />
     <Compile Include="Windows\Window.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windows\Controls\SideMenu.cs">

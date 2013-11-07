@@ -27,17 +27,17 @@ namespace DotNetApi.Windows.Themes
 	/// </summary>
 	public class ThemeRenderer : ToolStripProfessionalRenderer
 	{
-		private ThemeColorTable colorTable;
+		private ThemeSettings settings;
 
 		/// <summary>
 		/// Creates a new theme renderer instance.
 		/// </summary>
-		/// <param name="colorTable">The theme color table.</param>
-		public ThemeRenderer(ThemeColorTable colorTable)
-			: base(colorTable)
+		/// <param name="settings">The theme color table.</param>
+		public ThemeRenderer(ThemeSettings settings)
+			: base(settings.ColorTable)
 		{
 			this.RoundedEdges = false;
-			this.colorTable = colorTable;
+			this.settings = settings;
 		}
 
 		// Public properties.
@@ -45,7 +45,11 @@ namespace DotNetApi.Windows.Themes
 		/// <summary>
 		/// Gets the theme color table.
 		/// </summary>
-		public new ThemeColorTable ColorTable { get { return this.colorTable; } }
+		public new ThemeColorTable ColorTable { get { return this.settings.ColorTable; } }
+		/// <summary>
+		/// Gets teh theme settings.
+		/// </summary>
+		public ThemeSettings Settings { get { return this.settings; } }
 
 		// Protected methods.
 

@@ -24,7 +24,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A controls that displays a notification box.
 	/// </summary>
-	public class NotificationControl : ThreadSafeControl
+	public class NotificationControl : ThemeControl
 	{
 		private delegate void ShowNotificationAction(Image image, string title, string text, bool progress, int duration, NotificationTaskAction task, object[] parameters);
 		private delegate void HideNotificationAction(NotificationTaskAction task, object[] parameters);

@@ -36,8 +36,8 @@ namespace DotNetApi.Windows.Controls
 	{
 		private string title = null;
 		private Image image = null;
-		private ProgressBar progressBar = new ProgressBar();
-		private Timer timer = new Timer();
+		private readonly ProgressBar progressBar = new ProgressBar();
+		private readonly Timer timer = new Timer();
 		private int titleHeight = 35;
 		private int defaultWidth = 400;
 		private int defaultHeight = 130;
@@ -49,7 +49,7 @@ namespace DotNetApi.Windows.Controls
 		private Rectangle borderImage = new Rectangle();
 		private Rectangle borderText = new Rectangle();
 
-		private ThemeColorTable colorTable;
+		private readonly ThemeColorTable colorTable;
 
 		private NotificationTaskAction task = null;
 		private object[] parameters = null;
@@ -62,8 +62,8 @@ namespace DotNetApi.Windows.Controls
 			// Suspend the layout.
 			this.SuspendLayout();
 
-			// Get the theme color table.
-			this.colorTable = (ToolStripManager.Renderer as ThemeRenderer).ColorTable;
+			// Set the theme color table.
+			this.colorTable = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).ColorTable : ThemeColorTable.DefaultColorTable;
 
 			// Default properties.
 			this.Width = this.defaultWidth;

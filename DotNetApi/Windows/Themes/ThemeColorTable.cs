@@ -27,6 +27,17 @@ namespace DotNetApi.Windows.Themes
 	/// </summary>
 	public abstract class ThemeColorTable : ProfessionalColorTable
 	{
+		private static readonly ThemeColorTable blueColorTable = new BlueThemeColorTable();
+
+		/// <summary>
+		/// Gets the default color table.
+		/// </summary>
+		public static ThemeColorTable DefaultColorTable { get { return ThemeColorTable.blueColorTable; } }
+		/// <summary>
+		/// Gets the blue color table.
+		/// </summary>
+		public static ThemeColorTable BlueColorTable { get { return ThemeColorTable.blueColorTable; } }
+
 		/// <summary>
 		/// Gets the border color for a notification box.
 		/// </summary>
@@ -43,5 +54,41 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the title text color for a notification box.
 		/// </summary>
 		public abstract Color NotificationBoxTitleText { get; }
+		/// <summary>
+		/// Get the border color for a tool split container.
+		/// </summary>
+		public abstract Color ToolSplitContainerBorder { get; }
+		/// <summary>
+		/// Gets the title gradient begin color.
+		/// </summary>
+		public abstract Color PanelTitleGradientBegin { get; }
+		/// <summary>
+		/// Gets the title gradient end color.
+		/// </summary>
+		public abstract Color PanelTitleGradientEnd { get; }
+		/// <summary>
+		/// Gets the title text color.
+		/// </summary>
+		public abstract Color PanelTitleText { get; }
+		/// <summary>
+		/// Gets the selected title gradient begin color.
+		/// </summary>
+		public abstract Color PanelTitleSelectedGradientBegin { get; }
+		/// <summary>
+		/// Gets the selected title gradient end color.
+		/// </summary>
+		public abstract Color PanelTitleSelectedGradientEnd { get; }
+		/// <summary>
+		/// Gets the selected title text color.
+		/// </summary>
+		public abstract Color PanelTitleSelectedText { get; }
+		/// <summary>
+		/// Gets the normal background color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripNormalBackground { get; }
+		/// <summary>
+		/// Gets the normal text color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripNormalText { get; }
 	}
 }

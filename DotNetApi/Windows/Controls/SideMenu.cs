@@ -25,24 +25,23 @@ using System.Drawing.Design;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using DotNetApi.Windows.Themes;
 
 namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
 	/// A class representing a side menu.
 	/// </summary>
-	public sealed class SideMenu : ContainerControl
+	public sealed class SideMenu : ThreadSafeControl
 	{
 		// Private members
-		private ComponentCollection<SideMenuItem> items = new ComponentCollection<SideMenuItem>();
+		private readonly ComponentCollection<SideMenuItem> items = new ComponentCollection<SideMenuItem>();
 
 		private int dockButtonWidth = 18;				// The width of the dock button.
 		private int gripHeight = 8;						// The grip height.
 		private int itemHeight = 48;					// The menu item height.
-		private int titleHeight = 27;					// The height of the title.
 		private int minimumPanelHeight = 50;			// The minimum panel height.
 		private int minimizedItemWidth = 25;			// The width of a minimized item.
-		private float titleFontSize = 12.0f;			// The title font size.
 		private int toolTipTopOffset = -20;				// The top offset of a minimized item tooltip.
 
 		private int maximumVisibleItems = 0;			// The maximum number of visible items.
@@ -62,18 +61,23 @@ namespace DotNetApi.Windows.Controls
 		private bool dockButtonSelected;
 		private bool dockButtonPressed;
 
-		private ContextMenuStrip controlMenu = new ContextMenuStrip();
-		private ToolStripMenuItem toolStripMenuItemShowMoreButtons = new ToolStripMenuItem();
-		private ToolStripMenuItem toolStripMenuItemShowFewerButtons = new ToolStripMenuItem();
-		private ToolStripSeparator toolStripSeparator = new ToolStripSeparator();
+		private readonly ThemeSettings themeSettings;
 
-		private ImageAttributes imageAttributesGrayscale = new ImageAttributes();
+		private readonly ContextMenuStrip controlMenu = new ContextMenuStrip();
+		private readonly ToolStripMenuItem toolStripMenuItemShowMoreButtons = new ToolStripMenuItem();
+		private readonly ToolStripMenuItem toolStripMenuItemShowFewerButtons = new ToolStripMenuItem();
+		private readonly ToolStripSeparator toolStripSeparator = new ToolStripSeparator();
+
+		private readonly ImageAttributes imageAttributesGrayscale = new ImageAttributes();
 
 		/// <summary>
 		/// Creates a new side menu control.
 		/// </summary>
 		public SideMenu()
 		{
+			// Set the theme color table.
+			this.themeSettings = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).Settings : ThemeSettings.Default;
+
 			// Set the color matrix
 			this.imageAttributesGrayscale.SetColorMatrix(new ColorMatrix(
 				new float[][]{
@@ -94,16 +98,16 @@ namespace DotNetApi.Windows.Controls
 			this.toolStripMenuItemShowMoreButtons.Size = new Size(200, 22);
 			this.toolStripMenuItemShowMoreButtons.Image = Resources.ArrowUp_16;
 			this.toolStripMenuItemShowMoreButtons.Text = "Show &More Buttons";
-			this.toolStripMenuItemShowMoreButtons.Click += new EventHandler(this.OnShowMoreButtonsClick);
+			this.toolStripMenuItemShowMoreButtons.Click += this.OnShowMoreButtonsClick;
 
 			this.toolStripMenuItemShowFewerButtons.Size = new Size(200, 22);
 			this.toolStripMenuItemShowFewerButtons.Image = Resources.ArrowDown_16;
 			this.toolStripMenuItemShowFewerButtons.Text = "Show Fe&wer Buttons";
-			this.toolStripMenuItemShowFewerButtons.Click += new EventHandler(this.OnShowFewerButtonsClick);
+			this.toolStripMenuItemShowFewerButtons.Click += this.OnShowFewerButtonsClick;
 
 			this.DoubleBuffered = true;
 
-			this.controlMenu.Closed += new ToolStripDropDownClosedEventHandler(this.OnControlMenuClosed);
+			this.controlMenu.Closed += this.OnControlMenuClosed;
 
 			// Set the items collection event handlers.
 			this.items.BeforeCleared += this.OnBeforeItemsCleared;
@@ -260,7 +264,7 @@ namespace DotNetApi.Windows.Controls
 			base.OnPaint(e);
 			// Paint the control.
 			this.OnPaintTitle(e.Graphics);
-			this.OnPaintItemBackground(e.Graphics, 0, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
+			this.OnPaintItemBackground(e.Graphics, 0, this.themeSettings.ColorTable.MenuStripGradientEnd, this.themeSettings.ColorTable.MenuStripGradientBegin);
 			this.OnPaintGrip(e.Graphics);
 			for (int index = 0; index < this.visibleItems; index++)
 				this.OnPaintItem(e.Graphics, index);
@@ -279,7 +283,7 @@ namespace DotNetApi.Windows.Controls
 			base.OnResize(e);
 			
 			// Update the maximum number of visible items.
-			this.maximumVisibleItems = (this.ClientRectangle.Height - this.titleHeight - this.gripHeight - this.minimumPanelHeight) / this.itemHeight - 1;
+			this.maximumVisibleItems = (this.ClientRectangle.Height - this.themeSettings.PanelTitleHeight - this.gripHeight - this.minimumPanelHeight) / this.itemHeight - 1;
 			// Update the maximum number of minimized items.
 			this.maximumMinimizedItems = (this.ClientRectangle.Width - this.dockButtonWidth) / this.minimizedItemWidth;
 
@@ -524,6 +528,30 @@ namespace DotNetApi.Windows.Controls
 			this.OnRefresh();
 		}
 
+		/// <summary>
+		/// An event handler called when the control got focus.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnAnyGotFocus(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnAnyGotFocus(e);
+			// Refresh the title.
+			this.Invalidate(new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight));
+		}
+
+		/// <summary>
+		/// An event handler called when the control lost focus.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnAnyLostFocus(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnAnyLostFocus(e);
+			// Refresh the title.
+			this.Invalidate(new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight));
+		}
+
 		// Private methods.
 
 		/// <summary>
@@ -745,7 +773,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnRefresh()
 		{
 			// Compute the new padding of the side menu;
-			Padding padding = new Padding(0, this.titleHeight + 1, 0, this.itemHeight * (this.visibleItems + 1) + this.gripHeight);
+			Padding padding = new Padding(0, this.themeSettings.PanelTitleHeight + 1, 0, this.itemHeight * (this.visibleItems + 1) + this.gripHeight);
 
 			// If the new padding is different from the old padding, update the padding.
 			if (this.Padding != padding)
@@ -780,34 +808,34 @@ namespace DotNetApi.Windows.Controls
 						// The side menu item is selected.
 						if (this.itemPressed)
 							// The side menu item is pressed.
-							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
+							this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonPressedHighlight, this.themeSettings.ColorTable.ButtonPressedHighlight);
 						else
 							// The side menu item is not pressed.
-							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+							this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonSelectedGradientBegin, this.themeSettings.ColorTable.ButtonSelectedGradientEnd);
 					else
 						// The side menu item is not selected.
 						if (this.itemPressed)
 							// The side menu item is pressed.
-							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
+							this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonPressedGradientBegin, this.themeSettings.ColorTable.ButtonPressedGradientEnd);
 						else
 							// The side menu item is not pressed.
-							this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
+							this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonSelectedHighlight, this.themeSettings.ColorTable.ButtonSelectedHighlight);
 				else
 					// The side menu item is not highlighted.
 					if (this.selectedIndex == this.VisibleToGlobalIndex(index))
 						// The side menu item is not selected.
-						this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+						this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonSelectedGradientBegin, this.themeSettings.ColorTable.ButtonSelectedGradientEnd);
 					else
 						// The side menu item is not selected.
-						this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientEnd, ProfessionalColors.MenuStripGradientBegin);
+						this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.MenuStripGradientEnd, this.themeSettings.ColorTable.MenuStripGradientBegin);
 			else
 				// The side menu item is disabled.
 				if (this.selectedIndex == this.VisibleToGlobalIndex(index))
 					// The side menu item is selected.
-					this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+					this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.ButtonSelectedGradientBegin, this.themeSettings.ColorTable.ButtonSelectedGradientEnd);
 				else
 					// The side menu item is not selected.
-					this.OnPaintItemBackground(g, this.visibleItems - index, ProfessionalColors.MenuStripGradientBegin);
+					this.OnPaintItemBackground(g, this.visibleItems - index, this.themeSettings.ColorTable.MenuStripGradientBegin);
 
 
 			Rectangle rectText = new Rectangle(this.ClientRectangle.Left + this.itemHeight, this.ClientRectangle.Bottom - (this.visibleItems - index + 1) * this.itemHeight, this.ClientRectangle.Width - 40, this.itemHeight);
@@ -862,7 +890,7 @@ namespace DotNetApi.Windows.Controls
 		private void OnPaintItemBackground(Graphics g, int index, Color color)
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (index + 1) * this.itemHeight, this.ClientRectangle.Width, this.itemHeight);
-			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			using (Pen pen = new Pen(this.themeSettings.ColorTable.MenuBorder))
 			{
 				using (Brush brush = new SolidBrush(color))
 				{
@@ -886,7 +914,7 @@ namespace DotNetApi.Windows.Controls
 				this.ClientRectangle.Bottom - (index + 1) * this.itemHeight,
 				this.ClientRectangle.Width,
 				this.itemHeight);
-			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			using (Pen pen = new Pen(this.themeSettings.ColorTable.MenuBorder))
 			{
 				using (Brush brush = new LinearGradientBrush(
 					rect,
@@ -944,18 +972,18 @@ namespace DotNetApi.Windows.Controls
 						// If the side menu item is selected.
 						if (this.itemMinimizedPressed)
 							// If the side menu item is pressed.
-							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedHighlight, ProfessionalColors.ButtonPressedHighlight);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, this.themeSettings.ColorTable.ButtonPressedHighlight, this.themeSettings.ColorTable.ButtonPressedHighlight);
 						else
 							// If the side menu item is not pressed.
-							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, this.themeSettings.ColorTable.ButtonSelectedGradientBegin, this.themeSettings.ColorTable.ButtonSelectedGradientEnd);
 					else
 						// If the side menu item is not selected.
 						if (this.itemMinimizedPressed)
 							// If the side menu item is pressed.
-							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonPressedGradientBegin, ProfessionalColors.ButtonPressedGradientEnd);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, this.themeSettings.ColorTable.ButtonPressedGradientBegin, this.themeSettings.ColorTable.ButtonPressedGradientEnd);
 						else
 							// If the side menu item is not pressed.
-							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedHighlight, ProfessionalColors.ButtonSelectedHighlight);
+							this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, this.themeSettings.ColorTable.ButtonSelectedHighlight, this.themeSettings.ColorTable.ButtonSelectedHighlight);
 					// Show the tooltip.
 					sideMenuItem.ToolTip.Show(
 						sideMenuItem.Text, this,
@@ -967,7 +995,7 @@ namespace DotNetApi.Windows.Controls
 					// If the side menu item is not highlighted.
 					if (this.selectedIndex == this.MinimizedToGlobalIndex(index))
 						// If the side menu item is selected.
-						this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, ProfessionalColors.ButtonSelectedGradientBegin, ProfessionalColors.ButtonSelectedGradientEnd);
+						this.OnPaintMinimizedItemBackground(g, this.minimizedItems - index, this.themeSettings.ColorTable.ButtonSelectedGradientBegin, this.themeSettings.ColorTable.ButtonSelectedGradientEnd);
 					// Hide the tooltip.
 					sideMenuItem.ToolTip.Hide(this);
 				}
@@ -1010,12 +1038,12 @@ namespace DotNetApi.Windows.Controls
 		{
 			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.ClientRectangle.Width, this.gripHeight);
 
-			using (Pen pen = new Pen(ProfessionalColors.MenuBorder))
+			using (Pen pen = new Pen(this.themeSettings.ColorTable.MenuBorder))
 			{
 				using (Brush brush = new LinearGradientBrush(
 					rect,
-					ProfessionalColors.OverflowButtonGradientBegin,
-					ProfessionalColors.OverflowButtonGradientEnd,
+					this.themeSettings.ColorTable.OverflowButtonGradientBegin,
+					this.themeSettings.ColorTable.OverflowButtonGradientEnd,
 					LinearGradientMode.Vertical))
 				{
 					g.FillRectangle(brush, rect);
@@ -1039,36 +1067,32 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="g">The graphics object.</param>
 		private void OnPaintTitle(Graphics g)
 		{
-			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.titleHeight);
+			Rectangle rect = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight);
 
-			using (Pen pen = new Pen(SystemColors.WindowFrame))
+			using (Pen pen = new Pen(this.themeSettings.ColorTable.ToolSplitContainerBorder))
 			{
 				using (Brush brush = new LinearGradientBrush(
 					rect,
-					Color.FromArgb(246, 247, 248),
-					Color.FromArgb(218, 233, 230),
+					this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientBegin : this.themeSettings.ColorTable.PanelTitleGradientBegin,
+					this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientEnd : this.themeSettings.ColorTable.PanelTitleGradientEnd,
 					LinearGradientMode.Vertical))
 				{
 					g.FillRectangle(brush, rect);
 					g.DrawLine(pen, rect.Left, rect.Bottom, rect.Right, rect.Bottom);
-
-					pen.Color = Color.White;
-					g.DrawLine(pen, rect.Left, rect.Top, rect.Left, rect.Bottom - 1);
-					g.DrawLine(pen, rect.Left, rect.Top, rect.Right, rect.Top);
 				}
 			}
 
 			if (null == this.selectedIndex) return;
 			if (null == this.items[this.selectedIndex ?? -1]) return;
 
-			Rectangle rectText = new Rectangle(this.ClientRectangle.Left + 5, this.ClientRectangle.Top, this.ClientRectangle.Width - 5, this.titleHeight - 1);
+			Rectangle rectText = new Rectangle(this.ClientRectangle.Left + 5, this.ClientRectangle.Top, this.ClientRectangle.Width - 5, this.themeSettings.PanelTitleHeight - 1);
 
 			TextRenderer.DrawText(
 				g,
 				this.items[this.selectedIndex ?? -1].Text,
-				new System.Drawing.Font(SystemFonts.MenuFont.FontFamily, this.titleFontSize, FontStyle.Bold),
+				new System.Drawing.Font(Window.DefaultFont, this.themeSettings.PanelTitleFontStyle),
 				rectText,
-				Color.FromArgb(21, 66, 139),
+				this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedText : this.themeSettings.ColorTable.PanelTitleText,
 				TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 		}
 
@@ -1086,8 +1110,8 @@ namespace DotNetApi.Windows.Controls
 				{
 					using (Brush brush = new LinearGradientBrush(
 						rect,
-						ProfessionalColors.ButtonPressedGradientBegin,
-						ProfessionalColors.ButtonPressedGradientEnd,
+						this.themeSettings.ColorTable.ButtonPressedGradientBegin,
+						this.themeSettings.ColorTable.ButtonPressedGradientEnd,
 						LinearGradientMode.Vertical))
 					{
 						g.FillRectangle(brush, rect);
@@ -1097,8 +1121,8 @@ namespace DotNetApi.Windows.Controls
 				{
 					using (Brush brush = new LinearGradientBrush(
 						rect,
-						ProfessionalColors.ButtonSelectedHighlight,
-						ProfessionalColors.ButtonSelectedHighlight,
+						this.themeSettings.ColorTable.ButtonSelectedHighlight,
+						this.themeSettings.ColorTable.ButtonSelectedHighlight,
 						LinearGradientMode.Vertical))
 					{
 						g.FillRectangle(brush, rect);

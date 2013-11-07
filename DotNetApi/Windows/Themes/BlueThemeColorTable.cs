@@ -279,5 +279,41 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the title text color for a notification box.
 		/// </summary>
 		public override Color NotificationBoxTitleText { get { return Color.Black; } }
+		/// <summary>
+		/// Get the border color for a tool split container.
+		/// </summary>
+		public override Color ToolSplitContainerBorder { get { return Color.FromArgb(142, 155, 188); } }
+		/// <summary>
+		/// Gets the selected title gradient begin color.
+		/// </summary>
+		public override Color PanelTitleGradientBegin { get { return Color.FromArgb(77, 96, 130); } }
+		/// <summary>
+		/// Gets the selected title gradient end color.
+		/// </summary>
+		public override Color PanelTitleGradientEnd { get { return Color.FromArgb(77, 96, 130); } }
+		/// <summary>
+		/// Gets the selected title text color.
+		/// </summary>
+		public override Color PanelTitleText { get { return Color.White; } }
+		/// <summary>
+		/// Gets the selected title gradient begin color.
+		/// </summary>
+		public override Color PanelTitleSelectedGradientBegin { get { return Color.FromArgb(255, 242, 157); } }
+		/// <summary>
+		/// Gets the selected title gradient end color.
+		/// </summary>
+		public override Color PanelTitleSelectedGradientEnd { get { return Color.FromArgb(255, 242, 157); } }
+		/// <summary>
+		/// Gets the selected title text color.
+		/// </summary>
+		public override Color PanelTitleSelectedText { get { return Color.Black; } }
+		/// <summary>
+		/// Gets the normal background color of the status strip.
+		/// </summary>
+		public override Color StatusStripNormalBackground { get { return Color.FromArgb(14, 99, 156); } }
+		/// <summary>
+		/// Gets the normal text color of the status strip.
+		/// </summary>
+		public override Color StatusStripNormalText { get { return Color.White; } }
 	}
 }
