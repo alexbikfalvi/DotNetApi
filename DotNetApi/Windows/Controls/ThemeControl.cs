@@ -34,6 +34,7 @@ namespace DotNetApi.Windows.Controls
 
 		private bool hasBorder = false;
 		private bool hasTitle = false;
+		private bool hasFocus = false;
 		private string title = string.Empty;
 
 		public ThemeControl()
@@ -45,8 +46,35 @@ namespace DotNetApi.Windows.Controls
 			this.Padding = new Padding(0);
 		}
 
+		// Public events.
+
+		/// <summary>
+		/// An event raised when the control or any child control which is not a theme control gets focus.
+		/// </summary>
+		public event EventHandler AnyGotFocus;
+		/// <summary>
+		/// An event raised when the control or any child control which is not a theme control loses focus.
+		/// </summary>
+		public event EventHandler AnyLostFocus;
+		/// <summary>
+		/// An event raised when sending the focus to the parent control.
+		/// </summary>
+		public event EventHandler ChildGotFocus;
+		/// <summary>
+		/// An event raused when removing the focus from the parent control.
+		/// </summary>
+		public event EventHandler ChildLostFocus;
+
 		// Public properties.
 
+		/// <summary>
+		/// Gets whether the control has focus.
+		/// </summary>
+		[Browsable(false)]
+		public bool HasFocus
+		{
+			get { return this.hasFocus; }
+		}
 		/// <summary>
 		/// Gets or sets whether the control uses a theme border.
 		/// </summary>
@@ -92,8 +120,8 @@ namespace DotNetApi.Windows.Controls
 				{
 					using (Brush brush = new LinearGradientBrush(
 						rect,
-						this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientBegin : this.themeSettings.ColorTable.PanelTitleGradientBegin,
-						this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientEnd : this.themeSettings.ColorTable.PanelTitleGradientEnd,
+						this.hasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientBegin : this.themeSettings.ColorTable.PanelTitleGradientBegin,
+						this.hasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientEnd : this.themeSettings.ColorTable.PanelTitleGradientEnd,
 						LinearGradientMode.Vertical))
 					{
 						e.Graphics.FillRectangle(brush, rect);
@@ -117,7 +145,7 @@ namespace DotNetApi.Windows.Controls
 					this.title,
 					new System.Drawing.Font(Window.DefaultFont, this.themeSettings.PanelTitleFontStyle),
 					rectText,
-					this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedText : this.themeSettings.ColorTable.PanelTitleText,
+					this.hasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedText : this.themeSettings.ColorTable.PanelTitleText,
 					TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
 			// If the border is displayed.
@@ -131,18 +159,71 @@ namespace DotNetApi.Windows.Controls
 		}
 
 		/// <summary>
+		/// An event handler called when a child control has been added.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnControlAdded(ControlEventArgs e)
+		{
+			// Call the base class method.
+			base.OnControlAdded(e);
+			// Subscribe to the child control events.
+			this.OnSubscribeEvents(e.Control);
+		}
+
+		/// <summary>
+		/// An event handler called when a child control has been removed.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnControlRemoved(ControlEventArgs e)
+		{
+			// Call the base classs method.
+			base.OnControlRemoved(e);
+			// Unsubscribe from the child control events.
+			this.OnUnsubscribeEvents(e.Control);
+		}
+
+		/// <summary>
 		/// An event handler called when the control got focus.
 		/// </summary>
 		/// <param name="e">The event arguments.</param>
-		protected override void OnAnyGotFocus(EventArgs e)
+		protected override void OnGotFocus(EventArgs e)
 		{
 			// Call the base class method.
-			base.OnAnyGotFocus(e);
+			base.OnGotFocus(e);
+			// Call the any got focus handler.
+			this.OnControlGotFocusChild(this, e);
+		}
+
+		/// <summary>
+		/// An event handler called when the control lost focus.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnLostFocus(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnLostFocus(e);
+			// Call the any lost focus handler.
+			this.OnControlLostFocusChild(this, e);
+		}
+
+		/// <summary>
+		/// An event handler called when the control got focus.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected virtual void OnAnyGotFocus(EventArgs e)
+		{
+			// Raise the event.
+			if (null != this.AnyGotFocus) this.AnyGotFocus(this, e);
 			// If the control has title.
 			if (this.hasTitle)
 			{
 				// Refresh the title.
 				this.Invalidate(new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top + 1, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight));
+			}
+			else
+			{
+				// Send the focus to the parent control.
+				if (null != this.ChildGotFocus) this.ChildGotFocus(this, e);
 			}
 		}
 
@@ -150,15 +231,20 @@ namespace DotNetApi.Windows.Controls
 		/// An event handler called when the control lost focus.
 		/// </summary>
 		/// <param name="e">The event arguments.</param>
-		protected override void OnAnyLostFocus(EventArgs e)
+		protected virtual void OnAnyLostFocus(EventArgs e)
 		{
-			// Call the base class method.
-			base.OnAnyLostFocus(e);
+			// Raise the event.
+			if (null != this.AnyLostFocus) this.AnyLostFocus(this, e);
 			// If the control has title.
 			if (this.hasTitle)
 			{
 				// Refresh the title.
 				this.Invalidate(new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top + 1, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight));
+			}
+			else
+			{
+				// Remove the focus to the parent control.
+				if (null != this.ChildLostFocus) this.ChildLostFocus(this, e);
 			}
 		}
 
@@ -212,6 +298,138 @@ namespace DotNetApi.Windows.Controls
 			this.title = value;
 			// Refresh the title.
 			this.Invalidate(new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Top, this.ClientRectangle.Width, this.themeSettings.PanelTitleHeight));
+		}
+
+		/// <summary>
+		/// Subscribes to the events of a child control.
+		/// </summary>
+		/// <param name="control">The child control.</param>
+		private void OnSubscribeEvents(Control control)
+		{
+			// If the control is a theme control.
+			if (control is ThemeControl)
+			{
+				ThemeControl themeControl = control as ThemeControl;
+				// Add peer control event handlers.
+				themeControl.AnyGotFocus += this.OnControlGotFocusPeer;
+				themeControl.ChildGotFocus += this.OnControlGotFocusChild;
+				themeControl.ChildLostFocus += this.OnControlLostFocusChild;
+			}
+			else
+			{
+				// Add child control event handlers.
+				control.GotFocus += this.OnControlGotFocusChild;
+				control.LostFocus += this.OnControlLostFocusChild;
+				control.ControlAdded += this.OnControlControlAdded;
+				control.ControlRemoved += this.OnControlControlRemoved;
+
+				// Subscribe to the events of the child controls.
+				foreach (Control child in control.Controls)
+				{
+					this.OnSubscribeEvents(child);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Unsubscribes from the events of a child control.
+		/// </summary>
+		/// <param name="control">The child control.</param>
+		private void OnUnsubscribeEvents(Control control)
+		{
+			// If the control is a theme control.
+			if (control is ThemeControl)
+			{
+				ThemeControl themeControl = control as ThemeControl;
+				// Remive peer control event handlers.
+				themeControl.AnyGotFocus -= this.OnControlGotFocusPeer;
+				themeControl.ChildGotFocus -= this.OnControlGotFocusChild;
+				themeControl.ChildLostFocus -= this.OnControlLostFocusChild;
+			}
+			else
+			{
+				// Remove child control event handlers.
+				control.GotFocus -= this.OnControlGotFocusChild;
+				control.LostFocus -= this.OnControlLostFocusChild;
+				control.ControlAdded -= this.OnControlControlAdded;
+				control.ControlRemoved -= this.OnControlControlRemoved;
+
+				// Unsubscribe from the events of the child controls.
+				foreach (Control child in control.Controls)
+				{
+					this.OnUnsubscribeEvents(child);
+				}
+			}
+		}
+		
+		/// <summary>
+		/// An event handler called when a theme child control gets focus.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlGotFocusPeer(object sender, EventArgs e)
+		{
+			if (this.hasFocus)
+			{
+				// Set the flag to false.
+				this.hasFocus = false;
+				// Call the lost focus handler.
+				this.OnAnyLostFocus(e);
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when a child control got focus.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlGotFocusChild(object sender, EventArgs e)
+		{
+			if (!this.hasFocus)
+			{
+				// Set the flag to true.
+				this.hasFocus = true;
+				// Call the got focus handler.
+				this.OnAnyGotFocus(e);
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when a child control lost focus.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlLostFocusChild(object sender, EventArgs e)
+		{
+			if (!this.ContainsFocus)
+			{
+				// Set the flag to false.
+				this.hasFocus = false;
+				// Call the lost focus handler.
+				this.OnAnyLostFocus(e);
+			}
+		}
+
+		/// <summary>
+		/// An event handler called when a child control added a control.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlControlAdded(object sender, ControlEventArgs e)
+		{
+			// Subscribe to the child control events.
+			this.OnSubscribeEvents(e.Control);
+		}
+
+		/// <summary>
+		/// An event handler called when a child control removed a control.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnControlControlRemoved(object sender, ControlEventArgs e)
+		{
+			// Unsubscribe from the child control events.
+			this.OnUnsubscribeEvents(e.Control);
 		}
 	}
 }

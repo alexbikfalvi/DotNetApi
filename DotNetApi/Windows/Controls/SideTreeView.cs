@@ -151,8 +151,8 @@ namespace DotNetApi.Windows.Controls
 				}
 				else
 				{
-					// If the next collection is empty.
-					if (nodes[indices[index]].Nodes.Count == 0)
+					// If the next collection has fewer elements than the corresponding index.
+					if (nodes[indices[index]].Nodes.Count <= indices[index + 1])
 					{
 						// Select the node.
 						this.SelectedNode = nodes[indices[index]];

@@ -32,7 +32,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a side menu.
 	/// </summary>
-	public sealed class SideMenu : ThreadSafeControl
+	public sealed class SideMenu : ThemeControl
 	{
 		// Private members
 		private readonly ComponentCollection<SideMenuItem> items = new ComponentCollection<SideMenuItem>();
@@ -1073,8 +1073,8 @@ namespace DotNetApi.Windows.Controls
 			{
 				using (Brush brush = new LinearGradientBrush(
 					rect,
-					this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientBegin : this.themeSettings.ColorTable.PanelTitleGradientBegin,
-					this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientEnd : this.themeSettings.ColorTable.PanelTitleGradientEnd,
+					this.HasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientBegin : this.themeSettings.ColorTable.PanelTitleGradientBegin,
+					this.HasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedGradientEnd : this.themeSettings.ColorTable.PanelTitleGradientEnd,
 					LinearGradientMode.Vertical))
 				{
 					g.FillRectangle(brush, rect);
@@ -1092,7 +1092,7 @@ namespace DotNetApi.Windows.Controls
 				this.items[this.selectedIndex ?? -1].Text,
 				new System.Drawing.Font(Window.DefaultFont, this.themeSettings.PanelTitleFontStyle),
 				rectText,
-				this.ContainsFocus ? this.themeSettings.ColorTable.PanelTitleSelectedText : this.themeSettings.ColorTable.PanelTitleText,
+				this.HasFocus ? this.themeSettings.ColorTable.PanelTitleSelectedText : this.themeSettings.ColorTable.PanelTitleText,
 				TextFormatFlags.EndEllipsis | TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 		}
 
