@@ -207,6 +207,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Windows\Themes\BlueThemeColorTable.cs" />
+    <Compile Include="Windows\Themes\ThemeColorTable.cs" />
     <Compile Include="Windows\Themes\ThemeRenderer.cs" />
     <Compile Include="Windows\Window.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

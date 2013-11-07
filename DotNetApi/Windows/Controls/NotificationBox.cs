@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DotNetApi.Windows.Themes;
 
 namespace DotNetApi.Windows.Controls
 {
@@ -48,9 +49,7 @@ namespace DotNetApi.Windows.Controls
 		private Rectangle borderImage = new Rectangle();
 		private Rectangle borderText = new Rectangle();
 
-		private Color colorBorder = ProfessionalColors.MenuItemBorder;
-		private Color colorTitleBackground = Color.FromArgb(239, 239, 242);
-		private Color colorTitleForeground = SystemColors.GrayText;
+		private ThemeColorTable colorTable;
 
 		private NotificationTaskAction task = null;
 		private object[] parameters = null;
@@ -63,6 +62,9 @@ namespace DotNetApi.Windows.Controls
 			// Suspend the layout.
 			this.SuspendLayout();
 
+			// Get the theme color table.
+			this.colorTable = (ToolStripManager.Renderer as ThemeRenderer).ColorTable;
+
 			// Default properties.
 			this.Width = this.defaultWidth;
 			this.Height = this.defaultHeight;
@@ -70,7 +72,7 @@ namespace DotNetApi.Windows.Controls
 			this.Padding = new Padding(16, 8, 16, 16);
 			this.Visible = false;
 			this.DoubleBuffered = true;
-			this.BackColor = Color.FromArgb(246, 246, 246);
+			this.BackColor = this.colorTable.NotificationBoxBackground;
 
 			// Default components.
 			this.progressBar.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
@@ -172,12 +174,12 @@ namespace DotNetApi.Windows.Controls
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			// Paint the notification box.
-			using (Pen pen = new Pen(this.colorBorder))
+			using (Pen pen = new Pen(this.colorTable.NotificationBoxBorder))
 			{
 				e.Graphics.DrawRectangle(pen, this.borderControl);
 			}
 			// Paint the background.
-			using (SolidBrush brush = new SolidBrush(this.colorTitleBackground))
+			using (SolidBrush brush = new SolidBrush(this.colorTable.NotificationBoxTitle))
 			{
 				e.Graphics.FillRectangle(brush, this.borderTitle);
 				brush.Color = this.BackColor;
@@ -189,7 +191,7 @@ namespace DotNetApi.Windows.Controls
 				this.title,
 				this.Font,
 				this.borderTitleText,
-				this.colorTitleForeground,
+				this.colorTable.NotificationBoxTitleText,
 				TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 			
 			// Draw the image.
