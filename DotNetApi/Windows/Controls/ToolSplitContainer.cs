@@ -31,6 +31,7 @@ namespace DotNetApi.Windows.Controls
 	{
 		private bool panel1Border = true;
 		private bool panel2Border = true;
+		private bool useTheme = true;
 
 		private readonly ThemeColorTable colorTable;
 
@@ -62,7 +63,6 @@ namespace DotNetApi.Windows.Controls
 			get { return this.panel1Border; }
 			set { this.OnPanel1BorderSet(value); }
 		}
-
 		/// <summary>
 		/// Gets or sets whether the panel 1 border is enabled.
 		/// </summary>
@@ -72,16 +72,33 @@ namespace DotNetApi.Windows.Controls
 			get { return this.panel2Border; }
 			set { this.OnPanel2BorderSet(value); }
 		}
+		/// <summary>
+		/// Gets or sets whether the control uses the theme.
+		/// </summary>
+		[DisplayName("UseTheme"), Description("Indicates whether the control fills the background using a theme."), DefaultValue(true)]
+		public bool UseTheme
+		{
+			get { return this.useTheme; }
+			set { this.OnUseThemeSet(value); }
+		}
 
 		// Protected methods.
 
+		/// <summary>
+		/// An event handler caled when painting the control.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			// Create a brush.
-			using (SolidBrush brush = new SolidBrush(this.colorTable.ToolStripContentPanelGradientBegin))
+			// If the control uses a theme.
+			if (this.useTheme)
 			{
-				// Fill the content .
-				e.Graphics.FillRectangle(brush, new Rectangle(new Point(0, 0), this.ClientSize));
+				// Create a brush.
+				using (SolidBrush brush = new SolidBrush(this.colorTable.ToolStripContentPanelGradientBegin))
+				{
+					// Fill the content .
+					e.Graphics.FillRectangle(brush, new Rectangle(new Point(0, 0), this.ClientSize));
+				}
 			}
 			// Call the base class.
 			base.OnPaint(e);
@@ -146,6 +163,20 @@ namespace DotNetApi.Windows.Controls
 				this.Panel2.Padding = new Padding(0);
 				this.Panel2.Paint -= this.OnPanelPaint;
 			}
+			// Refresh the control.
+			this.Refresh();
+		}
+
+		/// <summary>
+		/// Sets whether the control uses a theme.
+		/// </summary>
+		/// <param name="value"><b>True</b> if the control uses a theme, <b>false</b> otherwise.</param>
+		private void OnUseThemeSet(bool value)
+		{
+			// If the value has not changed, do nothing.
+			if (value == this.useTheme) return;
+			// Set the state.
+			this.useTheme = value;
 			// Refresh the control.
 			this.Refresh();
 		}

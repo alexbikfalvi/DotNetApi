@@ -26,9 +26,9 @@ using DotNetApi.Windows.Themes;
 namespace DotNetApi.Windows.Controls
 {
 	/// <summary>
-	/// A class representing a theme user control.
+	/// A class representing a theme container control.
 	/// </summary>
-	public class ThemeControl : ThreadSafeControl
+	public class ThemePanel : ThreadSafePanel
 	{
 		private readonly ThemeSettings themeSettings;
 
@@ -37,7 +37,7 @@ namespace DotNetApi.Windows.Controls
 		private bool hasFocus = false;
 		private string title = string.Empty;
 
-		public ThemeControl()
+		public ThemePanel()
 		{
 			// Set the theme settings.
 			this.themeSettings = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).Settings : ThemeSettings.Default;
@@ -330,9 +330,9 @@ namespace DotNetApi.Windows.Controls
 		private void OnSubscribeEvents(Control control)
 		{
 			// If the control is a theme control.
-			if (control is ThemeControl)
+			if (control is ThemePanel)
 			{
-				ThemeControl themeControl = control as ThemeControl;
+				ThemePanel themeControl = control as ThemePanel;
 				// Add peer control event handlers.
 				themeControl.AnyGotFocus += this.OnControlGotFocusPeer;
 				themeControl.ChildGotFocus += this.OnControlGotFocusChild;
@@ -361,9 +361,9 @@ namespace DotNetApi.Windows.Controls
 		private void OnUnsubscribeEvents(Control control)
 		{
 			// If the control is a theme control.
-			if (control is ThemeControl)
+			if (control is ThemePanel)
 			{
-				ThemeControl themeControl = control as ThemeControl;
+				ThemePanel themeControl = control as ThemePanel;
 				// Remive peer control event handlers.
 				themeControl.AnyGotFocus -= this.OnControlGotFocusPeer;
 				themeControl.ChildGotFocus -= this.OnControlGotFocusChild;
@@ -384,7 +384,7 @@ namespace DotNetApi.Windows.Controls
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// An event handler called when a theme child control gets focus.
 		/// </summary>

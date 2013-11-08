@@ -308,6 +308,52 @@ namespace DotNetApi.Drawing
 		}
 
 		/// <summary>
+		/// Computes the maximum size encompassing the existing sizes.
+		/// </summary>
+		/// <param name="sizeList">The size list.</param>
+		/// <returns>The maximum size.</returns>
+		public static Size Max(params Size[] sizeList)
+		{
+			if (null == sizeList) throw new ArgumentNullException("sizeList");
+
+			int maxWidth = 0;
+			int maxHeight = 0;
+
+			foreach (Size size in sizeList)
+			{
+				if (maxWidth < size.Width) maxWidth = size.Width;
+				if (maxHeight < size.Height) maxHeight = size.Height;
+			}
+
+			return new Size(maxWidth, maxHeight);
+		}
+
+		/// <summary>
+		/// Computes the maximum rectangle encompassing the existing bounds.
+		/// </summary>
+		/// <param name="boundsList">The bounds list.</param>
+		/// <returns>The maximum rectangle.</returns>
+		public static Rectangle Max(params Rectangle[] boundsList)
+		{
+			if (null == boundsList) throw new ArgumentNullException("boundsList");
+
+			int minLeft = int.MaxValue;
+			int minTop = int.MaxValue;
+			int maxRight = int.MinValue;
+			int maxBottom = int.MinValue;
+
+			foreach (Rectangle bounds in boundsList)
+			{
+				if (minLeft > bounds.Left) minLeft = bounds.Left;
+				if (minTop > bounds.Top) minTop = bounds.Top;
+				if (maxRight < bounds.Right) maxRight = bounds.Right;
+				if (maxBottom < bounds.Bottom) maxBottom = bounds.Bottom;
+			}
+
+			return new Rectangle(minLeft, minTop, maxRight - minLeft, maxBottom - minTop);
+		}
+
+		/// <summary>
 		/// Computes the location of a rectangle of the specified size, align to the given anchor.
 		/// </summary>
 		/// <param name="size">The rectangle size.</param>
