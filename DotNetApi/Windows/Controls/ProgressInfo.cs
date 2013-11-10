@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Drawing;
 using System.ComponentModel;
 
 namespace DotNetApi.Windows.Controls
@@ -24,6 +25,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing multi-level progress information.
 	/// </summary>
+	[ToolboxBitmap(typeof(System.Windows.Forms.ProgressBar))]
 	public sealed class ProgressInfo : Component
 	{
 		private ProgressLegend legend = null;

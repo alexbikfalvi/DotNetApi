@@ -25,6 +25,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a progress box.
 	/// </summary>
+	[ToolboxBitmap(typeof(System.Windows.Forms.ProgressBar))]
 	public sealed class ProgressBox : ThreadSafeControl
 	{
 		private ProgressInfo progress = null;

@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -28,6 +29,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class representing a theme user control.
 	/// </summary>
+	[Designer("System.Windows.Forms.Design.ParentControlDesigner, System.Design", typeof(IDesigner))]
 	public class ThemeControl : ThreadSafeControl
 	{
 		private readonly ThemeSettings themeSettings;

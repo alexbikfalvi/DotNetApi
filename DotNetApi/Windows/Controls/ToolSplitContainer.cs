@@ -113,8 +113,12 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="e">The event arguments.</param>
 		private void OnPanelPaint(object sender, PaintEventArgs e)
 		{
+			// Get the splitter panel generating the event.
+			SplitterPanel panel = sender as SplitterPanel;
+			// If the panel is null, return.
+			if (null == panel) return;
 			// Draw the border.
-			ControlPaint.DrawBorder(e.Graphics, e.ClipRectangle, this.colorTable.ToolSplitContainerBorder, ButtonBorderStyle.Solid);
+			ControlPaint.DrawBorder(e.Graphics, panel.ClientRectangle, this.colorTable.ToolSplitContainerBorder, ButtonBorderStyle.Solid);
 		}
 
 		/// <summary>

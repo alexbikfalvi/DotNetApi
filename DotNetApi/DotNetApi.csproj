@@ -119,8 +119,6 @@
     <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
     <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
-    <Compile Include="Windows\Controls\ThemePanel.cs" />
-    <Compile Include="Windows\Controls\ThreadSafePanel.cs" />
     <Compile Include="Windows\Controls\ToolSplitContainer.cs" />
     <Compile Include="Windows\Controls\ThemeControl.cs" />
     <Compile Include="Windows\Controls\WizardControl.cs" />
