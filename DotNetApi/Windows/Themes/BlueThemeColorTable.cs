@@ -315,5 +315,21 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the normal text color of the status strip.
 		/// </summary>
 		public override Color StatusStripNormalText { get { return Color.White; } }
+		/// <summary>
+		/// Gets the ready background color of the status strip.
+		/// </summary>
+		public override Color StatusStripReadyBackground { get { return Color.FromArgb(104, 33, 122); } }
+		/// <summary>
+		/// Gets the ready text color of the status strip.
+		/// </summary>
+		public override Color StatusStripReadyText { get { return Color.White; } }
+		/// <summary>
+		/// Gets the busy background color of the status strip.
+		/// </summary>
+		public override Color StatusStripBusyBackground { get { return Color.FromArgb(202, 81, 0); } }
+		/// <summary>
+		/// Gets the busy text color of the status strip.
+		/// </summary>
+		public override Color StatusStripBusyText { get { return Color.White; } }
 	}
 }

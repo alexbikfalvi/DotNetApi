@@ -90,5 +90,21 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the normal text color of the status strip.
 		/// </summary>
 		public abstract Color StatusStripNormalText { get; }
+		/// <summary>
+		/// Gets the ready background color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripReadyBackground { get; }
+		/// <summary>
+		/// Gets the ready text color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripReadyText { get; }
+		/// <summary>
+		/// Gets the busy background color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripBusyBackground { get; }
+		/// <summary>
+		/// Gets the busy text color of the status strip.
+		/// </summary>
+		public abstract Color StatusStripBusyText { get; }
 	}
 }
