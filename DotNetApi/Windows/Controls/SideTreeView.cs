@@ -136,6 +136,8 @@ namespace DotNetApi.Windows.Controls
 			if (null == indices) return;
 			// The current nodes collection.
 			TreeNodeCollection nodes = this.Nodes;
+			// If the tree collection is empty, do nothing.
+			if (nodes.Count == 0) return;
 			// For all indices.
 			for (int index = 0; index < indices.Length; index++)
 			{

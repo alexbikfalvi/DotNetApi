@@ -157,7 +157,18 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets the tooltip corresponding to this side menu item.
 		/// </summary>
-		public ToolTip ToolTip { get { return this.toolTip; } }
+		public ToolTip ToolTip
+		{
+			get { return this.toolTip; }
+		
+		}
+		/// <summary>
+		/// Gets whether the menu item has a side control attached.
+		/// </summary>
+		public bool HasControl
+		{
+			get { return null != this.control; }
+		}
 
 		// Internal properties.
 
