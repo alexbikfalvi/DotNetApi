@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DotNetApi")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle(".NET Utility Tools Library")]
+[assembly: AssemblyDescription("A utility library for .NET Framework.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard")]
-[assembly: AssemblyProduct("DotNetApi")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2013")]
+[assembly: AssemblyCompany("Alex Bikfalvi.")]
+[assembly: AssemblyProduct(".NET Utility Tools Library")]
+[assembly: AssemblyCopyright("Copyright © Alex Bikfalvi 2011-2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

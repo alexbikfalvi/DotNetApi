@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MapApi")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Mapping Library")]
+[assembly: AssemblyDescription("A library for displaying maps in .NET applications.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MapApi")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCompany("Alex Bikfalvi")]
+[assembly: AssemblyProduct("Mapping Library")]
+[assembly: AssemblyCopyright("Copyright © Alex Bikfalvi 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
