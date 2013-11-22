@@ -24,34 +24,6 @@ using DotNetApi.Async;
 
 namespace DotNetApi.Web
 {
-	/*
-	/// <summary>
-	/// A class representing the asynchronous request result.
-	/// </summary>
-	public class AsyncRequestResult : IAsyncResult
-	{
-		/// <summary>
-		/// Indicates whether the asynchronous operation has completed.
-		/// </summary>
-		public bool IsCompleted { get; set; }
-
-		/// <summary>
-		/// The state of the asynchronous operation.
-		/// </summary>
-		public object AsyncState { get; set; }
-
-		/// <summary>
-		/// Indicates whether the operation completed synchronously.
-		/// </summary>
-		public bool CompletedSynchronously { get; set; }
-
-		/// <summary>
-		/// The wait handle of the asynchrounous operation.
-		/// </summary>
-		public WaitHandle AsyncWaitHandle { get; set; }
-	}
-	 * */
-
 	/// <summary>
 	/// A class representing the asynchronous request state.
 	/// </summary>
