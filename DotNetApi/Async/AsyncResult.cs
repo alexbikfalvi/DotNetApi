@@ -27,7 +27,7 @@ namespace DotNetApi.Async
 	public class AsyncResult : IAsyncResult, IDisposable
 	{
 		private object state;
-		private AutoResetEvent wait = new AutoResetEvent(false);
+		private ManualResetEvent wait = new ManualResetEvent(false);
 		private bool completedSynchronously = false;
 		private bool completed = false;
 
@@ -99,8 +99,10 @@ namespace DotNetApi.Async
 		{
 			if (disposing)
 			{
-				// Dispose the wait event.
-				this.wait.Dispose();
+				// Signal the wait event.
+				this.wait.Set();
+				// Close the wait event.
+				this.wait.Close();
 			}
 		}
 	}

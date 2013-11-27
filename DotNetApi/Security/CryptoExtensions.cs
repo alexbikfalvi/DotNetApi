@@ -194,5 +194,18 @@ namespace DotNetApi.Security
 			// Return the decrypted data converted to string using UTF8 encoding.
 			return Encoding.UTF8.GetString(value.DecryptAes(key, iv)).ConvertToSecureString();
 		}
+
+		/// <summary>
+		/// Generates an SHA-256 hash for the specified string.
+		/// </summary>
+		/// <param name="value">The string value.</param>
+		/// <returns>The hash.</returns>
+		public static byte[] HashSha256(this string value)
+		{
+			using (SHA256 sha = SHA256.Create())
+			{
+				return sha.ComputeHash(Encoding.UTF8.GetBytes(value));
+			}
+		}
 	}
 }

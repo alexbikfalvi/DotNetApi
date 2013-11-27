@@ -38,6 +38,10 @@ namespace DotNetApi.Web
 		T GetResult(string data);
 	}
 
+	/// <summary>
+	/// A delegate representing the callback from an asynchronous web request.
+	/// </summary>
+	/// <param name="result">The result of the asynchronous web request.</param>
 	public delegate void AsyncWebRequestCallback(AsyncWebResult result);
 
 	/// <summary>
@@ -251,6 +255,8 @@ namespace DotNetApi.Web
 				asyncState.Complete();
 				// Call the callback function
 				if (asyncState.Callback != null) asyncState.Callback(asyncState);
+				// Dispose the asynchronous state.
+				asyncState.Dispose();
 				// Return.
 				return;
 			}
@@ -308,6 +314,8 @@ namespace DotNetApi.Web
 					asyncState.Complete();
 					// Call the callback function
 					if (asyncState.Callback != null) asyncState.Callback(asyncState);
+					// Dispose the asynchronous state.
+					asyncState.Dispose();
 				}
 			}
 			catch (Exception exception)
@@ -318,6 +326,8 @@ namespace DotNetApi.Web
 				asyncState.Complete();
 				// Call the callback function
 				if (asyncState.Callback != null) asyncState.Callback(asyncState);
+				// Dispose the asynchronous state.
+				asyncState.Dispose();
 			}
 		}
 
@@ -373,6 +383,8 @@ namespace DotNetApi.Web
 					asyncState.Complete();
 					// Call the callback function.
 					if (asyncState.Callback != null) asyncState.Callback(asyncState);
+					// Dispose the asynchronous state.
+					asyncState.Dispose();
 				}
 			}
 			catch (Exception exception)
@@ -385,6 +397,8 @@ namespace DotNetApi.Web
 				asyncState.Complete();
 				// Call the callback method.
 				if (asyncState.Callback != null) asyncState.Callback(asyncState);
+				// Dispose the asynchronous state.
+				asyncState.Dispose();
 			}
 		}
 	}
