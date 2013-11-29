@@ -352,10 +352,10 @@ namespace DotNetApi.Windows.Controls
 			Rectangle rectGrip = new Rectangle(this.ClientRectangle.Left, this.ClientRectangle.Bottom - (this.visibleItems + 1) * this.itemHeight - this.gripHeight, this.Width, this.gripHeight);
 			if (this.resizeGrip)
 			{
-				if ((e.Y >= rectGrip.Bottom + this.itemHeight))
-					this.VisibleItems -= 1;
-				if ((e.Y <= rectGrip.Bottom - this.itemHeight))
-					this.VisibleItems += 1;
+				if ((e.Y >= rectGrip.Bottom + this.itemHeight) && (this.visibleItems > 0))
+					this.VisibleItems--;
+				if ((e.Y <= rectGrip.Bottom - this.itemHeight) && (this.visibleItems < this.maximumVisibleItems) && (this.visibleItems < this.Items.Count))
+					this.VisibleItems++;
 				return;
 			}
 			if (this.itemPressed) return;
