@@ -120,6 +120,9 @@
     <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
     <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
+    <Compile Include="Windows\Controls\StatisticsItem.cs" />
+    <Compile Include="Windows\Controls\StatisticsListBox.cs" />
+    <Compile Include="Windows\Controls\ThemeTabControl.cs" />
     <Compile Include="Windows\Controls\ToolSplitContainer.cs" />
     <Compile Include="Windows\Controls\ThemeControl.cs" />
     <Compile Include="Windows\Controls\WizardControl.cs" />
