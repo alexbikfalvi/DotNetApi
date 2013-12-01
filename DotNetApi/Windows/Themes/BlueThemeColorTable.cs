@@ -331,5 +331,49 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the busy text color of the status strip.
 		/// </summary>
 		public override Color StatusStripBusyText { get { return Color.White; } }
+		/// <summary>
+		/// Gets the background color for a tab control.
+		/// </summary>
+		public override Color TabControlBackgroundColor { get { return Color.FromArgb(41, 58, 86); } }
+		/// <summary>
+		/// Gets the selected and focused top tab color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedFocusedTopTabColor { get { return Color.FromArgb(255, 242, 157); } }
+		/// <summary>
+		/// Gets the selected and unfocused top tab color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedUnfocusedTopTabColor { get { return Color.FromArgb(77, 96, 130); } }
+		/// <summary>
+		/// Gets the unselected top tab color for a tab control.
+		/// </summary>
+		public override Color TabControlUnselectedTopTabColor { get { return Color.FromArgb(54, 78, 111); } }
+		/// <summary>
+		/// Gets the selected tab color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedTabColor { get { return Color.White; } }
+		/// <summary>
+		/// Gets the unselected tab color for a tab control.
+		/// </summary>
+		public override Color TabControlUnselectedTabColor { get { return Color.FromArgb(77, 96, 130); } }
+		/// <summary>
+		/// Gets the selected and focused top tab text color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedFocusedTopTextColor { get { return Color.Black; } }
+		/// <summary>
+		/// Gets the selected and unfocused top tab text color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedUnfocusedTopTextColor { get { return Color.White; } }
+		/// <summary>
+		/// Gets the unselected top tab text color for a tab control.
+		/// </summary>
+		public override Color TabControlUnselectedTopTextColor { get { return Color.White; } }
+		/// <summary>
+		/// Gets the selected tab text color for a tab control.
+		/// </summary>
+		public override Color TabControlSelectedTextColor { get { return Color.Black; } }
+		/// <summary>
+		/// Gets the unselected tab text color for a tab control.
+		/// </summary>
+		public override Color TabControlUnselectedTextColor { get { return Color.White; } }
 	}
 }

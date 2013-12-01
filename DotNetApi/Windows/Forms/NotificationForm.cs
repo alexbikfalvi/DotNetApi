@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright (C) 2012-2013 Alex Bikfalvi
+ * Copyright (C) 2013 Alex Bikfalvi
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,29 +19,25 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DotNetApi.Windows.Controls;
 using DotNetApi.Windows.Themes;
 
-namespace DotNetApi.Windows.Controls
+namespace DotNetApi.Windows.Forms
 {
 	/// <summary>
-	/// A delegate used for specifying a task to execute by the notification box.
+	/// A class representing a notification form.
 	/// </summary>
-	/// <param name="parameters">The task parameters.</param>
-	public delegate void NotificationTaskAction(object[] parameters);
-
-	/// <summary>
-	/// A control that displays a message box overlayed on a given control.
-	/// </summary>
-	public sealed class NotificationBox : ThreadSafeControl
+	public class NotificationForm : ThreadSafeForm
 	{
 		private string title = null;
 		private Image image = null;
 		private readonly ProgressBar progressBar = new ProgressBar();
+		private readonly Button button = new Button();
 		private readonly Timer timer = new Timer();
 
 		private const int titleHeight = 35;
-		private const int defaultWidth = 400;
-		private const int defaultHeight = 130;
+		private const int defaultWidth = 450;
+		private const int defaultHeight = 150;
 
 		private Rectangle borderControl = new Rectangle();
 		private Rectangle borderTitle = new Rectangle();
@@ -56,9 +52,9 @@ namespace DotNetApi.Windows.Controls
 		private object[] parameters = null;
 
 		/// <summary>
-		/// Creates a new control instance.
+		/// Creates a new notification form instance.
 		/// </summary>
-		public NotificationBox()
+		public NotificationForm()
 		{
 			// Suspend the layout.
 			this.SuspendLayout();
@@ -67,17 +63,25 @@ namespace DotNetApi.Windows.Controls
 			this.colorTable = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).ColorTable : ThemeColorTable.DefaultColorTable;
 
 			// Default properties.
-			this.Width = NotificationBox.defaultWidth;
-			this.Height = NotificationBox.defaultHeight;
-			this.Margin = new Padding(10);
+			this.FormBorderStyle = FormBorderStyle.None;
+			this.Width = NotificationForm.defaultWidth;
+			this.Height = NotificationForm.defaultHeight;
 			this.Padding = new Padding(16, 8, 16, 16);
-			this.Visible = false;
 			this.DoubleBuffered = true;
 			this.BackColor = this.colorTable.NotificationBoxBackground;
+			this.StartPosition = FormStartPosition.CenterParent;
+			this.ShowInTaskbar = false;
+			this.ShowIcon = false;
 
 			// Default components.
+			this.button.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+			this.button.Size = new Size(75, 23);
+			this.button.Location = new Point(this.Right - this.Padding.Right - this.button.Width, this.Bottom - this.Padding.Bottom - this.button.Height + 3);
+			this.button.Visible = false;
+			this.button.Text = "&Cancel";
+
 			this.progressBar.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
-			this.progressBar.Size = new Size(this.Width - this.Padding.Left - this.Padding.Right, 17);
+			this.progressBar.Size = new Size(this.Width - this.Padding.Left - this.Padding.Right - this.button.Width - 10, 17);
 			this.progressBar.Location = new Point(this.Padding.Left, this.Bottom - this.Padding.Bottom - this.progressBar.Height);
 			this.progressBar.MarqueeAnimationSpeed = 10;
 			this.progressBar.Style = ProgressBarStyle.Marquee;
@@ -88,21 +92,66 @@ namespace DotNetApi.Windows.Controls
 
 			// Add the controls.
 			this.Controls.Add(this.progressBar);
+			this.Controls.Add(this.button);
+
+			// Apply the window font.
+			Window.SetFont(this);
 
 			// Resume the layout.
 			this.ResumeLayout();
 		}
 
+		// Protected properties.
+
 		/// <summary>
-		/// Shows the message control. The method is thread-safe.
+		/// Gets or sets the window title.
 		/// </summary>
+		protected string Title
+		{
+			get { return this.title; }
+			set { this.OnTitleSet(value); }
+		}
+		/// <summary>
+		/// Gets or sets the window text.
+		/// </summary>
+		protected new string Text
+		{
+			get { return this.Text; }
+			set { this.OnTextSet(value); }
+		}
+		/// <summary>
+		/// Gets or sets whether the button is enabled for a progress control.
+		/// </summary>
+		protected bool ButtonEnabled
+		{
+			get { return this.button.Enabled; }
+			set { this.button.Enabled = value; }
+		}
+		/// <summary>
+		/// Gets or sets whether the progress bar is visible.
+		/// </summary>
+		protected bool ProgressVisible
+		{
+			get { return this.progressBar.Visible; }
+			set { this.progressBar.Visible = value; }
+		}
+
+		// Public methods.
+
+		/// <summary>
+		/// Shows the notification form. The method is thread-safe.
+		/// </summary>
+		/// <param name="owner">The owner control.</param>
 		/// <param name="image">The image.</param>
 		/// <param name="title">The title.</param>
 		/// <param name="text">The text.</param>
 		/// <param name="progress">The visibility of the progress bar.</param>
 		/// <param name="duration">The duration of the message in milliseconds. If negative, the message will be displayed indefinitely.</param>
 		/// <param name="task">A task to execute on the UI thread before the message is shown.</param>
-		public void Show(
+		/// <param name="parameters">The task parameters.</param>
+		/// <returns>The dialog result.</returns>
+		public DialogResult ShowDialog(
+			IWin32Window owner,
 			Image image,
 			string title,
 			string text,
@@ -116,11 +165,10 @@ namespace DotNetApi.Windows.Controls
 			this.title = title;
 			this.Text = text;
 			this.progressBar.Visible = progress;
+			this.button.Visible = progress;
+			this.button.Enabled = true;
 			this.task = task;
 			this.parameters = parameters;
-
-			// Reposition the control.
-			this.Reposition(progress);
 
 			// If the duration is positive.
 			if (duration > 0)
@@ -135,18 +183,12 @@ namespace DotNetApi.Windows.Controls
 				// Execute the task.
 				if (this.task != null) this.task(this.parameters);
 			}
-			// Show the control.
-			this.Show();
-			// Refresh the control.
-			this.OnRefresh();
-		}
 
-		/// <summary>
-		/// Repositions the progress box in the middle of the parent control.
-		/// </summary>
-		public void Reposition()
-		{
-			this.Reposition(this.progressBar.Visible);
+			// Call the form opened
+			this.OnFormOpened();
+
+			// Show the control.
+			return this.ShowDialog(owner);
 		}
 
 		// Protected methods.
@@ -163,6 +205,8 @@ namespace DotNetApi.Windows.Controls
 				this.timer.Dispose();
 				// Dispose the progerss bar.
 				this.progressBar.Dispose();
+				// Dispose the button.
+				this.button.Dispose();
 			}
 			// Call the base class dispose method.
 			base.Dispose(disposing);
@@ -194,13 +238,13 @@ namespace DotNetApi.Windows.Controls
 				this.borderTitleText,
 				this.colorTable.NotificationBoxTitleText,
 				TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-			
+
 			// Draw the image.
 			if (this.image != null)
 			{
 				e.Graphics.DrawImage(this.image, this.borderImage);
 			}
-			
+
 			// Draw the text.
 			TextRenderer.DrawText(
 				e.Graphics,
@@ -209,15 +253,15 @@ namespace DotNetApi.Windows.Controls
 				this.borderText,
 				this.ForeColor,
 				TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
-			
+
 			// Call the base class method.
 			base.OnPaint(e);
 		}
 
 		/// <summary>
-		/// An event handler called when the notification box is being resized.
+		/// An event handler called when the 
 		/// </summary>
-		/// <param name="e">The event arguments.</param>
+		/// <param name="e"></param>
 		protected override void OnResize(EventArgs e)
 		{
 			// Call the base class method.
@@ -231,7 +275,7 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// An event handler called when the text has changed.
 		/// </summary>
-		/// <param name="e">The event arguments.</param>
+		/// <param name="e"></param>
 		protected override void OnTextChanged(EventArgs e)
 		{
 			// Call the base class method.
@@ -240,7 +284,51 @@ namespace DotNetApi.Windows.Controls
 			this.Refresh();
 		}
 
+		/// <summary>
+		/// A methods called when the form has been opened.
+		/// </summary>
+		protected virtual void OnFormOpened()
+		{
+
+		}
+
 		// Private methods.
+
+		/// <summary>
+		/// Shows the notification form.
+		/// </summary>
+		private new void Show()
+		{
+			base.Show();
+		}
+
+		/// <summary>
+		/// Shows the notification form with the specified owner.
+		/// </summary>
+		/// <param name="owner">The owner window.</param>
+		private new void Show(IWin32Window owner)
+		{
+			base.Show(owner);
+		}
+
+		/// <summary>
+		/// Shows the notification dialog.
+		/// </summary>
+		/// <returns>The dialog result.</returns>
+		private new DialogResult ShowDialog()
+		{
+			return base.ShowDialog();
+		}
+
+		/// <summary>
+		/// Shows the notification dialog with the specified owner.
+		/// </summary>
+		/// <param name="owner">The owner window.</param>
+		/// <returns>The dialog result.</returns>
+		private new DialogResult ShowDialog(IWin32Window owner)
+		{
+			return base.ShowDialog(owner);
+		}
 
 		/// <summary>
 		/// An event handler called when the timer expires.
@@ -251,8 +339,8 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Disable the timer.
 			this.timer.Enabled = false;
-			// Hide the control.
-			this.Hide();
+			// Close the dialog.
+			this.Close();
 			// Execute the task on the UI thread.
 			if (this.task != null) this.task(this.parameters);
 		}
@@ -264,26 +352,6 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Repaint the control.
 			this.Refresh();
-		}
-
-		/// <summary>
-		/// Repositions the progress box in the middle of the parent control.
-		/// </summary>
-		/// <param name="progress">Indicates if the progress bar is showed.</param>
-		public void Reposition(bool progress)
-		{
-			// If the parent control is not null, reposition the control to the middle of the parent.
-			if (this.Parent != null)
-			{
-				// If the parent width is smaller than the default control width, resize the control.
-				this.Width = (this.Parent.ClientRectangle.Width < NotificationBox.defaultWidth - this.Margin.Left - this.Margin.Right) ?
-					this.Parent.ClientRectangle.Width - this.Margin.Left - this.Margin.Right : NotificationBox.defaultWidth;
-				// Measure the size of the controls.
-				this.OnMeasureControls(progress);
-				// Compute the position of the control.
-				this.Left = (this.Parent.Width - this.Width) / 2;
-				this.Top = (this.Parent.Height - this.Height) / 2;
-			}
 		}
 
 		/// <summary>
@@ -302,13 +370,13 @@ namespace DotNetApi.Windows.Controls
 			this.borderTitle.X = this.borderControl.X + 1;
 			this.borderTitle.Y = this.borderControl.Y + 1;
 			this.borderTitle.Width = this.borderControl.Width - 1;
-			this.borderTitle.Height = NotificationBox.titleHeight;
+			this.borderTitle.Height = NotificationForm.titleHeight;
 
 			// Title text border.
 			this.borderTitleText.X = this.borderTitle.X + 8;
 			this.borderTitleText.Y = this.borderTitle.Y;
 			this.borderTitleText.Width = this.borderTitle.Width - 16;
-			this.borderTitleText.Height = NotificationBox.titleHeight;
+			this.borderTitleText.Height = NotificationForm.titleHeight;
 
 			// The content border.
 			this.borderContent.X = this.borderTitle.X;
@@ -328,6 +396,30 @@ namespace DotNetApi.Windows.Controls
 			this.borderText.Width = this.borderControl.Right - this.borderText.X - this.Padding.Right;
 			this.borderText.Height = progress ? this.progressBar.Top - this.borderText.Y - this.Padding.Bottom :
 				this.ClientRectangle.Bottom - this.borderText.Y - this.Padding.Bottom;
+		}
+
+		/// <summary>
+		/// Sets the current title.
+		/// </summary>
+		/// <param name="title">The title.</param>
+		private void OnTitleSet(string title)
+		{
+			// Set the title.
+			this.title = title;
+			// Refresh the title region.
+			this.Invalidate(this.borderTitleText);
+		}
+
+		/// <summary>
+		/// Sets the current text.
+		/// </summary>
+		/// <param name="text">The text.</param>
+		private void OnTextSet(string text)
+		{
+			// Set the text.
+			this.Text = text;
+			// Refresh the text region.
+			this.Invalidate(this.borderText);
 		}
 	}
 }

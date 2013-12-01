@@ -30,6 +30,7 @@ namespace DotNetApi.Windows
 	{
 		private static readonly bool fontChange = false;
 		private static readonly FontFamily fontDefaultFamily = null;
+		private static readonly float fontDefaultSize;
 		private static readonly List<string> fontReplaceList = new List<string>(new string[] { "Microsoft Sans Serif", "Tahoma" });
 
 		private static readonly Font defaultFont;
@@ -44,17 +45,19 @@ namespace DotNetApi.Windows
 			{
 				// Windows 2000 (5.0), XP (5.1) and Server 2003 (5.2): the default font is Tahoma.
 				Window.fontDefaultFamily = SystemFonts.DialogFont.FontFamily;
+				Window.fontDefaultSize = SystemFonts.DialogFont.Size;
 				Window.fontChange = true;
 			}
 			else if (Environment.OSVersion.Version.Major >= 6)
 			{
 				// Windows Vista and above: the default font is SegoeUI.
 				Window.fontDefaultFamily = SystemFonts.MessageBoxFont.FontFamily;
+				Window.fontDefaultSize = SystemFonts.MessageBoxFont.Size;
 				Window.fontChange = true;
 			}
 
 			// Create static fonts.
-			Window.defaultFont = new Font(Window.fontDefaultFamily, SystemFonts.DefaultFont.Size, SystemFonts.DefaultFont.Style);
+			Window.defaultFont = new Font(Window.fontDefaultFamily, Window.fontDefaultSize, SystemFonts.DefaultFont.Style);
 		}
 
 		// Public properties.
@@ -86,7 +89,7 @@ namespace DotNetApi.Windows
 			Font oldFont = control.Font;
 			// The new font for the current control.
 			Font newFont;
-			// If the parent font has the same size and style as the old font.
+			// If the parent font has the same (or smaller) size and style as the old font.
 			if (null != font ? (oldFont.Size == font.Size) && (oldFont.Style == font.Style) : false)
 			{
 				// Use the same font as the parent.
@@ -115,7 +118,7 @@ namespace DotNetApi.Windows
 			// Set the font for the current control.
 			control.Font = newFont;
 			// Resume the control layout.
-			control.ResumeLayout();
+			control.ResumeLayout(false);
 		}
 	}
 }

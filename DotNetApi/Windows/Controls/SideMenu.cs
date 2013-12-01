@@ -779,7 +779,7 @@ namespace DotNetApi.Windows.Controls
 			if (this.Padding != padding)
 			{
 				this.SuspendLayout();
-				this.Padding = padding;
+				base.SetPadding(padding);
 				this.ResumeLayout();
 			}
 

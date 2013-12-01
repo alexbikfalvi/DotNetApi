@@ -106,5 +106,49 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the busy text color of the status strip.
 		/// </summary>
 		public abstract Color StatusStripBusyText { get; }
+		/// <summary>
+		/// Gets the background color for a tab control.
+		/// </summary>
+		public abstract Color TabControlBackgroundColor { get; }
+		/// <summary>
+		/// Gets the selected and focused top tab color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedFocusedTopTabColor { get; }
+		/// <summary>
+		/// Gets the selected and unfocused top tab color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedUnfocusedTopTabColor { get; }
+		/// <summary>
+		/// Gets the unselected top tab color for a tab control.
+		/// </summary>
+		public abstract Color TabControlUnselectedTopTabColor { get; }
+		/// <summary>
+		/// Gets the selected tab color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedTabColor { get; }
+		/// <summary>
+		/// Gets the unselected tab color for a tab control.
+		/// </summary>
+		public abstract Color TabControlUnselectedTabColor { get; }
+		/// <summary>
+		/// Gets the selected and focused top tab text color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedFocusedTopTextColor { get; }
+		/// <summary>
+		/// Gets the selected and unfocused top tab text color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedUnfocusedTopTextColor { get; }
+		/// <summary>
+		/// Gets the unselected top tab text color for a tab control.
+		/// </summary>
+		public abstract Color TabControlUnselectedTopTextColor { get; }
+		/// <summary>
+		/// Gets the selected tab text color for a tab control.
+		/// </summary>
+		public abstract Color TabControlSelectedTextColor { get; }
+		/// <summary>
+		/// Gets the unselected tab text color for a tab control.
+		/// </summary>
+		public abstract Color TabControlUnselectedTextColor { get; }
 	}
 }

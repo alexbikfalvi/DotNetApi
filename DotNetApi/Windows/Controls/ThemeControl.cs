@@ -39,14 +39,23 @@ namespace DotNetApi.Windows.Controls
 		private bool hasFocus = false;
 		private string title = string.Empty;
 
+		private Padding padding;
+
 		public ThemeControl()
 		{
+			// Set the control style.
+			base.SetStyle(
+				ControlStyles.UserPaint |
+				ControlStyles.OptimizedDoubleBuffer |
+				ControlStyles.AllPaintingInWmPaint, true);
+
+			base.AutoScaleMode = AutoScaleMode.Font;
+
 			// Set the theme settings.
 			this.themeSettings = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).Settings : ThemeSettings.Default;
 
 			// Set the default properties.
-			this.DoubleBuffered = true;
-			this.Padding = new Padding(0);
+			base.Padding = new Padding(0);
 		}
 
 		// Public events.
@@ -81,7 +90,10 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets or sets whether the control uses a theme border.
 		/// </summary>
-		[DisplayName("Show border"), Description("Indicates whether the control uses a theme border."), DefaultValue(false)]
+		[Browsable(true)]
+		[DisplayName("Show border")]
+		[Description("Indicates whether the control uses a theme border.")]
+		[DefaultValue(false)]
 		public bool ShowBorder
 		{
 			get { return this.hasBorder; }
@@ -90,7 +102,10 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets or sets whether the control uses a theme title.
 		/// </summary>
-		[DisplayName("Show title"), Description("Indicates whether the control uses a theme title."), DefaultValue(false)]
+		[Browsable(true)]
+		[DisplayName("Show title")]
+		[Description("Indicates whether the control uses a theme title.")]
+		[DefaultValue(false)]
 		public bool ShowTitle
 		{
 			get { return this.hasTitle; }
@@ -99,14 +114,51 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets or sets whether the control title.
 		/// </summary>
-		[DisplayName("Title"), Description("The control title.")]
+		[Browsable(true)]
+		[DisplayName("Title")]
+		[Description("The control title.")]
 		public string Title
 		{
 			get { return this.title; }
 			set { this.OnSetTitle(value); }
 		}
+		/// <summary>
+		/// Gets or sets the control padding.
+		/// </summary>
+		[Browsable(false)]
+		[DisplayName("Padding")]
+		[Description("The control padding.")]
+		protected new Padding Padding
+		{
+			get { return base.Padding; }
+		}
 
 		// Protected methods.
+
+		/// <summary>
+		/// Sets the padding for the theme control.
+		/// </summary>
+		/// <param name="padding">The padding.</param>
+		protected void SetPadding(Padding padding)
+		{
+			base.Padding = (this.padding = padding);
+		}
+
+		/// <summary>
+		/// An event handler called when the padding has changed.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnPaddingChanged(EventArgs e)
+		{
+			// If the padding is different from the padding set by the current control.
+			if (base.Padding != padding)
+			{
+				// Correct the padding.
+				base.Padding = padding;
+			}
+			// Call the base class method.
+			base.OnPaddingChanged(e);
+		}
 
 		/// <summary>
 		/// An event handler called when the control is being resized.
@@ -273,7 +325,34 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 
+		/// <summary>
+		/// An event handler called when the font has changed.
+		/// </summary>
+		/// <param name="e"></param>
+		protected override void OnFontChanged(EventArgs e)
+		{
+			// Call the base class method.
+			base.OnFontChanged(e);
+			// Update the control.
+			this.OnUpdate();
+		}
+
 		// Private methods.
+
+		/// <summary>
+		/// Updates the control.
+		/// </summary>
+		private void OnUpdate()
+		{
+			// Update the padding.
+			if (this.hasBorder) this.padding = new Padding(1, 1 + (this.hasTitle ? this.themeSettings.PanelTitleHeight + 1: 0), 1, 1);
+			else if (this.hasTitle) this.padding = new Padding(0, 1 + this.themeSettings.PanelTitleHeight, 0, 0);
+			else this.padding = new Padding(0);
+			// Set the base class padding.
+			base.Padding = this.padding;
+			// Refresh the control.
+			this.Refresh();
+		}
 
 		/// <summary>
 		/// Sets whether the control displays a theme border.
@@ -285,12 +364,8 @@ namespace DotNetApi.Windows.Controls
 			if (this.hasBorder == value) return;
 			// Set the border.
 			this.hasBorder = value;
-			// Update the padding.
-			if (this.hasBorder) this.Padding = new Padding(1, 1 + (this.hasTitle ? this.themeSettings.PanelTitleHeight : 0), 1, 1);
-			else if (this.hasTitle) this.Padding = new Padding(0, 1 + this.themeSettings.PanelTitleHeight, 0, 0);
-			else this.Padding = new Padding(0);
-			// Refresh the control.
-			this.Refresh();
+			// Update the control.
+			this.OnUpdate();
 		}
 
 		/// <summary>
@@ -303,12 +378,8 @@ namespace DotNetApi.Windows.Controls
 			if (this.hasTitle == value) return;
 			// Set the title.
 			this.hasTitle = value;
-			// Update the padding.
-			if (this.hasBorder) this.Padding = new Padding(1, 1 + (this.hasTitle ? this.themeSettings.PanelTitleHeight : 0), 1, 1);
-			else if (this.hasTitle) this.Padding = new Padding(0, 1 + this.themeSettings.PanelTitleHeight, 0, 0);
-			else this.Padding = new Padding(0);
-			// Refresh the control.
-			this.Refresh();
+			// Update the control.
+			this.OnUpdate();
 		}
 
 		/// <summary>

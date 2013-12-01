@@ -33,11 +33,11 @@ namespace DotNetApi.Windows.Themes
 		/// <summary>
 		/// Gets the panel title height.
 		/// </summary>
-		public override int PanelTitleHeight { get { return (int)(2.55 * this.PanelTitleFontSize); } }
+		public override int PanelTitleHeight { get { return (int)(2.34 * this.PanelTitleFontSize); } }
 		/// <summary>
 		/// Gets the panel title font size.
 		/// </summary>
-		public override float PanelTitleFontSize { get { return SystemFonts.DefaultFont.Size; } }
+		public override float PanelTitleFontSize { get { return Window.DefaultFont.Size; } }
 		/// <summary>
 		/// Gets the panel title font style.
 		/// </summary>

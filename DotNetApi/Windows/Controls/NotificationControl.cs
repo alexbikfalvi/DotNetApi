@@ -36,8 +36,14 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public NotificationControl()
 		{
+			// Suspend the layout.
+			this.SuspendLayout();
+
 			// Add the message control.
 			this.Controls.Add(this.notification);
+
+			// Resume the layout.
+			this.ResumeLayout();
 		}
 
 		// Protected methods.

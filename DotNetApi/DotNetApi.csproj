@@ -129,6 +129,7 @@
     <Compile Include="Windows\Controls\WizardPage.cs" />
     <Compile Include="Windows\Controls\WizardPageEventArgs.cs" />
     <Compile Include="Windows\Cursors.cs" />
+    <Compile Include="Windows\Forms\NotificationForm.cs" />
     <Compile Include="Windows\Forms\ThreadSafeForm.cs" />
     <Compile Include="Windows\Registry.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
