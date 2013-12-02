@@ -53,6 +53,7 @@
     <Compile Include="Concurrent\Generic\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentList.cs" />
     <Compile Include="Conversion.cs" />
+    <Compile Include="Windows\Themes\Code\CodeColorCollection.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
     <Compile Include="Drawing\Geometry.cs" />
@@ -215,6 +216,7 @@
     </Compile>
     <Compile Include="Windows\Themes\BlueThemeColorTable.cs" />
     <Compile Include="Windows\Themes\BlueThemeSettings.cs" />
+    <Compile Include="Windows\Themes\Code\CodeColorTable.cs" />
     <Compile Include="Windows\Themes\ThemeColorTable.cs" />
     <Compile Include="Windows\Themes\ThemeRenderer.cs" />
     <Compile Include="Windows\Themes\ThemeSettings.cs" />

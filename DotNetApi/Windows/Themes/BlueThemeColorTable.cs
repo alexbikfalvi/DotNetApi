@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DotNetApi.Windows.Themes.Code;
 
 namespace DotNetApi.Windows.Themes
 {
@@ -27,13 +28,19 @@ namespace DotNetApi.Windows.Themes
 	/// </summary>
 	public class BlueThemeColorTable : ThemeColorTable
 	{
+		private static readonly CodeColorTable codeColorTable = new CodeColorTable();
+
 		/// <summary>
-		/// Initializes a new instance of the System.Windows.Forms.ProfessionalColorTable class.
+		/// Initializes a new instance of the blue theme color table class.
 		/// </summary>
 		public BlueThemeColorTable()
 		{
-
 		}
+
+		/// <summary>
+		/// Gets the code color table.
+		/// </summary>
+		public override CodeColorTable CodeColorTable { get { return BlueThemeColorTable.codeColorTable; } }
 
 		/// <summary>
 		/// Gets the starting color of the gradient used when the button is checked.

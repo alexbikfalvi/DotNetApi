@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using DotNetApi.Windows.Themes.Code;
 
 namespace DotNetApi.Windows.Themes
 {
@@ -37,6 +38,11 @@ namespace DotNetApi.Windows.Themes
 		/// Gets the blue color table.
 		/// </summary>
 		public static ThemeColorTable BlueColorTable { get { return ThemeColorTable.blueColorTable; } }
+
+		/// <summary>
+		/// Gets the code color table.
+		/// </summary>
+		public abstract CodeColorTable CodeColorTable { get; }
 
 		/// <summary>
 		/// Gets the border color for a notification box.
