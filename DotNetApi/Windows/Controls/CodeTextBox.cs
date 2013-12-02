@@ -14,8 +14,6 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Get the collection of currently installed fonts.
 			InstalledFontCollection collection = new InstalledFontCollection();
-			// Set the color.
-			this.ForeColor = Color.Blue;
 			// Check if the "Consolas" font is installed.
 			foreach (FontFamily fontFamily in collection.Families)
 			{
@@ -27,6 +25,16 @@ namespace DotNetApi.Windows.Controls
 			}
 			// Else, set the default monospace font.
 			this.Font = new Font(FontFamily.GenericMonospace, 10);
+		}
+
+		/// <summary>
+		/// An event handler called when the text has changed.
+		/// </summary>
+		/// <param name="e">The event arguments.</param>
+		protected override void OnTextChanged(EventArgs e)
+		{
+			// Call the base class event handler.
+			base.OnTextChanged(e);
 		}
 	}
 }
