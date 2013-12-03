@@ -26,8 +26,10 @@ namespace DotNetApi.Windows.Themes.Code
 	/// <summary>
 	/// A class representing a collection of tokens for coloring code.
 	/// </summary>
-	public abstract class CodeColorCollection : IEnumerable<CodeColorCollection.Token>
+	public class CodeColorCollection : IEnumerable<CodeColorCollection.Token>
 	{
+		private readonly List<Token> tokens = new List<Token>();
+
 		/// <summary>
 		/// A structure representing a color collection token.
 		/// </summary>
@@ -39,11 +41,14 @@ namespace DotNetApi.Windows.Themes.Code
 			/// <param name="regex">The token regular expression.</param>
 			/// <param name="foregroundColor">The foreground color.</param>
 			/// <param name="backgroundColor">The background color.</param>
-			public Token(string regex, Color foregroundColor, Color backgroundColor)
+			/// <param name="enforce">Indicates whether the token is always enforced. The default is <b>false</b>.</param>
+			public Token(string regex, Color foregroundColor, Color backgroundColor, bool enforce = false)
+				: this()
 			{
 				this.Regex = regex;
 				this.ForegroundColor = foregroundColor;
 				this.BackgroundColor = backgroundColor;
+				this.Enforce = enforce;
 			}
 
 			// Properties.
@@ -51,15 +56,26 @@ namespace DotNetApi.Windows.Themes.Code
 			/// <summary>
 			/// The token regular expression string.
 			/// </summary>
-			public string Regex { get; private set; }
+			public string Regex { get; set; }
 			/// <summary>
 			/// The token foreground color.
 			/// </summary>
-			public Color ForegroundColor { get; private set; }
+			public Color ForegroundColor { get; set; }
 			/// <summary>
 			/// The token background color.
 			/// </summary>
-			public Color BackgroundColor { get; private set; }
+			public Color BackgroundColor { get; set; }
+			/// <summary>
+			/// Indicates whether the token is always enforced.
+			/// </summary>
+			public bool Enforce { get; set; }
+		}
+
+		/// <summary>
+		/// Creates a new code collor collection with the specified list of tokens.
+		/// </summary>
+		public CodeColorCollection()
+		{
 		}
 
 		// Public methods.
@@ -70,7 +86,7 @@ namespace DotNetApi.Windows.Themes.Code
 		/// <returns>The enumerator.</returns>
 		public IEnumerator<Token> GetEnumerator()
 		{
-			return this.Tokens.GetEnumerator() as IEnumerator<Token>;
+			return this.tokens.GetEnumerator();
 		}
 
 		/// <summary>
@@ -82,11 +98,22 @@ namespace DotNetApi.Windows.Themes.Code
 			return this.GetEnumerator();
 		}
 
-		// Abstract methods.
+		/// <summary>
+		/// Adds the specified token to the collection.
+		/// </summary>
+		/// <param name="token">The token.</param>
+		public void Add(Token token)
+		{
+			this.tokens.Add(token);
+		}
 
 		/// <summary>
-		/// Gets the list of tokens.
+		/// Adds the specified range of tokens to the collection.
 		/// </summary>
-		protected abstract Token[] Tokens { get; }
+		/// <param name="tokens">The tokens.</param>
+		public void AddRange(IEnumerable<Token> tokens)
+		{
+			this.tokens.AddRange(tokens);
+		}
 	}
 }

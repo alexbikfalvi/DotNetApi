@@ -33,5 +33,16 @@ namespace DotNetApi
 		/// <returns>The string length.</returns>
 		[DllImport("kernel32.dll", EntryPoint="lstrlen", CharSet = CharSet.Unicode)]
 		internal static extern unsafe int StrLen(char* str);
+
+		/// <summary>
+		/// A method to call directly the send message function of the Windows API.
+		/// </summary>
+		/// <param name="hWnd">The window handle.</param>
+		/// <param name="msg">The message.</param>
+		/// <param name="wParam">Parameter.</param>
+		/// <param name="lParam">Parameter.</param>
+		/// <returns>The operation response.</returns>
+		[DllImport("user32.dll", CharSet = CharSet.Auto)]
+		internal extern static IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 	}
 }

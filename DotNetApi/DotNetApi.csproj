@@ -47,12 +47,18 @@
     <Compile Include="Async\AsyncResult.cs" />
     <Compile Include="Async\AsyncState.cs" />
     <Compile Include="Async\AsyncTask.cs" />
+    <Compile Include="Collections\Generic\GenericEnumerator.cs" />
+    <Compile Include="Collections\Generic\RedBlackTree.cs" />
+    <Compile Include="Collections\Generic\SortedMap.cs" />
     <Compile Include="Concurrent\ConcurrentBase.cs" />
     <Compile Include="Concurrent\ConcurrentCollectionBase.cs" />
     <Compile Include="Concurrent\ConcurrentList.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentList.cs" />
     <Compile Include="Conversion.cs" />
+    <Compile Include="IO\Csv\CsvFileCommon.cs" />
+    <Compile Include="IO\Csv\CsvFileReader.cs" />
+    <Compile Include="IO\Csv\CsvFileWriter.cs" />
     <Compile Include="Windows\Themes\Code\CodeColorCollection.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
@@ -217,6 +223,7 @@
     <Compile Include="Windows\Themes\BlueThemeColorTable.cs" />
     <Compile Include="Windows\Themes\BlueThemeSettings.cs" />
     <Compile Include="Windows\Themes\Code\CodeColorTable.cs" />
+    <Compile Include="Windows\Themes\Code\LinuxCodeColorCollection.cs" />
     <Compile Include="Windows\Themes\ThemeColorTable.cs" />
     <Compile Include="Windows\Themes\ThemeRenderer.cs" />
     <Compile Include="Windows\Themes\ThemeSettings.cs" />
