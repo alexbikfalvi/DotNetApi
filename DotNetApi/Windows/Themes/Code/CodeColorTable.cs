@@ -26,19 +26,61 @@ namespace DotNetApi.Windows.Themes.Code
 	/// </summary>
 	public class CodeColorTable
 	{
+		/// <summary>
+		/// The comment foreground color.
+		/// </summary>
 		public virtual Color CommentForeground { get { return Color.Green; } }
+		/// <summary>
+		/// The comment background color.
+		/// </summary>
 		public virtual Color CommentBackground { get { return Color.White; } }
+		/// <summary>
+		/// The string foreground color.
+		/// </summary>
 		public virtual Color StringForeground { get { return Color.FromArgb(163, 21, 21); } }
+		/// <summary>
+		/// The string background color.
+		/// </summary>
 		public virtual Color StringBackground { get { return Color.White; } }
+		/// <summary>
+		/// The keyword foreground color.
+		/// </summary>
 		public virtual Color KeywordForeground { get { return Color.Blue; } }
+		/// <summary>
+		/// The keyword background color.
+		/// </summary>
 		public virtual Color KeywordBackground { get { return Color.White; } }
+		/// <summary>
+		/// The number foreground color.
+		/// </summary>
 		public virtual Color NumberForeground { get { return Color.Black; } }
+		/// <summary>
+		/// The number background color.
+		/// </summary>
 		public virtual Color NumberBackground { get { return Color.White; } }
+		/// <summary>
+		/// The operator foreground color.
+		/// </summary>
 		public virtual Color OperatorForeground { get { return Color.Black; } }
+		/// <summary>
+		/// The operator background color.
+		/// </summary>
 		public virtual Color OperatorBackground { get { return Color.White; } }
+		/// <summary>
+		/// The text foreground color.
+		/// </summary>
 		public virtual Color TextForeground { get { return Color.Black; } }
+		/// <summary>
+		/// The text background color.
+		/// </summary>
 		public virtual Color TextBackground { get { return Color.White; } }
+		/// <summary>
+		/// The user type foreground color.
+		/// </summary>
 		public virtual Color UserTypeForeground { get { return Color.FromArgb(43, 145, 175); } }
+		/// <summary>
+		/// The user type background color.
+		/// </summary>
 		public virtual Color UserTypeBackground { get { return Color.White; } }
 	}
 }

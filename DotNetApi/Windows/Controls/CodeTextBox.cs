@@ -35,6 +35,24 @@ namespace DotNetApi.Windows.Controls
 	public sealed class CodeTextBox : RichTextBox
 	{
 		/// <summary>
+		/// A structure representing the text formatting.
+		/// </summary>
+		private struct Format
+		{
+			/// <summary>
+			/// The foreground color.
+			/// </summary>
+			public Color Foreground = Color.Empty;
+			/// <summary>
+			/// The background color.
+			/// </summary>
+			public Color Background = Color.Empty;
+		}
+
+		private const int bufferSize = 1024;
+		private Format[] buffer = new Format[CodeTextBox.bufferSize];
+
+		/// <summary>
 		/// An enumeration representing the token bound.
 		/// </summary>
 		private enum TokenBound
@@ -184,6 +202,16 @@ namespace DotNetApi.Windows.Controls
 
 			// If the text is empty, do nothing.
 			if (string.IsNullOrWhiteSpace(this.Text)) return;
+
+			// If the buffer is smaller than the text size.
+			if (this.buffer.Length < this.Text.Length)
+			{
+				// Resize the buffer.
+				Array.Resize<Format>(ref this.buffer, (1 + (this.Text.Length / CodeTextBox.bufferSize)) * CodeTextBox.bufferSize);
+			}
+
+			// Set the color for all text.
+			Array.
 
 			// Save the cursor position and selection.
 			int selectionStart = this.SelectionStart;
