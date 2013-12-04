@@ -26,5 +26,29 @@ namespace DotNetApi.Windows.Controls
 	/// </summary>
 	public sealed class StatisticsListBox : ListBox
 	{
+
+		// Private properties.
+
+		/// <summary>
+		/// Gets or sets the draw mode.
+		/// </summary>
+		private new DrawMode DrawMode
+		{
+			get { return this.DrawMode; }
+		}
+		/// <summary>
+		/// Gets the item height.
+		/// </summary>
+		private new int ItemHeight
+		{
+			get { return this.ItemHeight; }
+		}
+		/// <summary>
+		/// Gets whether the list box displays an integral number of items.
+		/// </summary>
+		private new bool IntegralHeight
+		{
+			get { return this.IntegralHeight; }
+		}
 	}
 }

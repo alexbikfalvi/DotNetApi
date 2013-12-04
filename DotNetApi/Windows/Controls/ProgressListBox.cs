@@ -71,10 +71,10 @@ namespace DotNetApi.Windows.Controls
 		public ProgressListBox()
 		{
 			// Set control properties.
-			this.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.DoubleBuffered = true;
-			this.ItemHeight = this.itemHeight;
-			this.IntegralHeight = false;
+			base.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			base.DoubleBuffered = true;
+			base.ItemHeight = this.itemHeight;
+			base.IntegralHeight = false;
 
 			// Set the control variables.
 			this.fontText = new Font(this.Font, FontStyle.Bold);
@@ -93,7 +93,34 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
 		[Editor(typeof(CollectionEditor), typeof(UITypeEditor))]
+		[DisplayName("Items"), Description("The collection of progress items."), Category("Behavior")]
 		public new ComponentCollection<ProgressItem> Items { get { return this.items; } }
+		/// <summary>
+		/// Gets the draw mode.
+		/// </summary>
+		[Browsable(false)]
+		public override DrawMode DrawMode
+		{
+			get { return base.DrawMode; }
+		}
+		/// <summary>
+		/// Gets the item height.
+		/// </summary>
+		[Browsable(false)]
+		public override int ItemHeight
+		{
+			get { return base.ItemHeight; }
+		}
+
+		// Private properties.
+
+		/// <summary>
+		/// Gets whether the list box displays an integral number of items.
+		/// </summary>
+		private new bool IntegralHeight
+		{
+			get { return base.IntegralHeight; }
+		}
 
 		// Public methods.
 

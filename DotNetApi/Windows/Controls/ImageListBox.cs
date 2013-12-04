@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -38,9 +39,9 @@ namespace DotNetApi.Windows.Controls
 		public ImageListBox()
 		{
 			// Set the object properties.
-			this.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.ItemHeight = 48;
-			this.IntegralHeight = false;
+			base.DrawMode = DrawMode.OwnerDrawFixed;
+			base.ItemHeight = 48;
+			base.IntegralHeight = false;
 		}
 
 		// Public properties.
@@ -48,10 +49,37 @@ namespace DotNetApi.Windows.Controls
 		/// <summary>
 		/// Gets or sets the image width.
 		/// </summary>
+		[Browsable(false)]
 		public int ImageWidth
 		{
 			get { return this.imageWidth; }
 			set { this.imageWidth = value; this.Invalidate(); }
+		}
+		/// <summary>
+		/// Gets the draw mode.
+		/// </summary>
+		[Browsable(false)]
+		public override DrawMode DrawMode
+		{
+			get { return base.DrawMode; }
+		}
+		/// <summary>
+		/// Gets the item height.
+		/// </summary>
+		[Browsable(false)]
+		public override int ItemHeight
+		{
+			get { return base.ItemHeight; }
+		}
+
+		// Private properties.
+
+		/// <summary>
+		/// Gets whether the list box displays an integral number of items.
+		/// </summary>
+		private new bool IntegralHeight
+		{
+			get { return this.IntegralHeight; }
 		}
 
 		// Public events.

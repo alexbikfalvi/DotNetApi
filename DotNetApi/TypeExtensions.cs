@@ -24,7 +24,7 @@ namespace DotNetApi
 	/// <summary>
 	/// An class with type extension methods.
 	/// </summary>
-	public static class Types
+	public static class TypeExtensions
 	{
 		/// <summary>
 		/// Checks whether the given type is nullable.

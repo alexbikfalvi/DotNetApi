@@ -27,7 +27,7 @@ namespace DotNetApi.Windows
 	/// <summary>
 	/// A class that simplifies access to the registry for common data types.
 	/// </summary>
-	public static class Registry
+	public static class RegistryExtensions
 	{
 		// Static properties.
 
@@ -643,7 +643,7 @@ namespace DotNetApi.Windows
 					foreach (string subkey in src.GetSubKeyNames())
 					{
 						// Copy the registry key.
-						Registry.CopyKey(src, subkey, dst, subkey, progress);
+						RegistryExtensions.CopyKey(src, subkey, dst, subkey, progress);
 					}
 
 					return true;
@@ -663,7 +663,7 @@ namespace DotNetApi.Windows
 		public static bool MoveKey(RegistryKey srcKey, string srcPath, RegistryKey dstKey, string dstPath, Action<string, string> progress = null)
 		{
 			// Copy the key.
-			if (Registry.CopyKey(srcKey, srcPath, dstKey, dstPath, progress))
+			if (RegistryExtensions.CopyKey(srcKey, srcPath, dstKey, dstPath, progress))
 			{
 				// Delete the old key.
 				srcKey.DeleteSubKeyTree(srcPath);

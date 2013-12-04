@@ -24,6 +24,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using DotNetApi;
 using DotNetApi.Collections.Generic;
 using DotNetApi.Windows.Themes.Code;
 
@@ -39,18 +40,73 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private struct Format
 		{
+			//public Format()
+			//{
+			//	this.Foreground = Color.Empty;
+			//	this.Background = Color.Empty;
+			//}
+
+			// Fields.
+
 			/// <summary>
 			/// The foreground color.
 			/// </summary>
-			public Color Foreground = Color.Empty;
+			public Color Foreground;
 			/// <summary>
 			/// The background color.
 			/// </summary>
-			public Color Background = Color.Empty;
+			public Color Background;
+
+			// Public methods.
+
+			/// <summary>
+			/// Compares two format objects for equality.
+			/// </summary>
+			/// <param name="obj1">The first object.</param>
+			/// <param name="obj2">The second object.</param>
+			/// <returns><b>True</b> if the objects are equal, otherwise <b>false</b>.</returns>
+			public static bool operator ==(Format obj1, Format obj2)
+			{
+				return (obj1.Foreground == obj2.Foreground) && (obj1.Background == obj2.Background);
+			}
+
+			/// <summary>
+			/// Compares two format objects for inequality.
+			/// </summary>
+			/// <param name="obj1">The first object.</param>
+			/// <param name="obj2">The second object.</param>
+			/// <returns><b>True</b> if the objects are different, otherwise <b>false</b>.</returns>
+			public static bool operator !=(Format obj1, Format obj2)
+			{
+				return (obj1.Foreground != obj2.Foreground) || (obj1.Background != obj2.Background);
+			}
+
+			/// <summary>
+			/// Compares two objects for equality.
+			/// </summary>
+			/// <param name="obj">The objects to compare.</param>
+			/// <returns><b>True</b> if the objects are equal, otherwise <b>false</b>.</returns>
+			public override bool Equals(object obj)
+			{
+				if (null == obj) return false;
+				if (!(obj is Format)) return false;
+				Format format = (Format)obj;
+				return (this.Foreground == format.Foreground) && (this.Background == format.Background);
+			}
+
+			/// <summary>
+			/// Returns the hash code for the current object.
+			/// </summary>
+			/// <returns>The hash code.</returns>
+			public override int GetHashCode()
+			{
+				return this.Foreground.GetHashCode() ^ this.Background.GetHashCode();
+			}
 		}
 
 		private const int bufferSize = 1024;
-		private Format[] buffer = new Format[CodeTextBox.bufferSize];
+		private Format[] bufferNew = new Format[CodeTextBox.bufferSize];
+		private Format[] bufferOld = new Format[CodeTextBox.bufferSize];
 
 		/// <summary>
 		/// An enumeration representing the token bound.
@@ -204,18 +260,51 @@ namespace DotNetApi.Windows.Controls
 			if (string.IsNullOrWhiteSpace(this.Text)) return;
 
 			// If the buffer is smaller than the text size.
-			if (this.buffer.Length < this.Text.Length)
+			if (this.bufferNew.Length < this.Text.Length)
 			{
 				// Resize the buffer.
-				Array.Resize<Format>(ref this.buffer, (1 + (this.Text.Length / CodeTextBox.bufferSize)) * CodeTextBox.bufferSize);
+				Array.Resize(ref this.bufferNew, (1 + (this.Text.Length / CodeTextBox.bufferSize)) * CodeTextBox.bufferSize);
+				Array.Resize(ref this.bufferOld, (1 + (this.Text.Length / CodeTextBox.bufferSize)) * CodeTextBox.bufferSize);
 			}
 
 			// Set the color for all text.
-			Array.
+			this.bufferNew.Set(new Format { Foreground = this.defaultForegroundColor, Background = this.defaultBackgroundColor });
 
 			// Save the cursor position and selection.
 			int selectionStart = this.SelectionStart;
 			int selectionLength = this.SelectionLength;
+
+			// Clear the token bounds.
+			this.tokenBounds.Clear();
+
+			// Set the token colors.
+			foreach (CodeColorCollection.Token token in this.colorCollection)
+			{
+				// Find the matches for the current token.
+				MatchCollection matches = Regex.Matches(this.Text, token.Regex);
+				// For each match.
+				foreach (Match match in matches)
+				{
+					// Find the token bound equal or greater to the start position.
+					TokenBound bound;
+
+					// If the token is not enforced, if such a value is found and the value is an end bound, skip the token
+					if ((!token.Enforce) && this.tokenBounds.TryLowerBound(match.Index, out bound) && (bound == TokenBound.End)) continue;
+
+					// Set the color for the corresponding text.
+					this.bufferNew.Set(new Format { Foreground = token.ForegroundColor, Background = token.BackgroundColor }, match.Index, match.Length);
+
+					// Add the bounds to the token bounds.
+					if (!token.Enforce)
+					{
+						this.tokenBounds.Add(match.Index, TokenBound.Begin);
+						if (match.Length > 1)
+						{
+							this.tokenBounds.Add(match.Index + match.Length - 1, TokenBound.End);
+						}
+					}
+				}
+			}
 
 			// The event mask.
 			IntPtr eventMask = IntPtr.Zero;
@@ -223,57 +312,34 @@ namespace DotNetApi.Windows.Controls
 			try
 			{
 				// Stop redrawing.
-				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, new IntPtr(0), IntPtr.Zero);
+				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, IntPtr.Zero, IntPtr.Zero);
 				// Stop sending of events.
-				eventMask = UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emGetEventMask, new IntPtr(0), IntPtr.Zero);
+				eventMask = UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emGetEventMask, IntPtr.Zero, IntPtr.Zero);
 
-				// Set the color for all text to the default color.
-				this.SelectAll();
-				this.SelectionColor = this.defaultForegroundColor;
-				this.SelectionBackColor = this.defaultBackgroundColor;
-
-				// Clear the token bounds.
-				this.tokenBounds.Clear();
-
-				// Set the token colors.
-				foreach (CodeColorCollection.Token token in this.colorCollection)
+				// Set the text where there is a difference.
+				for (int index = 0; index < this.Text.Length; index++)
 				{
-					// Find the matches for the current token.
-					MatchCollection matches = Regex.Matches(this.Text, token.Regex);
-					// For each match.
-					foreach (Match match in matches)
+					if (this.bufferOld[index] != this.bufferNew[index])
 					{
-						// Find the token bound equal or greater to the start position.
-						TokenBound bound;
-
-						// If the token is not enforced, if such a value is found and the value is an end bound, skip the token
-						if ((!token.Enforce) && this.tokenBounds.TryLowerBound(match.Index, out bound) && (bound == TokenBound.End)) continue;
-
-						// Select the corresponding text.
-						this.Select(match.Index, match.Length);
-						// Color the text selection.
-						this.SelectionColor = token.ForegroundColor;
-						this.SelectionBackColor = token.BackgroundColor;
-
-						// Add the bounds to the token bounds.
-						if (!token.Enforce)
-						{
-							this.tokenBounds.Add(match.Index, TokenBound.Begin);
-							if (match.Length > 1)
-							{
-								this.tokenBounds.Add(match.Index + match.Length - 1, TokenBound.End);
-							}
-						}
+						this.Select(index, 1);
+						this.SelectionColor = this.bufferNew[index].Foreground;
+						this.SelectionBackColor = this.bufferNew[index].Background;
 					}
 				}
 			}
 			finally
 			{
 				// Turn on events.
-				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emSetEventMask, new IntPtr(0), eventMask);
+				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emSetEventMask, IntPtr.Zero, eventMask);
 				// Turn on redrawing.
 				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, new IntPtr(1), IntPtr.Zero);
+				// Invalidate the control.
+				this.Invalidate();
 			}
+
+
+			// Copy the new buffer to the old buffer.
+			Array.Copy(this.bufferNew, this.bufferNew, this.Text.Length);
 
 			// Restore the cursor position and selection.
 			this.Select(selectionStart, selectionLength);

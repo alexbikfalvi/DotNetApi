@@ -44,6 +44,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Async\AsyncResult.cs" />
     <Compile Include="Async\AsyncState.cs" />
     <Compile Include="Async\AsyncTask.cs" />
@@ -84,12 +85,12 @@
     <Compile Include="IO\Operations.cs" />
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="Templates.cs" />
-    <Compile Include="Types.cs" />
+    <Compile Include="TypeExtensions.cs" />
     <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Web\AsyncWeb.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcExtensions.cs" />
     <Compile Include="Windows\Controls\ConcurrentComponentCollection.cs" />
-    <Compile Include="Windows\Controls\Extensions.cs" />
+    <Compile Include="Windows\Controls\ControlExtensions.cs" />
     <Compile Include="Windows\Controls\ImageListBoxItemActivateEventArgs.cs" />
     <Compile Include="Windows\Controls\MapInfoAnnotation.cs">
       <SubType>Component</SubType>
@@ -138,7 +139,7 @@
     <Compile Include="Windows\Cursors.cs" />
     <Compile Include="Windows\Forms\NotificationForm.cs" />
     <Compile Include="Windows\Forms\ThreadSafeForm.cs" />
-    <Compile Include="Windows\Registry.cs" />
+    <Compile Include="Windows\RegistryExtensions.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
     <Compile Include="Security\SecureStringExtensions.cs" />
     <Compile Include="Web\AsyncWebBuffer.cs" />

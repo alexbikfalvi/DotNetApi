@@ -26,7 +26,7 @@ namespace DotNetApi.Windows.Controls
 	/// <summary>
 	/// A class with extension methods for windows forms controls.
 	/// </summary>
-	public static class Extensions
+	public static class ControlExtensions
 	{
 		/// <summary>
 		/// Returns the first element in the list view items collection that matches the specified predicate.
@@ -41,6 +41,21 @@ namespace DotNetApi.Windows.Controls
 				if (predicate(item)) return item;
 			}
 			return default(ListViewItem);
+		}
+
+		/// <summary>
+		/// Returns the first element in the list box object collection that matches the specified predicate.
+		/// </summary>
+		/// <param name="items">The collection of list box items.</param>
+		/// <param name="predicate">The predicate.</param>
+		/// <returns>The item found, or the default value otherwise.</returns>
+		public static object FirstOrDefault(this ListBox.ObjectCollection items, Func<object, bool> predicate)
+		{
+			foreach (object item in items)
+			{
+				if (predicate(item)) return item;
+			}
+			return default(object);
 		}
 	}
 }
