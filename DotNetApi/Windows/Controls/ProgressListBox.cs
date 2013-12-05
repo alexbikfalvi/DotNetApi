@@ -186,7 +186,7 @@ namespace DotNetApi.Windows.Controls
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
 			// Call the base class method.
-			base.OnDrawItem(e);
+			//base.OnDrawItem(e);
 
 			// If the item index is outside the items range, do nothing.
 			if ((e.Index < 0) || (e.Index >= this.Items.Count)) return;
@@ -299,6 +299,7 @@ namespace DotNetApi.Windows.Controls
 										e.Graphics,
 										this.textNotAvailable,
 										this.Font,
+										//e.Bounds,
 										item.geometrics.legendBounds,
 										e.ForeColor,
 										TextFormatFlags.EndEllipsis | TextFormatFlags.Right | TextFormatFlags.Top);
@@ -923,7 +924,8 @@ namespace DotNetApi.Windows.Controls
 				item.geometrics.contentBounds.Height);
 
 			// If the legend is invalid, update the legend geometric characteristics.
-			if (!item.geometrics.validLegend) this.OnUpdateItemLegendGeometrics(item);
+			//if (!item.geometrics.validLegend)
+				this.OnUpdateItemLegendGeometrics(item);
 		}
 
 		/// <summary>
