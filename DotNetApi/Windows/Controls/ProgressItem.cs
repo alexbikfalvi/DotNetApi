@@ -53,6 +53,7 @@ namespace DotNetApi.Windows.Controls
 		// Private variables.
 	
 		private string text = null;
+		private string subtext = null;
 		private bool enabled = true;
 		private ProgressInfo progress = null;
 
@@ -88,6 +89,10 @@ namespace DotNetApi.Windows.Controls
 		/// An event raised when the item text has changed.
 		/// </summary>
 		public event ProgressItemEventHandler TextChanged;
+		/// <summary>
+		/// An event raised when the item subtext has changed.
+		/// </summary>
+		public event ProgressItemEventHandler SubtextChanged;
 		/// <summary>
 		/// An event raised when the item enabled state has changed.
 		/// </summary>
@@ -134,6 +139,20 @@ namespace DotNetApi.Windows.Controls
 			}
 		}
 		/// <summary>
+		/// Gets or sets the item subtext.
+		/// </summary>
+		public string Subtext
+		{
+			get { return this.subtext; }
+			set
+			{
+				// Set the text.
+				this.subtext = value;
+				// Call the event handler.
+				this.OnSubtextChanged();
+			}
+		}
+		/// <summary>
 		/// Gets or sets the item progress.
 		/// </summary>
 		public ProgressInfo Progress
@@ -165,6 +184,10 @@ namespace DotNetApi.Windows.Controls
 				this.OnEnabledChanged(enabled, value);
 			}
 		}
+		/// <summary>
+		/// Gets or sets an item tag.
+		/// </summary>
+		public object Tag { get; set; }
 
 		// Private methods.
 
@@ -175,6 +198,15 @@ namespace DotNetApi.Windows.Controls
 		{
 			// Raise the event.
 			if (null != this.TextChanged) this.TextChanged(this, new ProgressItemEventArgs(this));
+		}
+
+		/// <summary>
+		/// An event handler called when the item subtext has changed.
+		/// </summary>
+		private void OnSubtextChanged()
+		{
+			// Raise the event.
+			if (null != this.SubtextChanged) this.SubtextChanged(this, new ProgressItemEventArgs(this));
 		}
 
 		/// <summary>

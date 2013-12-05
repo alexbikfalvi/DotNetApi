@@ -70,8 +70,13 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		public ProgressListBox()
 		{
+			// Set the control style.
+			base.SetStyle(
+				ControlStyles.OptimizedDoubleBuffer |
+				ControlStyles.AllPaintingInWmPaint, true);
+
 			// Set control properties.
-			base.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			base.DrawMode = DrawMode.OwnerDrawFixed;
 			base.DoubleBuffered = true;
 			base.ItemHeight = this.itemHeight;
 			base.IntegralHeight = false;
@@ -226,8 +231,6 @@ namespace DotNetApi.Windows.Controls
 								// Get the legend.
 								ProgressLegend legend = progress.Legend;
 
-								// Draw the progress.
-
 								// If the progress count is greater than zero.
 								if (progress.Count > 0)
 								{
@@ -297,9 +300,8 @@ namespace DotNetApi.Windows.Controls
 									// Draw the not available text.
 									TextRenderer.DrawText(
 										e.Graphics,
-										this.textNotAvailable,
+										string.IsNullOrEmpty(item.Subtext) ? this.textNotAvailable : item.Subtext,
 										this.Font,
-										//e.Bounds,
 										item.geometrics.legendBounds,
 										e.ForeColor,
 										TextFormatFlags.EndEllipsis | TextFormatFlags.Right | TextFormatFlags.Top);
@@ -312,7 +314,7 @@ namespace DotNetApi.Windows.Controls
 						// Draw the disabled text.
 						TextRenderer.DrawText(
 							e.Graphics,
-							this.textDisabled,
+							string.IsNullOrEmpty(item.Subtext) ? this.textDisabled : item.Subtext,
 							this.Font,
 							item.geometrics.legendBounds,
 							SystemColors.GrayText,
@@ -442,6 +444,7 @@ namespace DotNetApi.Windows.Controls
 			if (null == item) return;
 			// Add the item event handlers.
 			item.TextChanged += this.OnItemTextChanged;
+			item.SubtextChanged += this.OnItemSubtextChanged;
 			item.EnabledChanged += this.OnItemEnabledChanged;
 			item.ProgressSet += this.OnItemProgressSet;
 			item.ProgressLevelChanged += this.OnItemProgressLevelChanged;
@@ -471,6 +474,7 @@ namespace DotNetApi.Windows.Controls
 			if (null == item) return;
 			// Remove the item event handlers.
 			item.TextChanged -= this.OnItemTextChanged;
+			item.SubtextChanged -= this.OnItemSubtextChanged;
 			item.EnabledChanged -= this.OnItemEnabledChanged;
 			item.ProgressSet -= this.OnItemProgressSet;
 			item.ProgressLevelChanged -= this.OnItemProgressLevelChanged;
@@ -496,6 +500,25 @@ namespace DotNetApi.Windows.Controls
 		/// <param name="sender">The sender object.</param>
 		/// <param name="e">The event arguments.</param>
 		private void OnItemTextChanged(object sender, ProgressItemEventArgs e)
+		{
+			// If the object has been disposed, do nothing.
+			if (this.IsDisposed) return;
+			// Update the item text.
+			this.OnUpdateItemText(e.Item);
+			// Update the item measurements.
+			this.OnUpdateGeometrics();
+			// Update the geometrics of the specified item.
+			this.OnUpdateItemGeometrics(e.Item, this.GetItemRectangle(this.Items.IndexOf(e.Item)));
+			// Refresh the list box item.
+			this.Invalidate(e.Item.geometrics.textBounds);
+		}
+
+		/// <summary>
+		/// An event handler called when the item text has changed.
+		/// </summary>
+		/// <param name="sender">The sender object.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnItemSubtextChanged(object sender, ProgressItemEventArgs e)
 		{
 			// If the object has been disposed, do nothing.
 			if (this.IsDisposed) return;

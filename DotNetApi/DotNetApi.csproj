@@ -60,6 +60,7 @@
     <Compile Include="IO\Csv\CsvFileCommon.cs" />
     <Compile Include="IO\Csv\CsvFileReader.cs" />
     <Compile Include="IO\Csv\CsvFileWriter.cs" />
+    <Compile Include="Windows\Controls\NotificationPanel.cs" />
     <Compile Include="Windows\Themes\Code\CodeColorCollection.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
