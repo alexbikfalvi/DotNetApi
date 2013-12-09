@@ -82,7 +82,9 @@ namespace MapApi
 		/// <returns><b>True</b> if the two map points are equal, <b>false</b> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
-			return obj is MapPoint ? this == ((MapPoint)obj) : false;
+			if (null == obj) return false;
+			if (!(obj is MapPoint)) return false;
+			return this == ((MapPoint)obj);
 		}
 
 		/// <summary>

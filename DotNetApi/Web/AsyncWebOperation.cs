@@ -26,15 +26,19 @@ namespace DotNetApi.Web
 	public struct AsyncWebOperation
 	{
 		private AsyncWebRequest request;
-		private AsyncWebResult result;
+		private IAsyncResult result;
 
 		/// <summary>
 		/// Creates a new asynchronous web operation pair.
 		/// </summary>
-		/// <param name="request">The asynchronous web request.</param>
-		/// <param name="result">The resuest result.</param>
-		public AsyncWebOperation(AsyncWebRequest request, AsyncWebResult result)
+		/// <param name="request">The asynchronous web request. It cannot be null.</param>
+		/// <param name="result">The resuest result. It cannot be null.</param>
+		public AsyncWebOperation(AsyncWebRequest request, IAsyncResult result)
 		{
+			// Validate the arguments.
+			if (null == request) throw new ArgumentNullException("request");
+			if (null == result) throw new ArgumentNullException("result");
+
 			this.request = request;
 			this.result = result;
 		}
@@ -49,7 +53,7 @@ namespace DotNetApi.Web
 		/// <summary>
 		/// The request result.
 		/// </summary>
-		public AsyncWebResult Result { get { return this.result; } }
+		public IAsyncResult Result { get { return this.result; } }
 
 		// Public methods.
 
@@ -59,6 +63,50 @@ namespace DotNetApi.Web
 		public void Cancel()
 		{
 			this.request.Cancel(this.result);
+		}
+
+		/// <summary>
+		/// Compares two web operation objects for equality.
+		/// </summary>
+		/// <param name="left">The left object.</param>
+		/// <param name="right">The right object.</param>
+		/// <returns><b>True</b> if the two web operations objects are equal, otherwise, false.</returns>
+		public static bool operator ==(AsyncWebOperation left, AsyncWebOperation right)
+		{
+			return left.Equals(right);
+		}
+
+		/// <summary>
+		/// Compares two web operation objects for inequality.
+		/// </summary>
+		/// <param name="left">The left object.</param>
+		/// <param name="right">The right object.</param>
+		/// <returns><b>True</b> if the two web operations objects are different, otherwise, false.</returns>
+		public static bool operator !=(AsyncWebOperation left, AsyncWebOperation right)
+		{
+			return !left.Equals(right);
+		}
+
+		/// <summary>
+		/// Compares two web operations objects.
+		/// </summary>
+		/// <param name="obj">The object to compare with.</param>
+		/// <returns><b>True</b> if the two web operations objects are equal, otherwise, false.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			if (!(obj is AsyncWebOperation)) return false;
+			AsyncWebOperation operation = (AsyncWebOperation)obj;
+			return object.ReferenceEquals(this.request, operation.request) && object.ReferenceEquals(this.result, operation.result);
+		}
+
+		/// <summary>
+		/// Gets the hash code for the web operation object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.request.GetHashCode() ^ this.result.GetHashCode();
 		}
 	}
 }
