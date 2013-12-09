@@ -43,13 +43,11 @@ namespace DotNetApi.Windows.Controls
 			((System.ComponentModel.ISupportInitialize)(this.pictureProgress)).BeginInit();
 			this.SuspendLayout();
 			// progressBar
-			//this.progressBar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			this.progressBar.Location = new Point(62, 40);
 			this.progressBar.Size = new Size(730, 16);
 			this.progressBar.TabIndex = 1;
 			this.progressBar.Visible = false;
 			// labelProgress
-			//this.labelProgress.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 			this.labelProgress.Location = new Point(62, 8);
 			this.labelProgress.Size = new Size(730, 29);
 			this.labelProgress.TabIndex = 0;
