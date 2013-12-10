@@ -60,6 +60,11 @@
     <Compile Include="IO\Csv\CsvFileCommon.cs" />
     <Compile Include="IO\Csv\CsvFileReader.cs" />
     <Compile Include="IO\Csv\CsvFileWriter.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Windows\Controls\NotificationPanel.cs" />
     <Compile Include="Windows\Themes\Code\CodeColorCollection.cs" />
     <Compile Include="Drawing\Effect.cs" />
@@ -147,11 +152,6 @@
     <Compile Include="Web\AsyncWebOperation.cs" />
     <Compile Include="Web\AsyncWebRequest.cs" />
     <Compile Include="Web\AsyncWebResult.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Web\Http\HttpHeader.cs" />
     <Compile Include="Web\Http\HttpUtils.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcArray.cs" />
@@ -245,8 +245,9 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
+    <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>DotNetApi</CustomToolNamespace>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
@@ -285,15 +286,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ArrowDown_48.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\WorldMap1000x506.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\WorldMap2000x1012.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\WorldMap4000x2024.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MapApi\MapApi.csproj">

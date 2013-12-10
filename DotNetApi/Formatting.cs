@@ -67,6 +67,21 @@ namespace DotNetApi
 		}
 
 		/// <summary>
+		/// Converts the specified array into an extended string.
+		/// </summary>
+		/// <param name="value">The array.</param>
+		/// <returns>The string.</returns>
+		public static string ToExtendedString(this Array array)
+		{
+			StringBuilder builder = new StringBuilder();
+			foreach (object obj in array)
+			{
+				builder.AppendFormat(CultureInfo.InvariantCulture, "{0} ", obj.ToString());
+			}
+			return builder.ToString();
+		}
+
+		/// <summary>
 		/// Formats the specified string using the list of arguments and an invariant culture.
 		/// </summary>
 		/// <param name="format">The string to format.</param>
