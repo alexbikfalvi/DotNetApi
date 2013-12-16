@@ -25,6 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace DotNetApi.Xml
 {
@@ -47,7 +48,7 @@ namespace DotNetApi.Xml
 			if (null == obj) throw new ArgumentNullException("obj");
 			if (null == stream) throw new ArgumentNullException("stream");
 			// Create an XML document for the object.
-			XDocument document = new XDocument(obj.Serialize(obj.GetType(), obj.GetType().Name));
+			XDocument document = new XDocument(obj.Serialize(obj.GetType()));
 			// Save the document to the specified stream.
 			document.Save(stream, SaveOptions.None);
 		}
@@ -79,6 +80,17 @@ namespace DotNetApi.Xml
 		{
 			// Serialize the object as the current type.
 			return obj.Serialize(obj.GetType(), name);
+		}
+
+		/// <summary>
+		/// Serializes the specified value as an XML element, where the value is considered having the specified type.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <param name="type">The type.</param>
+		/// <returns>The XML element.</returns>
+		private static XElement Serialize(this object value, Type type)
+		{
+
 		}
 
 		/// <summary>
@@ -411,6 +423,14 @@ namespace DotNetApi.Xml
 
 			// Return the object.
 			return obj;
+		}
+
+		private XmlRootAttribute GetRootAttribute(Type type)
+		{
+			// Get the attributes.
+			object[] attr = type.GetCustomAttributes(typeof(XmlRootAttribute), false);
+			// Return the first attribute, if any or null otherwise.
+			return attr.Length > 0 ? attr[0] : null;
 		}
 	}
 }
