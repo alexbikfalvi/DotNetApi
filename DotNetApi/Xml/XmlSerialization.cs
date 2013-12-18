@@ -151,8 +151,10 @@ namespace DotNetApi.Xml
 		{
 			// If the element corresponds to a null object, return null.
 			XAttribute attr = element.Attributes(XmlSerialization.nil).FirstOrDefault();
-			if (null == attr) throw new SerializationException("Cannot deserialize the element {0} of type {1} because it does not have a null attribute.".FormatWith(element.Name, type.FullName));
-			if (bool.Parse(attr.Value)) return null;
+			if (null != attr)
+			{
+				if (bool.Parse(attr.Value)) return null;
+			}
 
 			// Deserialize the element according to the underlying type.
 			if (type.Equals(typeof(bool))) return element.DeserializeBoolean();
@@ -214,51 +216,53 @@ namespace DotNetApi.Xml
 			return element;
 		}
 
-		///// <summary>
-		///// Deserializes the XML element into an array.
-		///// </summary>
-		///// <param name="element">The XML element.</param>
-		///// <param name="type">The type.</param>
-		///// <returns>An array object.</returns>
-		//private static Array DeserializeArray(this XElement element, Type type)
-		//{
-		//	// Get the item type.
-		//	Type itemType = type.GetElementType();
-		//	// Get the XML elements.
-		//	IEnumerable<XElement> elements = element.Elements(XmlSerialization.nameItem);
-		//	// Create an array instance.
-		//	Array array = Activator.CreateInstance(type, elements.Count()) as Array;
-		//	// Deserialize all list items and add them to the list.
-		//	int index = 0;
-		//	foreach (XElement item in elements)
-		//	{
-		//		array.SetValue(item.Deserialize(itemType, null), index++);
-		//	}
-		//	// Return the array.
-		//	return array;
-		//}
+		/// <summary>
+		/// Deserializes the XML element into an array.
+		/// </summary>
+		/// <param name="element">The XML element.</param>
+		/// <param name="type">The type.</param>
+		/// <param name="nameItem">The item name.</param>
+		/// <returns>An array object.</returns>
+		private static Array DeserializeArray(this XElement element, Type type, XName nameItem)
+		{
+			// Get the item type.
+			Type itemType = type.GetElementType();
+			// Get the XML elements.
+			IEnumerable<XElement> elements = element.Elements(nameItem);
+			// Create an array instance.
+			Array array = Activator.CreateInstance(type, elements.Count()) as Array;
+			// Deserialize all list items and add them to the list.
+			int index = 0;
+			foreach (XElement item in elements)
+			{
+				array.SetValue(item.Deserialize(itemType, null), index++);
+			}
+			// Return the array.
+			return array;
+		}
 
 		/// <summary>
 		/// Deserializes the XML element into a generic list.
 		/// </summary>
 		/// <param name="element">The XML element.</param>
 		/// <param name="type">The type.</param>
+		/// <param name="nameItem">The item name.</param>
 		/// <param name="instance">An existing instance or <c>null</c>.</param>
 		/// <returns>A generic list object.</returns>
-		//private static IList DeserializeList(this XElement element, Type type, IList instance = null)
-		//{
-		//	// Get the item type.
-		//	Type itemType = type.GetGenericArguments()[0];
-		//	// Create a list instance.
-		//	IList list = instance == null ? Activator.CreateInstance(type) as IList : instance;
-		//	// Deserialize all list items and add them to the list.
-		//	foreach (XElement item in element.Elements(nameItem))
-		//	{
-		//		list.Add(item.Deserialize(itemType, null));
-		//	}
-		//	// Return the list.
-		//	return list;
-		//}
+		private static IList DeserializeList(this XElement element, Type type, XName nameItem, IList instance = null)
+		{
+			// Get the item type.
+			Type itemType = type.GetGenericArguments()[0];
+			// Create a list instance.
+			IList list = instance == null ? Activator.CreateInstance(type) as IList : instance;
+			// Deserialize all list items and add them to the list.
+			foreach (XElement item in element.Elements(nameItem))
+			{
+				list.Add(item.Deserialize(itemType, null));
+			}
+			// Return the list.
+			return list;
+		}
 
 		/// <summary>
 		/// Serializes the specified boolean value as an XML element.
@@ -665,40 +669,18 @@ namespace DotNetApi.Xml
 				if (property.GetAttribute<XmlElementAttribute>() != null)
 				{
 					// Deserialize the property from an XML element.
-					element.DeserializePropertyAsElement(obj, property);
+					element.DeserializePropertyFromElement(obj, property);
 				}
 				else if (property.GetAttribute<XmlAttributeAttribute>() != null)
 				{
 					// Deserialize the property from an XML attribute.
-					element.DeserializePropertyAsAttribute(obj, property);
+					element.DeserializePropertyFromAttribute(obj, property);
 				}
 				else if ((property.GetAttribute<XmlArrayAttribute>() != null) && (property.GetAttribute<XmlArrayItemAttribute>() != null))
 				{
 					// Deserialize the property from an XML array.
-					element.DeserializePropertyAsArray(obj, property);
+					element.DeserializePropertyFromArray(obj, property);
 				}
-
-
-				//// If the property cannot be read and written, continue.
-				//if (!property.CanRead || !property.CanWrite) continue;
-
-				//// If the property does not have a public get method, continue.
-				//if (null == property.GetGetMethod(false)) continue;
-				//// If the property does not have a non-public set method, continue.
-				//if (null == property.GetSetMethod(true)) continue;
-
-				//// If the property is indexed, throw an exception.
-				//if (property.GetIndexParameters().Length > 0) throw new SerializationException("The property {0} of type {1} is indexed, but the serialization does not support indexed properties.".FormatWith(property.Name, obj.GetType().FullName));
-
-				//// Get the XML element corresponding to this property.
-				//XElement el = element.Element(property.Name);
-				//if (null == el) throw new SerializationException("Cannot deserialize the property {0} of type {1} because a corresponing XML element was not found.".FormatWith(property.Name, type.FullName));
-
-				//// Deserialize the element into the property value.
-				//object value = el.Deserialize(property.PropertyType, null);
-
-				//// Set the value to the object.
-				//property.SetValue(obj, value, null);
 			}
 
 			// Return the object.
@@ -708,27 +690,168 @@ namespace DotNetApi.Xml
 		/// <summary>
 		/// Deserializes the object property from an XML element.
 		/// </summary>
+		/// <param name="element">The parent XML element.</param>
 		/// <param name="obj">The object.</param>
 		/// <param name="property">The property.</param>
-		/// <returns>The XML element.</returns>
-		private static void DeserializePropertyAsElement(this XElement element, object obj, PropertyInfo property)
+		private static void DeserializePropertyFromElement(this XElement element, object obj, PropertyInfo property)
 		{
 			// Get the element attribute.
 			XmlElementAttribute attr = property.GetAttribute<XmlElementAttribute>();
 
 			// If the property cannot be read and written, throw an exception.
-			if (!property.CanRead || !property.CanWrite) throw new SerializationException();
+			if (!property.CanRead || !property.CanWrite) throw new SerializationException("Cannot deserialize the property {0} of type {1} because is not readable or writeable.".FormatWith(property.Name, property.PropertyType.Name));
 
 			// If the property does not have a public get method, return null.
-			if (null == property.GetGetMethod(false)) throw new SerializationException();
+			if (null == property.GetGetMethod(false)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the get accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
 			// If the property does not have a non-public set method, return null.
-			if (null == property.GetSetMethod(true)) throw new SerializationException();
+			if (null == property.GetSetMethod(true)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the set accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
 
-			// Get the property value.
-			object value = property.GetValue(obj, null);
+			// Compute the element name.
+			XName name = XmlSerialization.GetName(attr.ElementName, attr.Namespace);
 
-			// Serialize the property as an attribute.
-			return value.SerializeAsElement(property.PropertyType, XmlSerialization.GetName(attr.ElementName, attr.Namespace), attr.IsNullable);
+			// Get the XML element corresponding to this property.
+			XElement el = element.Element(name);
+			if (null == el) throw new SerializationException("Cannot deserialize the property {0} of type {1} because a corresponing XML element {2} was not found.".FormatWith(property.Name, property.PropertyType.FullName, name));
+
+			// Deserialize the element into the property value.
+			object value = el.Deserialize(property.PropertyType, null);
+
+			// Set the value to the object.
+			property.SetValue(obj, value, null);
+		}
+
+		/// <summary>
+		/// Deserializes the object property from an XML attribute.
+		/// </summary>
+		/// <param name="element">The parent XML element.</param>
+		/// <param name="obj">The object.</param>
+		/// <param name="property">The property.</param>
+		private static void DeserializePropertyFromAttribute(this XElement element, object obj, PropertyInfo property)
+		{
+			// Get the attribute attribute.
+			XmlAttributeAttribute attr = property.GetAttribute<XmlAttributeAttribute>();
+
+			// If the property cannot be read and written, throw an exception.
+			if (!property.CanRead || !property.CanWrite) throw new SerializationException("Cannot deserialize the property {0} of type {1} because is not readable or writeable.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// If the property does not have a public get method, return null.
+			if (null == property.GetGetMethod(false)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the get accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
+			// If the property does not have a non-public set method, return null.
+			if (null == property.GetSetMethod(true)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the set accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// Compute the element name.
+			XName name = XmlSerialization.GetName(attr.AttributeName, attr.Namespace);
+
+			// Get the XML attribute corresponding to this property.
+			XAttribute at = element.Attribute(name);
+			if (null == at) throw new SerializationException("Cannot deserialize the property {0} of type {1} because a corresponing XML element {2} was not found.".FormatWith(property.Name, property.PropertyType.FullName, name));
+
+			// Deserialize the element into the property value.
+			object value = at.Deserialize(property.PropertyType);
+
+			// Set the value to the object.
+			property.SetValue(obj, value, null);
+		}
+
+		/// <summary>
+		/// Deserializes the object property from an XML element array.
+		/// </summary>
+		/// <param name="element">The parent XML element.</param>
+		/// <param name="obj">The object.</param>
+		/// <param name="property">The property.</param>
+		private static void DeserializePropertyFromArray(this XElement element, object obj, PropertyInfo property)
+		{
+			// If the property cannot be read and written, throw an exception.
+			if (!property.CanRead) throw new SerializationException("Cannot deserialize the property {0} of type {1} because is not readable.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// If the property does not have a public get method, return null.
+			if (null == property.GetGetMethod(false)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the get accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// Check the property type.
+			if (property.PropertyType.IsSubclassOf(typeof(Array)))
+			{
+				// Deserialize an array.
+				element.DeserializePropertyFromArrayArray(obj, property);
+			}
+			else if (property.PropertyType.IsAssignableToGenericInterface(typeof(IList<>)) && property.PropertyType.IsAssignableToInterface(typeof(IList)))
+			{
+				// Deserialize a list.
+				element.DeserializePropertyFromListArray(obj, property);
+			}
+			else throw new SerializationException("Cannot deserialize the property {0} of type {1} because it not of a supported array type.".FormatWith(property.Name, property.PropertyType.FullName));
+		}
+
+		/// <summary>
+		/// Deserializes the object property from an XML element array.
+		/// </summary>
+		/// <param name="element">The parent XML element.</param>
+		/// <param name="obj">The object.</param>
+		/// <param name="property">The property.</param>
+		private static void DeserializePropertyFromArrayArray(this XElement element, object obj, PropertyInfo property)
+		{
+			// Get the array and array item attributes.
+			XmlArrayAttribute attrArray = property.GetAttribute<XmlArrayAttribute>();
+			XmlArrayItemAttribute attrItem = property.GetAttribute<XmlArrayItemAttribute>();
+
+			// If the property cannot be written, throw an exception.
+			if (!property.CanWrite) throw new SerializationException("Cannot deserialize the property {0} of type {1} because is not writeable.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// If the property does not have a non-public set method, return null.
+			if (null == property.GetSetMethod(true)) throw new SerializationException("Cannot deserialize the property {0} of type {1} because the set accessor is not available.".FormatWith(property.Name, property.PropertyType.Name));
+
+			// Compute the element names.
+			XName nameArray = XmlSerialization.GetName(attrArray.ElementName, attrArray.Namespace);
+			XName nameItem = XmlSerialization.GetName(attrItem.ElementName, attrItem.Namespace);
+
+			// Get the XML element corresponding to this property.
+			XElement el = element.Element(nameArray);
+			if (null == el) throw new SerializationException("Cannot deserialize the property {0} of type {1} because a corresponing XML element {2} was not found.".FormatWith(property.Name, property.PropertyType.FullName, nameArray));
+
+			// Deserialize the element into the property value.
+			Array value = el.DeserializeArray(property.PropertyType, nameItem);
+
+			// Set the value to the object.
+			property.SetValue(obj, value, null);
+		}
+
+		/// <summary>
+		/// Deserializes the object property from an XML element list.
+		/// </summary>
+		/// <param name="element">The parent XML element.</param>
+		/// <param name="obj">The object.</param>
+		/// <param name="property">The property.</param>
+		private static void DeserializePropertyFromListArray(this XElement element, object obj, PropertyInfo property)
+		{
+			// Get the array and array item attributes.
+			XmlArrayAttribute attrArray = property.GetAttribute<XmlArrayAttribute>();
+			XmlArrayItemAttribute attrItem = property.GetAttribute<XmlArrayItemAttribute>();
+
+			// Compute the element names.
+			XName nameArray = XmlSerialization.GetName(attrArray.ElementName, attrArray.Namespace);
+			XName nameItem = XmlSerialization.GetName(attrItem.ElementName, attrItem.Namespace);
+
+			// Get the XML element corresponding to this property.
+			XElement el = element.Element(nameArray);
+			if (null == el) throw new SerializationException("Cannot deserialize the property {0} of type {1} because a corresponing XML element {2} was not found.".FormatWith(property.Name, property.PropertyType.FullName, nameArray));
+
+			// Get the current property instance.
+			IList instance = property.GetValue(obj, null) as IList;
+
+			// If the property is readable.
+			if (property.CanWrite && (null != property.GetSetMethod(true)) && (null == instance))
+			{
+				// Deserialize writeable list.
+				IList value = el.DeserializeList(property.PropertyType, nameItem);
+
+				// Set the value to the object.
+				property.SetValue(obj, value, null);
+			}
+			else if (instance != null)
+			{
+				// Deserialize readeable list.
+				el.DeserializeList(property.PropertyType, nameItem, instance);
+			}
+			else throw new SerializationException("Cannot deserialize the property {0} of type {1} because the list is read-only and null.".FormatWith(property.Name, property.PropertyType.FullName));
 		}
 
 		/// <summary>

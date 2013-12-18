@@ -44,7 +44,7 @@ namespace DotNetApi
 		/// <returns><b>True</b> if the type is assignable to the specified generic type, <b>false</b> otherwise.</returns>
 		public static bool IsAssignableToInterface(this Type type, Type otherType)
 		{
-			// For all interfaces.
+			// For all interfaces of this type.
 			foreach (Type iface in type.GetInterfaces())
 				if (iface == otherType)
 					return true;
@@ -67,6 +67,11 @@ namespace DotNetApi
 			}
 			// Get the number of generic arguments.
 			int count = otherType.GetGenericArguments().Count();
+			// If the type matches the other type.
+			if ((type.GetGenericTypeDefinition() == otherType) && (type.GetGenericArguments().Count() == count))
+			{
+				return true;
+			}
 			// For all interfaces.
 			foreach (Type iface in type.GetInterfaces())
 				if (iface.IsGenericType)
