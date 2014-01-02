@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace DotNetApiTest
 			InitializeComponent();
 		}
 
-		private XmlRpcAsyncRequest request = new XmlRpcAsyncRequest();
+		private XmlRpcAsyncRequest request = new XmlRpcAsyncRequest(CultureInfo.InvariantCulture);
 
 		private void Test(object sender, EventArgs e)
 		{

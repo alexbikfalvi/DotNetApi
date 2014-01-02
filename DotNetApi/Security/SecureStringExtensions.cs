@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using DotNetApi;
+using DotNetApi.Windows.Native;
 
 namespace DotNetApi.Security
 {
@@ -193,7 +194,7 @@ namespace DotNetApi.Security
 					// Get a pointer to the null terminated unmanaged string.
 					char* chars = (char*)unmanagedString.ToPointer();
 					// Get the length of the null terminated unmanaged string.
-					int charCount = UnsafeNativeMethods.StrLen(chars);
+					int charCount = NativeMethods.StrLen(chars);
 					// Get the number of bytes needed for the byte array.
 					int byteCount = encoding.GetByteCount(chars, secureString.Length);
 					// Create a byte array to contain the unsecure data.

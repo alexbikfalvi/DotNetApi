@@ -37,6 +37,7 @@ namespace DotNetApi.Windows.Forms
 		/// </summary>
 		public ThreadSafeForm()
 		{
+			// Set the action.
 			this.action = new Action<Action>(this.Invoke);
 		}
 

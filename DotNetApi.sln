@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApi", "DotNetApi\DotNetApi.csproj", "{475F767E-2288-4E56-9B90-179A10DCAB49}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetApiTest", "DotNetApiTest\DotNetApiTest.csproj", "{35413D72-829D-4547-A59F-AB974CCAC93F}"
@@ -14,6 +16,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapConverter", "MapConverter\MapConverter.csproj", "{CD4BDD10-50AF-479D-9A9D-4EF209AFA95E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catfood.Shapefile", "..\Catfood.Shapefile\Catfood.Shapefile\Catfood.Shapefile.csproj", "{2086F1A5-3D34-40AD-80EF-C1943411451F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocaleConverter", "LocaleConverter\LocaleConverter.csproj", "{D17972FE-3DFB-43DC-892A-0AFEA411048B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoKey", "CryptoKey\CryptoKey.csproj", "{3DF00433-A171-42A6-9660-4BB5D48AFDAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +55,14 @@ Global
 		{2086F1A5-3D34-40AD-80EF-C1943411451F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2086F1A5-3D34-40AD-80EF-C1943411451F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2086F1A5-3D34-40AD-80EF-C1943411451F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D17972FE-3DFB-43DC-892A-0AFEA411048B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D17972FE-3DFB-43DC-892A-0AFEA411048B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D17972FE-3DFB-43DC-892A-0AFEA411048B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D17972FE-3DFB-43DC-892A-0AFEA411048B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DF00433-A171-42A6-9660-4BB5D48AFDAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DF00433-A171-42A6-9660-4BB5D48AFDAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DF00433-A171-42A6-9660-4BB5D48AFDAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DF00433-A171-42A6-9660-4BB5D48AFDAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

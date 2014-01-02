@@ -56,7 +56,18 @@
     <Compile Include="Concurrent\ConcurrentList.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentList.cs" />
-    <Compile Include="Conversion.cs" />
+    <Compile Include="ConvertExtensions.cs" />
+    <Compile Include="Globalization\CultureId.cs" />
+    <Compile Include="Globalization\Language.cs" />
+    <Compile Include="Globalization\LanguageCollection.cs" />
+    <Compile Include="Globalization\Locale.cs" />
+    <Compile Include="Globalization\LocaleCollection.cs" />
+    <Compile Include="Globalization\LocaleReader.cs" />
+    <Compile Include="Globalization\LocaleWriter.cs" />
+    <Compile Include="Globalization\Script.cs" />
+    <Compile Include="Globalization\ScriptCollection.cs" />
+    <Compile Include="Globalization\Territory.cs" />
+    <Compile Include="Globalization\TerritoryCollection.cs" />
     <Compile Include="IO\Csv\CsvFileCommon.cs" />
     <Compile Include="IO\Csv\CsvFileReader.cs" />
     <Compile Include="IO\Csv\CsvFileWriter.cs" />
@@ -65,7 +76,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Windows\Controls\NotificationPanel.cs" />
+    <Compile Include="Windows\Controls\NotificationPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Native\BitmapInfo.cs" />
+    <Compile Include="Windows\Native\DwmApi.cs" />
+    <Compile Include="Windows\Native\Gdi32.cs" />
+    <Compile Include="Windows\Native\Kernel32.cs" />
+    <Compile Include="Windows\Native\Rect.cs" />
+    <Compile Include="Windows\Native\SafeHandles.cs" />
+    <Compile Include="Windows\Native\User32.cs" />
+    <Compile Include="Windows\Native\UxTheme.cs" />
     <Compile Include="Windows\Themes\Code\CodeColorCollection.cs" />
     <Compile Include="Drawing\Effect.cs" />
     <Compile Include="Drawing\Effects.cs" />
@@ -84,7 +105,7 @@
     </Compile>
     <Compile Include="Drawing\Transforms\Transform.cs" />
     <Compile Include="Drawing\Transforms\TransformAsymptotic.cs" />
-    <Compile Include="Formatting.cs" />
+    <Compile Include="FormatExtensions.cs" />
     <Compile Include="IO\Directory.cs" />
     <Compile Include="IO\Extensions.cs" />
     <Compile Include="IO\File.cs" />
@@ -92,7 +113,6 @@
     <Compile Include="Numeric\SpecialFunctions.cs" />
     <Compile Include="Templates.cs" />
     <Compile Include="TypeExtensions.cs" />
-    <Compile Include="UnsafeNativeMethods.cs" />
     <Compile Include="Web\AsyncWeb.cs" />
     <Compile Include="Web\XmlRpc\XmlRpcExtensions.cs" />
     <Compile Include="Windows\Controls\ConcurrentComponentCollection.cs" />
@@ -134,17 +154,35 @@
     <Compile Include="Windows\Controls\SideMenuItemControlChangedEventArgs.cs" />
     <Compile Include="Windows\Controls\SideMenuItemEventArgs.cs" />
     <Compile Include="Windows\Controls\ControlChangedEventArgs.cs" />
-    <Compile Include="Windows\Controls\StatisticsItem.cs" />
-    <Compile Include="Windows\Controls\StatisticsListBox.cs" />
-    <Compile Include="Windows\Controls\ThemeTabControl.cs" />
-    <Compile Include="Windows\Controls\ToolSplitContainer.cs" />
-    <Compile Include="Windows\Controls\ThemeControl.cs" />
-    <Compile Include="Windows\Controls\WizardControl.cs" />
-    <Compile Include="Windows\Controls\WizardPage.cs" />
+    <Compile Include="Windows\Controls\StatisticsItem.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\StatisticsListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ThemeTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ToolSplitContainer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\ThemeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\WizardControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Windows\Controls\WizardPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Windows\Controls\WizardPageEventArgs.cs" />
     <Compile Include="Windows\Cursors.cs" />
-    <Compile Include="Windows\Forms\NotificationForm.cs" />
-    <Compile Include="Windows\Forms\ThreadSafeForm.cs" />
+    <Compile Include="Windows\Forms\NotificationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Windows\Forms\ThreadSafeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Windows\RegistryExtensions.cs" />
     <Compile Include="Security\CryptoExtensions.cs" />
     <Compile Include="Security\SecureStringExtensions.cs" />
@@ -232,7 +270,7 @@
     <Compile Include="Windows\Window.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windows\Controls\SideMenu.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Windows\Controls\SideMenuItem.cs">
       <SubType>Component</SubType>

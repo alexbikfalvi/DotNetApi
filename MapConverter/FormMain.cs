@@ -68,7 +68,7 @@ namespace MapConverter
 						this.textBox.AppendText(string.Format("Shape file name is: \'{0}\'{1}", shapeFileName, Environment.NewLine));
 
 						// Create the temporary folder.
-						Directory.CreateDirectory(tempFolder);
+						System.IO.Directory.CreateDirectory(tempFolder);
 
 						this.textBox.AppendText(string.Format("Creating temporary folder \'{0}\'...{1}", tempFolder, Environment.NewLine));
 
@@ -169,7 +169,7 @@ namespace MapConverter
 									if (this.saveFileDialog.ShowDialog(this) == DialogResult.OK)
 									{
 										// Create a file stream.
-										using (FileStream fileOutStream = File.Create(this.saveFileDialog.FileName))
+										using (FileStream fileOutStream = System.IO.File.Create(this.saveFileDialog.FileName))
 										{
 											// Compress the stream.
 											//using (GZipStream zipStream = new GZipStream(fileOutStream, CompressionLevel.Optimal))
@@ -189,7 +189,7 @@ namespace MapConverter
 						{
 							// Delete the temporary folder.
 							this.textBox.AppendText(Environment.NewLine);
-							Directory.Delete(tempFolder, true);
+							System.IO.Directory.Delete(tempFolder, true);
 							this.textBox.AppendText(string.Format("Temporary folder \'{0}\' deleted.{1}", tempFolder, Environment.NewLine));
 						}
 					}

@@ -26,6 +26,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using DotNetApi;
 using DotNetApi.Collections.Generic;
+using DotNetApi.Windows.Native;
 using DotNetApi.Windows.Themes.Code;
 
 namespace DotNetApi.Windows.Controls
@@ -40,12 +41,6 @@ namespace DotNetApi.Windows.Controls
 		/// </summary>
 		private struct Format
 		{
-			//public Format()
-			//{
-			//	this.Foreground = Color.Empty;
-			//	this.Background = Color.Empty;
-			//}
-
 			// Fields.
 
 			/// <summary>
@@ -312,9 +307,9 @@ namespace DotNetApi.Windows.Controls
 			try
 			{
 				// Stop redrawing.
-				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, IntPtr.Zero, IntPtr.Zero);
+				NativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, IntPtr.Zero, IntPtr.Zero);
 				// Stop sending of events.
-				eventMask = UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emGetEventMask, IntPtr.Zero, IntPtr.Zero);
+				eventMask = NativeMethods.SendMessage(this.Handle, CodeTextBox.emGetEventMask, IntPtr.Zero, IntPtr.Zero);
 
 				// Set the text where there is a difference.
 				for (int index = 0; index < this.Text.Length; index++)
@@ -330,9 +325,9 @@ namespace DotNetApi.Windows.Controls
 			finally
 			{
 				// Turn on events.
-				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.emSetEventMask, IntPtr.Zero, eventMask);
+				NativeMethods.SendMessage(this.Handle, CodeTextBox.emSetEventMask, IntPtr.Zero, eventMask);
 				// Turn on redrawing.
-				UnsafeNativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, new IntPtr(1), IntPtr.Zero);
+				NativeMethods.SendMessage(this.Handle, CodeTextBox.wmSetRedraw, new IntPtr(1), IntPtr.Zero);
 				// Invalidate the control.
 				this.Invalidate();
 			}
