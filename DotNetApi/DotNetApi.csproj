@@ -57,6 +57,7 @@
     <Compile Include="Concurrent\Generic\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\Generic\ConcurrentList.cs" />
     <Compile Include="ConvertExtensions.cs" />
+    <Compile Include="EnumExtensions.cs" />
     <Compile Include="Globalization\CultureId.cs" />
     <Compile Include="Globalization\Language.cs" />
     <Compile Include="Globalization\LanguageCollection.cs" />
