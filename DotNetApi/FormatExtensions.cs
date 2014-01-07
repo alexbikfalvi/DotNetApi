@@ -96,6 +96,16 @@ namespace DotNetApi
 		/// </summary>
 		/// <param name="value">The value.</param>
 		/// <returns>The plural suffix.</returns>
+		public static string PluralSuffix(this byte value)
+		{
+			return value == 1 ? string.Empty : "s";
+		}
+
+		/// <summary>
+		/// Returns the plural suffix for the specified value for an invariant culture.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The plural suffix.</returns>
 		public static string PluralSuffix(this int value)
 		{
 			return value == 1 ? string.Empty : "s";
