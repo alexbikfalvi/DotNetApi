@@ -32,7 +32,7 @@ namespace DotNetApi.Async
 		private WaitCallback cancelCallback = null;
 		private object cancelState = null;
 
-		private AutoResetEvent wait = new AutoResetEvent(false);
+		private ManualResetEvent wait = new ManualResetEvent(false);
 
 		/// <summary>
 		/// Creates a new asynchronous state.

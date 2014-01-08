@@ -162,5 +162,24 @@ namespace DotNetApi
 			else if (minutes != 0.0) return string.Format("{0}° {1}ʹ {2}", degrees, minutes, hemisphere);
 			else return string.Format("{0}° {1}", degrees, hemisphere);
 		}
+
+		/// <summary>
+		/// Converts the specified bitrate to string.
+		/// </summary>
+		/// <param name="bitrate">The bitrate.</param>
+		/// <returns>The string.</returns>
+		public static string BitRateToString(this long bitrate)
+		{
+			if (bitrate > 1000000000000L)
+				return "{0:G3} Tb/s".FormatWith((double)bitrate / 1000000000000L);
+			else if (bitrate > 1000000000L)
+				return "{0:G3} Gb/s".FormatWith((double)bitrate / 1000000000L);
+			else if (bitrate > 1000000L)
+				return "{0:G3} Mb/s".FormatWith((double)bitrate / 1000000L);
+			else if (bitrate > 1000L)
+				return "{0:G3} kb/s".FormatWith((double)bitrate / 1000L);
+			else
+				return "{0} b/s".FormatWith(bitrate);
+		}
 	}
 }
