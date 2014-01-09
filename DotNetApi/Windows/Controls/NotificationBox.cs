@@ -326,8 +326,8 @@ namespace DotNetApi.Windows.Controls
 			this.borderText.X = this.borderImage.Right + this.Padding.Left;
 			this.borderText.Y = this.borderImage.Y;
 			this.borderText.Width = this.borderControl.Right - this.borderText.X - this.Padding.Right;
-			this.borderText.Height = progress ? this.progressBar.Top - this.borderText.Y - this.Padding.Bottom :
-				this.ClientRectangle.Bottom - this.borderText.Y - this.Padding.Bottom;
+			this.borderText.Height = progress ? this.progressBar.Top - this.borderText.Y :
+				this.ClientRectangle.Bottom - this.borderText.Y;
 		}
 	}
 }
