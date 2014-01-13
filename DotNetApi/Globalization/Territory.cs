@@ -37,6 +37,8 @@ namespace DotNetApi.Globalization
 			this.Name = name;
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Gets the territory type.
 		/// </summary>
@@ -45,5 +47,62 @@ namespace DotNetApi.Globalization
 		/// Gets the territory name.
 		/// </summary>
 		public string Name { get; private set; }
+
+		// Public methods.
+
+		/// <summary>
+		/// Gets the territory name.
+		/// </summary>
+		/// <returns>The name.</returns>
+		public override string ToString()
+		{
+			return this.Name;
+		}
+
+		/// <summary>
+		/// Compares with an object for equality.
+		/// </summary>
+		/// <param name="obj">The object to compare.</param>
+		/// <returns><b>True</b> if the objects are the equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			Territory territory = obj as Territory;
+			if (null == territory) return false;
+			return this.Type == territory.Type;
+		}
+
+		/// <summary>
+		/// Returns the hash code of the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Type.GetHashCode();
+		}
+
+		/// <summary>
+		/// Compares two territory objects for equality.
+		/// </summary>
+		/// <param name="left">The left territory.</param>
+		/// <param name="right">The right territory.</param>
+		/// <returns><b>True</b> if the territories are the equal, <b>false</b> otherwise.</returns>
+		public static bool operator ==(Territory left, Territory right)
+		{
+			if (object.ReferenceEquals(left, right)) return true;
+			if (((object)left == null) || ((object)right == null)) return false;
+			return left.Type == right.Type;
+		}
+
+		/// <summary>
+		/// Compares two territory objects for inequality.
+		/// </summary>
+		/// <param name="left">The left territory.</param>
+		/// <param name="right">The right territory.</param>
+		/// <returns><b>True</b> if the territories are the different, <b>false</b> otherwise.</returns>
+		public static bool operator !=(Territory left, Territory right)
+		{
+			return !(left == right);
+		}
 	}
 }

@@ -57,23 +57,23 @@ namespace DotNetApi.Windows.Controls
 			/// <summary>
 			/// Compares two format objects for equality.
 			/// </summary>
-			/// <param name="obj1">The first object.</param>
-			/// <param name="obj2">The second object.</param>
+			/// <param name="left">The left object.</param>
+			/// <param name="right">The right object.</param>
 			/// <returns><b>True</b> if the objects are equal, otherwise <b>false</b>.</returns>
-			public static bool operator ==(Format obj1, Format obj2)
+			public static bool operator ==(Format left, Format right)
 			{
-				return (obj1.Foreground == obj2.Foreground) && (obj1.Background == obj2.Background);
+				return (left.Foreground == right.Foreground) && (left.Background == right.Background);
 			}
 
 			/// <summary>
 			/// Compares two format objects for inequality.
 			/// </summary>
-			/// <param name="obj1">The first object.</param>
-			/// <param name="obj2">The second object.</param>
+			/// <param name="left">The left object.</param>
+			/// <param name="right">The right object.</param>
 			/// <returns><b>True</b> if the objects are different, otherwise <b>false</b>.</returns>
-			public static bool operator !=(Format obj1, Format obj2)
+			public static bool operator !=(Format left, Format right)
 			{
-				return (obj1.Foreground != obj2.Foreground) || (obj1.Background != obj2.Background);
+				return !(left == right);
 			}
 
 			/// <summary>
@@ -84,8 +84,8 @@ namespace DotNetApi.Windows.Controls
 			public override bool Equals(object obj)
 			{
 				if (null == obj) return false;
-				if (!(obj is Format)) return false;
 				Format format = (Format)obj;
+				if (null == (object)format) return false;
 				return (this.Foreground == format.Foreground) && (this.Background == format.Background);
 			}
 

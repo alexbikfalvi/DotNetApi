@@ -73,7 +73,9 @@ namespace DotNetApi.Web
 		/// <returns><b>True</b> if the two web operations objects are equal, otherwise, false.</returns>
 		public static bool operator ==(AsyncWebOperation left, AsyncWebOperation right)
 		{
-			return left.Equals(right);
+			if (object.ReferenceEquals(left, right)) return true;
+			if (((object)left == null) || ((object)right == null)) return false;
+			return object.ReferenceEquals(left.request, right.request) && object.ReferenceEquals(left.result, right.result);
 		}
 
 		/// <summary>
@@ -84,7 +86,7 @@ namespace DotNetApi.Web
 		/// <returns><b>True</b> if the two web operations objects are different, otherwise, false.</returns>
 		public static bool operator !=(AsyncWebOperation left, AsyncWebOperation right)
 		{
-			return !left.Equals(right);
+			return !(left == right);
 		}
 
 		/// <summary>
@@ -95,8 +97,8 @@ namespace DotNetApi.Web
 		public override bool Equals(object obj)
 		{
 			if (null == obj) return false;
-			if (!(obj is AsyncWebOperation)) return false;
 			AsyncWebOperation operation = (AsyncWebOperation)obj;
+			if (null == (object)operation) return false;
 			return object.ReferenceEquals(this.request, operation.request) && object.ReferenceEquals(this.result, operation.result);
 		}
 

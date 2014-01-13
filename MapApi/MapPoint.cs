@@ -72,7 +72,7 @@ namespace MapApi
 		/// <returns><b>True</b> if the two map points are different, <b>true</b> otherwise.</returns>
 		public static bool operator !=(MapPoint point1, MapPoint point2)
 		{
-			return (point1.X != point2.X) || (point1.Y != point2.Y);
+			return !(point1 == point2);
 		}
 
 		/// <summary>

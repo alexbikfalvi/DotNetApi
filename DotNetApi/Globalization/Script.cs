@@ -37,6 +37,8 @@ namespace DotNetApi.Globalization
 			this.Name = name;
 		}
 
+		// Public properties.
+
 		/// <summary>
 		/// Gets the script type.
 		/// </summary>
@@ -45,5 +47,62 @@ namespace DotNetApi.Globalization
 		/// Gets the script name.
 		/// </summary>
 		public string Name { get; private set; }
+		
+		// Public methods.
+
+		/// <summary>
+		/// Gets the script name.
+		/// </summary>
+		/// <returns>The name.</returns>
+		public override string ToString()
+		{
+			return this.Name;
+		}
+
+		/// <summary>
+		/// Compares with an object for equality.
+		/// </summary>
+		/// <param name="obj">The object to compare.</param>
+		/// <returns><b>True</b> if the objects are the equal, <b>false</b> otherwise.</returns>
+		public override bool Equals(object obj)
+		{
+			if (null == obj) return false;
+			Script script = obj as Script;
+			if (null == script) return false;
+			return this.Type == script.Type;
+		}
+
+		/// <summary>
+		/// Returns the hash code of the current object.
+		/// </summary>
+		/// <returns>The hash code.</returns>
+		public override int GetHashCode()
+		{
+			return this.Type.GetHashCode();
+		}
+
+		/// <summary>
+		/// Compares two script objects for equality.
+		/// </summary>
+		/// <param name="left">The left script.</param>
+		/// <param name="right">The right script.</param>
+		/// <returns><b>True</b> if the scripts are the equal, <b>false</b> otherwise.</returns>
+		public static bool operator ==(Script left, Script right)
+		{
+			if (object.ReferenceEquals(left, right)) return true;
+			if (((object)left == null) || ((object)right == null)) return false;
+			return left.Type == right.Type;
+		}
+
+		/// <summary>
+		/// Compares two script objects for inequality.
+		/// </summary>
+		/// <param name="left">The left script.</param>
+		/// <param name="right">The right script.</param>
+		/// <returns><b>True</b> if the scripts are the different, <b>false</b> otherwise.</returns>
+		public static bool operator !=(Script left, Script right)
+		{
+			return !(left == right);
+		}
 	}
 }

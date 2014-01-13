@@ -71,14 +71,10 @@ namespace DotNetApi.Web.Http
 		/// <returns><b>True</b> if the current object is equal to the object, or <b>false</b> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
-			// If the object is null, return false.
 			if (null == obj) return false;
-			// Get the right object.
-			HttpHeader right = (HttpHeader)obj;
-			// If the right object is null, return false.
-			if (null == (object)right) return false;
-			// Else, compare the objects.
-			return (this.name == right.name) && (this.value == right.value);
+			HttpHeader header = (HttpHeader)obj;
+			if (null == (object)header) return false;
+			return (this.name == header.name) && (this.value == header.value);
 		}
 
 		/// <summary>
@@ -98,7 +94,7 @@ namespace DotNetApi.Web.Http
 		/// <returns><b>True</b> if the two headers are equal, or <b>false</b> otherwise.</returns>
 		public static bool operator ==(HttpHeader left, HttpHeader right)
 		{
-			return left.Equals(right);
+			return (left.name == right.name) && (left.value == right.value);
 		}
 
 		/// <summary>
@@ -109,7 +105,7 @@ namespace DotNetApi.Web.Http
 		/// <returns><b>True</b> if the two headers are equal, or <b>false</b> otherwise.</returns>
 		public static bool operator !=(HttpHeader left, HttpHeader right)
 		{
-			return !left.Equals(right);
+			return !(left == right);
 		}
 	}
 }

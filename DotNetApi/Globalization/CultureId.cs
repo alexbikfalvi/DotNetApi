@@ -84,7 +84,7 @@ namespace DotNetApi.Globalization
 		/// <returns><b>True</b> if the two culture identifiers are equal, <b>false</b> otherwise.</returns>
 		public static bool operator ==(CultureId left, CultureId right)
 		{
-			return (left.Language == right.Language) && (left.Script == right.Script) && (left.Territory == right.Territory);
+			return left.Equals(right);
 		}
 
 		/// <summary>
@@ -95,7 +95,7 @@ namespace DotNetApi.Globalization
 		/// <returns><b>True</b> if the two culture identifiers are different, <b>false</b> otherwise.</returns>
 		public static bool operator !=(CultureId left, CultureId right)
 		{
-			return (left.Language != right.Language) || (left.Script != right.Script) || (left.Territory != right.Territory);
+			return !(left.Equals(right));
 		}
 
 		/// <summary>
@@ -108,7 +108,7 @@ namespace DotNetApi.Globalization
 			if (null == obj) return false;
 			if (!(obj is CultureId)) return false;
 			CultureId id = (CultureId)obj;
-			return this == id;
+			return (this.Language == id.Language) && (this.Script == id.Script) && (this.Territory == id.Territory); ;
 		}
 
 		/// <summary>
@@ -117,9 +117,7 @@ namespace DotNetApi.Globalization
 		/// <returns>The hash code.</returns>
 		public override int GetHashCode()
 		{
-			return this.Language.GetHashCode() ^
-				(this.Script != null ? this.Script.GetHashCode() : 0) ^
-				(this.Territory != null ? this.Territory.GetHashCode() : 0);
+			return this.Language.GetHashCode() ^ (this.Script != null ? this.Script.GetHashCode() : 0) ^ (this.Territory != null ? this.Territory.GetHashCode() : 0);
 		}
 
 		/// <summary>
