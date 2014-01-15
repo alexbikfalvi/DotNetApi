@@ -34,9 +34,18 @@ namespace DotNetApi.Web
 		/// <summary>
 		/// Processes the string data from the asynchronous operation, and returns a custom type result.
 		/// </summary>
+		/// <param name="data">The data.</param>
 		/// <returns>The custom type result.</returns>
 		T GetResult(string data);
 	}
+
+	/// <summary>
+	/// A delegate for conversion of the asynchronous operation data to a custom type.
+	/// </summary>
+	/// <typeparam name="T">The custom type used for conversion.</typeparam>
+	/// <param name="data">The data.</param>
+	/// <returns>The custom type result.</returns>
+	public delegate T IAsyncDelegate<T>(string data);
 
 	/// <summary>
 	/// A delegate representing the callback from an asynchronous web request.
@@ -135,8 +144,7 @@ namespace DotNetApi.Web
 			if (asyncState.Response != null)
 			{
 				// Get the encoding
-				Encoding encoding = asyncState.Response.CharacterSet != null ?
-					Encoding.GetEncoding(asyncState.Response.CharacterSet) : Encoding.UTF8;
+				Encoding encoding = string.IsNullOrWhiteSpace(asyncState.Response.CharacterSet) ? Encoding.UTF8 : Encoding.GetEncoding(asyncState.Response.CharacterSet);
 
 				// Get the string data.
 				data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : null;
@@ -167,6 +175,18 @@ namespace DotNetApi.Web
 		/// <returns>The data received during the asynchronous operation.</returns>
 		protected T End<T>(IAsyncResult result, IAsyncFunction<T> func)
 		{
+			return this.End<T>(result, func.GetResult);
+		}
+
+		/// <summary>
+		/// Completes the asynchronous operation and returns the received data.
+		/// </summary>
+		/// <typeparam name="T">The type of the returned data.</typeparam>
+		/// <param name="result">The asynchronous result.</param>
+		/// <param name="func">A delegate method used to convert the received data to the desired format.</param>
+		/// <returns>The data received during the asynchronous operation.</returns>
+		protected T End<T>(IAsyncResult result, IAsyncDelegate<T> func)
+		{
 			// Get the state of the asynchronous operation.
 			AsyncWebResult asyncState = (AsyncWebResult)result;
 
@@ -185,7 +205,7 @@ namespace DotNetApi.Web
 			string data = (null != asyncState.ReceiveData.Data) ? encoding.GetString(asyncState.ReceiveData.Data) : null;
 
 			// Return the converted data.
-			return func.GetResult(data);
+			return func(data);
 		}
 
 		/// <summary>
@@ -283,7 +303,7 @@ namespace DotNetApi.Web
 					if (!result.AsyncWaitHandle.WaitOne(this.Timeout))
 					{
 						// If no signal was received in the timeout period, throw a timeout exception.
-						throw new TimeoutException("The web request did not complete within the timeout {0}.".FormatWith(this.Timeout));
+						throw new TimeoutException(string.Format("The web request did not complete within the timeout {0}.", this.Timeout));
 					}
 				}
 
@@ -360,7 +380,7 @@ namespace DotNetApi.Web
 					if (!result.AsyncWaitHandle.WaitOne(this.Timeout))
 					{
 						// If no signal was received in the timeout period, throw a timeout exception.
-						throw new TimeoutException("The read request did not complete within the timeout {0}.".FormatWith(this.Timeout));
+						throw new TimeoutException(string.Format("The read request did not complete within the timeout {0}.", this.Timeout));
 					}
 				}
 
