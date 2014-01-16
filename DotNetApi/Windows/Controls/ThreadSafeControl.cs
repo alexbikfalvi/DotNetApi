@@ -52,7 +52,8 @@ namespace DotNetApi.Windows.Controls
 			if (this.InvokeRequired)
 			{
 				// Invoke the action delegate.
-				this.Invoke(this.action, new object[] { action });
+				try { this.Invoke(this.action, new object[] { action }); }
+				catch (ObjectDisposedException) { }
 			}
 			else if(!this.IsDisposed)
 			{

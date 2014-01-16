@@ -633,7 +633,9 @@ namespace DotNetApi.Windows.Controls
 			// Save the number of original visible items.
 			int originalItems = this.visibleItems;
 			// Upper-limit the number of visible items to the maximum number of visible items.
-			this.visibleItems = (visibleItems <= this.maximumVisibleItems) ? visibleItems : this.maximumVisibleItems;
+			visibleItems = (visibleItems <= this.maximumVisibleItems) ? visibleItems : this.maximumVisibleItems;
+			visibleItems = (visibleItems < this.items.Count) ? visibleItems : this.items.Count;
+			this.visibleItems = visibleItems;
 
 			// Update the hidden menu for the visible items.
 			for (int index = 0; index < this.visibleItems; index++)
