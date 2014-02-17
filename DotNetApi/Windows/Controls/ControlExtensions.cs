@@ -57,5 +57,24 @@ namespace DotNetApi.Windows.Controls
 			}
 			return default(object);
 		}
+
+		/// <summary>
+		/// Returns an enumerable of the list view items that match the specified predicate.
+		/// </summary>
+		/// <param name="items">The collection of list view items.</param>
+		/// <param name="predicate">The predicate.</param>
+		/// <returns>The items enumerable.</returns>
+		public static IEnumerable<ListViewItem> Where(this ListView.ListViewItemCollection items, Func<ListViewItem, bool> predicate)
+		{
+			// Create a list of list view items.
+			List<ListViewItem> list = new List<ListViewItem>();
+			// For each item.
+			foreach (ListViewItem item in items)
+			{
+				if (predicate(item)) list.Add(item);
+			}
+			// Return the list.
+			return list;
+		}
 	}
 }
