@@ -53,7 +53,7 @@ namespace DotNetApi.Windows.Forms
 			if (this.InvokeRequired)
 			{
 				// Invoke the action delegate.
-				this.Invoke(this.action, new object[] { action });
+				base.Invoke(this.action, new object[] { action });
 			}
 			else if (!this.IsDisposed)
 			{

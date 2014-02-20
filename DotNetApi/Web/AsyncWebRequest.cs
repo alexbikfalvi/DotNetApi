@@ -173,7 +173,7 @@ namespace DotNetApi.Web
 		/// <param name="result">The asynchronous result.</param>
 		/// <param name="func">An instance used to convert the received data to the desired format.</param>
 		/// <returns>The data received during the asynchronous operation.</returns>
-		protected T End<T>(IAsyncResult result, IAsyncFunction<T> func)
+		public T End<T>(IAsyncResult result, IAsyncFunction<T> func)
 		{
 			return this.End<T>(result, func.GetResult);
 		}
@@ -185,7 +185,7 @@ namespace DotNetApi.Web
 		/// <param name="result">The asynchronous result.</param>
 		/// <param name="func">A delegate method used to convert the received data to the desired format.</param>
 		/// <returns>The data received during the asynchronous operation.</returns>
-		protected T End<T>(IAsyncResult result, IAsyncDelegate<T> func)
+		public T End<T>(IAsyncResult result, IAsyncDelegate<T> func)
 		{
 			// Get the state of the asynchronous operation.
 			AsyncWebResult asyncState = (AsyncWebResult)result;
