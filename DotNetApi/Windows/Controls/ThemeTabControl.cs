@@ -86,7 +86,7 @@ namespace DotNetApi.Windows.Controls
 			this.themeSettings = ToolStripManager.Renderer is ThemeRenderer ? (ToolStripManager.Renderer as ThemeRenderer).Settings : ThemeSettings.Default;
 		}
 
-		// Public properties.
+		#region Public properties.
 
 		/// <summary>
 		/// Gets whether the control has focus.
@@ -130,7 +130,9 @@ namespace DotNetApi.Windows.Controls
 			get { return base.Multiline; }
 		}
 
-		// Protected methods.
+		#endregion
+
+		#region Protected methods.
 
 		/// <summary>
 		/// A method called when the object is being disposed.
@@ -241,7 +243,9 @@ namespace DotNetApi.Windows.Controls
 			base.WndProc(ref m);
 		}
 
-		// Private methods.
+		#endregion
+
+		#region Private methods.
 
 		/// <summary>
 		/// Subscribes to the events of a child control.
@@ -510,5 +514,7 @@ namespace DotNetApi.Windows.Controls
 				this.ItemSize.Height
 				));
 		}
+
+		#endregion
 	}
 }

@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DotNetApi.Windows.Controls
@@ -48,11 +49,13 @@ namespace DotNetApi.Windows.Controls
 			this.listBox.ItemCheck += new ItemCheckEventHandler(this.OnItemCheck);
 
 			// Add the list box to the drop down.
-			this.Items.Add(new ToolStripControlHost(this.listBox));
+			base.Items.Add(new ToolStripControlHost(this.listBox));
 
 			// Set the padding.
 			this.Padding = new Padding(4, 2, 4, 0);
 		}
+
+		#region Public properties
 
 		/// <summary>
 		/// Gets or sets the list box size.
@@ -62,7 +65,6 @@ namespace DotNetApi.Windows.Controls
 			get { return this.listBox.Size; }
 			set { this.listBox.Size = value; }
 		}
-
 		/// <summary>
 		/// Gets or sets the list box minimum size.
 		/// </summary>
@@ -71,7 +73,6 @@ namespace DotNetApi.Windows.Controls
 			get { return this.listBox.MinimumSize; }
 			set { this.listBox.MinimumSize = value; }
 		}
-
 		/// <summary>
 		/// Returns the value check-state pair at a given index.
 		/// </summary>
@@ -81,11 +82,33 @@ namespace DotNetApi.Windows.Controls
 		{
 			get { return this.items[index]; }
 		}
+		/// <summary>
+		/// Returns the items collection.
+		/// </summary>
+		public new IEnumerable<CheckedListItem> Items
+		{
+			get { return this.items; }
+		}
+		/// <summary>
+		/// Returns the checked items collection.
+		/// </summary>
+		public IEnumerable<CheckedListItem> CheckedItems
+		{
+			get { return this.items.Where(item => item.State == CheckState.Checked); }
+		}
+
+		#endregion
+
+		#region Public events
 
 		/// <summary>
 		/// An event raised when the checked state of an item has changed.
 		/// </summary>
 		public event ItemCheckEventHandler ItemCheck;
+
+		#endregion
+
+		#region Public methods
 
 		/// <summary>
 		/// Adds a new item to the checked list box.
@@ -106,6 +129,10 @@ namespace DotNetApi.Windows.Controls
 			{
 				this.listBox.MinimumSize = new Size(this.listBox.MinimumSize.Width, this.totalItemsHeight);
 				this.listBox.Size = this.listBox.MinimumSize;
+			}
+			else if (this.listBox.Items.Count == this.minimumVisibleItems)
+			{
+				this.listBox.MaximumSize = new Size(this.listBox.MinimumSize.Width, this.totalItemsHeight);
 			}
 		}
 
@@ -141,7 +168,9 @@ namespace DotNetApi.Windows.Controls
 			this.Refresh();
 		}
 
-		// Private methods.
+		#endregion
+
+		#region Private methods
 
 		/// <summary>
 		/// An event handler called when the checked state of an item has changed.
@@ -157,6 +186,8 @@ namespace DotNetApi.Windows.Controls
 			// Raise an item check event.
 			if (null != this.ItemCheck) this.ItemCheck(sender, e);
 		}
+
+		#endregion
 	}
 
 	/// <summary>

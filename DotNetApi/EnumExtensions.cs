@@ -28,6 +28,19 @@ namespace DotNetApi
 	public static class EnumExtensions
 	{
 		/// <summary>
+		/// Indicates whether the enumeration value has at least one attribute of the specified type.
+		/// </summary>
+		/// <typeparam name="T">The attribute type.</typeparam>
+		/// <param name="value">The enumeration value.</param>
+		/// <returns><b>True</b> if the enumeratin value has an attribute of the specified type, <b>false</b> otherwise.</returns>
+		public static bool HasAttribute<T>(this Enum value) where T : Attribute
+		{
+			Type type = value.GetType();
+			MemberInfo[] member = type.GetMember(value.ToString());
+			return member[0].GetCustomAttributes(typeof(T), false).Length > 0;
+		}
+
+		/// <summary>
 		/// Gets the attribute of the specified enumeration value.
 		/// </summary>
 		/// <typeparam name="T">The attribute type.</typeparam>
@@ -39,6 +52,16 @@ namespace DotNetApi
 			MemberInfo[] member = type.GetMember(value.ToString());
 			object[] attributes = member[0].GetCustomAttributes(typeof(T), false);
 			return attributes[0] as T;
+		}
+
+		/// <summary>
+		/// Indicates whether the enumeration value has at least one description attribute.
+		/// </summary>
+		/// <param name="value">The enumeration value.</param>
+		/// <returns><b>True</b> if the enumeration has a description attribute, <b>false</b> otherwise.</returns>
+		public static bool HasDescription(this Enum value)
+		{
+			return value.HasAttribute<DescriptionAttribute>();
 		}
 
 		/// <summary>

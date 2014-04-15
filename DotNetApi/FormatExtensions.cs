@@ -112,6 +112,28 @@ namespace DotNetApi
 		}
 
 		/// <summary>
+		/// Returns the plural suffix for the specified value for an invariant culture.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <param name="suffix">The plural suffix.</param>
+		/// <returns>The plural suffix.</returns>
+		public static string PluralSuffix(this byte value, string suffix)
+		{
+			return value == 1 ? string.Empty : suffix;
+		}
+
+		/// <summary>
+		/// Returns the plural suffix for the specified value for an invariant culture.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <param name="suffix">The plural suffix.</param>
+		/// <returns>The plural suffix.</returns>
+		public static string PluralSuffix(this int value, string suffix)
+		{
+			return value == 1 ? string.Empty : suffix;
+		}
+
+		/// <summary>
 		/// Converts the specified longitude to a string.
 		/// </summary>
 		/// <param name="longitude">The longitude.</param>
