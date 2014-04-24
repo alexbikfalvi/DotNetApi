@@ -67,6 +67,22 @@ namespace DotNetApi
 		}
 
 		/// <summary>
+		/// Converts the specified byte array into an extended string.
+		/// </summary>
+		/// <param name="value">The byte array.</param>
+		/// <param name="count">The number of bytes to convert.</param>
+		/// <returns>The string.</returns>
+		public static string ToExtendedString(this byte[] value, int count)
+		{
+			StringBuilder builder = new StringBuilder();
+			for (int index = 0; index < count && index < value.Length; index++)
+			{
+				builder.AppendFormat(CultureInfo.InvariantCulture, "{0:X2} ", value[index]);
+			}
+			return builder.ToString();
+		}
+
+		/// <summary>
 		/// Converts the specified array into an extended string.
 		/// </summary>
 		/// <param name="value">The array.</param>
